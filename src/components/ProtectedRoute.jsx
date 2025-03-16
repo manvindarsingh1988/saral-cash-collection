@@ -6,6 +6,11 @@ import {
 } from "react-router-dom";
 import { mockApi } from "../lib/mockApi";
 
+const routesForRoles = {
+    Admin: ["/", "/add-collector", "/assign-retail"],
+    Collector: ["/"],
+    RetailUser: ["/"],
+};
 
 export default function ProtectedRoute({ children }) {
   const [user, setUser] = useState(() => mockApi.getCurrentUser());
@@ -24,5 +29,9 @@ export default function ProtectedRoute({ children }) {
 
   if (!user) return <Navigate to="/signin" replace />;
 
-  return children;
+  if (routesForRoles[user.role].includes(location.pathname)) {
+    return children;    
+  }else{
+    return <Navigate to="/" replace />;
+  }
 }
