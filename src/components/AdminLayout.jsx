@@ -25,7 +25,7 @@ export default function AdminLayout({ children }) {
             <div className="flex items-center">
               <div className="flex-shrink-0">
                 <span className="text-white text-xl font-bold">
-                  Admin Dashboard
+                  Saral Cash Collection
                 </span>
               </div>
               <div className="hidden md:block">

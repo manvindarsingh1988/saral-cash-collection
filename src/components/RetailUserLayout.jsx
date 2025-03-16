@@ -23,7 +23,7 @@ export default function RetailUserLayout({ children }) {
             <div className="flex items-center">
               <div className="flex-shrink-0">
                 <span className="text-white text-xl font-bold">
-                  Retail User Dashboard
+                  Saral Cash Collection
                 </span>
               </div>
               <div className="hidden md:block">

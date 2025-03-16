@@ -1,19 +1,19 @@
-import React from 'react'
-import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom'
-import { mockApi } from '../lib/mockApi'
+import React from "react";
+import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
+import { mockApi } from "../lib/mockApi";
 
-export default function CollectorLayout({children}) {
-  const location = useLocation()
-  const navigate = useNavigate()
+export default function CollectorLayout({ children }) {
+  const location = useLocation();
+  const navigate = useNavigate();
 
   const isActive = (path) => {
-    return location.pathname === path ? 'bg-indigo-700' : ''
-  }
+    return location.pathname === path ? "bg-indigo-700" : "";
+  };
 
   const handleSignOut = async () => {
-    await mockApi.signOut()
-    navigate('/signin')
-  }
+    await mockApi.signOut();
+    navigate("/signin");
+  };
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -22,7 +22,9 @@ export default function CollectorLayout({children}) {
           <div className="flex h-16 items-center justify-between">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <span className="text-white text-xl font-bold">Collector Dashboard</span>
+                <span className="text-white text-xl font-bold">
+                  Saral Cash Collection
+                </span>
               </div>
               <div className="hidden md:block">
                 {/* <div className="ml-10 flex items-baseline space-x-4">
@@ -63,5 +65,5 @@ export default function CollectorLayout({children}) {
         {children}
       </main>
     </div>
-  )
+  );
 }
