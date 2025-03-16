@@ -46,7 +46,7 @@ export const mockApi = {
     localStorage.removeItem('mockUser');
   },
 
-  getCurrentUser: async () => {
+  getCurrentUser: () => {
     if (!currentUser) {
       const stored = localStorage.getItem('mockUser');
       if (stored) {
@@ -85,7 +85,7 @@ export const mockApi = {
   },
 
   getStats: async () => {
-    const user = await mockApi.getCurrentUser();
+    const user = mockApi.getCurrentUser();
     
     if (!user) {
       throw new Error('Not authenticated');
@@ -145,7 +145,7 @@ export const mockApi = {
   },
 
   createTransaction: async (amount) => {
-    const user = await mockApi.getCurrentUser();
+    const user = mockApi.getCurrentUser();
     if (!user || user.role !== 'RetailUser') {
       throw new Error('Unauthorized');
     }

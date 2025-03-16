@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { mockApi } from '../../lib/mockApi'
 
 export default function AdminDashboard() {
+  console.log('AdminDashboard.jsx')
   const [stats, setStats] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)

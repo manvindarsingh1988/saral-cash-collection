@@ -1,53 +1,55 @@
-import React, { useState, useEffect } from 'react'
-import { mockApi } from '../../lib/mockApi'
+import React, { useState, useEffect } from "react";
+import { mockApi } from "../../lib/mockApi";
 
 export default function RetailDashboard() {
-  const [stats, setStats] = useState(null)
-  const [amount, setAmount] = useState('')
-  const [error, setError] = useState(null)
-  const [success, setSuccess] = useState(false)
-  const [loading, setLoading] = useState(true)
+  const [stats, setStats] = useState(null);
+  const [amount, setAmount] = useState("");
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchStats()
-  }, [])
+    fetchStats();
+  }, []);
 
   const fetchStats = async () => {
     try {
-      const data = await mockApi.getStats()
-      setStats(data)
+      const data = await mockApi.getStats();
+      setStats(data);
     } catch (err) {
-      setError(err.message)
+      setError(err.message);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const handleCreateTransaction = async (e) => {
-    e.preventDefault()
+    e.preventDefault();
     try {
-      setError(null)
-      await mockApi.createTransaction(Number(amount))
-      setSuccess(true)
-      setAmount('')
-      setTimeout(() => setSuccess(false), 3000)
-      fetchStats() // Refresh stats instead of reloading the page
+      setError(null);
+      await mockApi.createTransaction(Number(amount));
+      setSuccess(true);
+      setAmount("");
+      setTimeout(() => setSuccess(false), 3000);
+      fetchStats(); // Refresh stats instead of reloading the page
     } catch (error) {
-      setError(error.message)
+      setError(error.message);
     }
-  }
+  };
 
   if (loading) {
-    return <div>Loading...</div>
+    return <div>Loading...</div>;
   }
 
   if (error) {
-    return <div className="text-red-600">{error}</div>
+    return <div className="text-red-600">{error}</div>;
   }
 
   if (!stats) {
-    return <div>No data available</div>
+    return <div>No data available</div>;
   }
+
+  console.log("RetailDashboard.jsx");
 
   return (
     <div className="space-y-6">
@@ -66,7 +68,9 @@ export default function RetailDashboard() {
 
         <div className="bg-white overflow-hidden shadow rounded-lg">
           <div className="px-4 py-5 sm:p-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Add New Liability</h3>
+            <h3 className="text-lg font-medium text-gray-900 mb-4">
+              Add New Liability
+            </h3>
             <form onSubmit={handleCreateTransaction} className="space-y-4">
               {error && (
                 <div className="rounded-md bg-red-50 p-4 text-sm text-red-700">
@@ -79,7 +83,10 @@ export default function RetailDashboard() {
                 </div>
               )}
               <div>
-                <label htmlFor="amount" className="block text-sm font-medium text-gray-700">
+                <label
+                  htmlFor="amount"
+                  className="block text-sm font-medium text-gray-700"
+                >
                   Amount ($)
                 </label>
                 <input
@@ -106,7 +113,9 @@ export default function RetailDashboard() {
 
       <div className="bg-white shadow rounded-lg">
         <div className="px-4 py-5 sm:p-6">
-          <h3 className="text-lg font-medium text-gray-900">Transaction History</h3>
+          <h3 className="text-lg font-medium text-gray-900">
+            Transaction History
+          </h3>
           <div className="mt-4">
             <table className="min-w-full divide-y divide-gray-200">
               <thead>
@@ -135,16 +144,18 @@ export default function RetailDashboard() {
                       ${transaction.amount}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        transaction.status === 'Done' 
-                          ? 'bg-green-100 text-green-800' 
-                          : 'bg-yellow-100 text-yellow-800'
-                      }`}>
+                      <span
+                        className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                          transaction.status === "Done"
+                            ? "bg-green-100 text-green-800"
+                            : "bg-yellow-100 text-yellow-800"
+                        }`}
+                      >
                         {transaction.status}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {transaction.handoverDate || '-'}
+                      {transaction.handoverDate || "-"}
                     </td>
                   </tr>
                 ))}
@@ -154,5 +165,5 @@ export default function RetailDashboard() {
         </div>
       </div>
     </div>
-  )
+  );
 }

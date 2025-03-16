@@ -1,19 +1,21 @@
-import React from 'react'
-import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom'
-import { mockApi } from '../lib/mockApi'
+import React from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { mockApi } from "../lib/mockApi";
 
-export default function AdminLayout() {
-  const location = useLocation()
-  const navigate = useNavigate()
+export default function AdminLayout({ children }) {
+  console.log("AdminLayout.jsx");
+
+  const location = useLocation();
+  const navigate = useNavigate();
 
   const isActive = (path) => {
-    return location.pathname === path ? 'bg-indigo-700' : ''
-  }
+    return location.pathname === path ? "bg-indigo-700" : "";
+  };
 
   const handleSignOut = async () => {
-    await mockApi.signOut()
-    navigate('/signin')
-  }
+    await mockApi.signOut();
+    navigate("/signin");
+  };
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -22,25 +24,33 @@ export default function AdminLayout() {
           <div className="flex h-16 items-center justify-between">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <span className="text-white text-xl font-bold">Admin Dashboard</span>
+                <span className="text-white text-xl font-bold">
+                  Admin Dashboard
+                </span>
               </div>
               <div className="hidden md:block">
                 <div className="ml-10 flex items-baseline space-x-4">
                   <Link
-                    to="/admin"
-                    className={`${isActive('/admin')} text-white rounded-md px-3 py-2 text-sm font-medium`}
+                    to="/"
+                    className={`${isActive(
+                      "/"
+                    )} text-white rounded-md px-3 py-2 text-sm font-medium`}
                   >
                     Dashboard
                   </Link>
                   <Link
-                    to="/admin/add-collector"
-                    className={`${isActive('/admin/add-collector')} text-white rounded-md px-3 py-2 text-sm font-medium`}
+                    to="/add-collector"
+                    className={`${isActive(
+                      "/add-collector"
+                    )} text-white rounded-md px-3 py-2 text-sm font-medium`}
                   >
                     Add Collector
                   </Link>
                   <Link
-                    to="/admin/assign-retail"
-                    className={`${isActive('/admin/assign-retail')} text-white rounded-md px-3 py-2 text-sm font-medium`}
+                    to="/assign-retail"
+                    className={`${isActive(
+                      "/assign-retail"
+                    )} text-white rounded-md px-3 py-2 text-sm font-medium`}
                   >
                     Assign Retail Users
                   </Link>
@@ -60,8 +70,8 @@ export default function AdminLayout() {
       </nav>
 
       <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-        <Outlet />
+        {children}
       </main>
     </div>
-  )
+  );
 }

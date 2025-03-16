@@ -2,7 +2,7 @@ import React from 'react'
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { mockApi } from '../lib/mockApi'
 
-export default function CollectorLayout() {
+export default function CollectorLayout({children}) {
   const location = useLocation()
   const navigate = useNavigate()
 
@@ -60,7 +60,7 @@ export default function CollectorLayout() {
       </nav>
 
       <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-        <Outlet />
+        {children}
       </main>
     </div>
   )
