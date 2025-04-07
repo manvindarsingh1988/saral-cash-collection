@@ -7,6 +7,7 @@ export default function AssignRetail() {
   const [selectedCollector, setSelectedCollector] = useState(null);
   const [unassignedRetailers, setUnassignedRetailers] = useState([]);
   const [mappedRetailers, setMappedRetailers] = useState([]);
+  const [selectedMappedRetailers, setSelectedMappedRetailers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
@@ -50,7 +51,11 @@ export default function AssignRetail() {
     );
     console.log("Mapped Retail Data:", mappedRetailData);
     setMappedRetailers(mappedRetailData);
-    setUnassignedRetailers(retailers.filter((r) => !r.assignedCollectorId));
+    setSelectedMappedRetailers(mappedRetailData);
+    setUnassignedRetailers(
+      retailers.filter((r) => !mappedRetailData.some((mr) => mr.RetailerUserId === r.Id))
+    );
+    console.log("Unassigned Retailers:", unassignedRetailers);
   };
 
   const handleAssign = async (retailerId) => {
@@ -140,19 +145,13 @@ export default function AssignRetail() {
                 placeholder="Search assigned retailer..."
                 className="mb-4 block w-full rounded-md border-gray-300 px-4 py-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-black"
                 onChange={(e) => {
-                  const filtered = retailers.filter(
+                  const filtered = mappedRetailers.filter(
                     (r) =>
-                      r.assignedCollectorId === selectedCollector.Id &&
-                      r.UserName.toLowerCase().includes(
+                      r.RetailerUserName.toLowerCase().includes(
                         e.target.value.toLowerCase()
                       )
                   );
-                  setRetailers((prev) => [
-                    ...prev.filter(
-                      (r) => r.assignedCollectorId !== selectedCollector.Id
-                    ),
-                    ...filtered,
-                  ]);
+                  setSelectedMappedRetailers(filtered);
                 }}
               />
 
@@ -167,7 +166,7 @@ export default function AssignRetail() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200">
-                    {mappedRetailers.map((mappedRetailer) => (
+                    {selectedMappedRetailers.map((mappedRetailer) => (
                         <tr key={mappedRetailer.RetailerId}>
                           <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-900">
                             {mappedRetailer.RetailerUserName}
@@ -185,9 +184,7 @@ export default function AssignRetail() {
                   </tbody>
                 </table>
 
-                {retailers.filter(
-                  (r) => r.assignedCollectorId === selectedCollector.Id
-                ).length === 0 && (
+                {mappedRetailers.length === 0 && (
                   <div className="mt-4 text-sm text-gray-500">
                     No assigned retailers found.
                   </div>
@@ -211,7 +208,6 @@ export default function AssignRetail() {
                   setUnassignedRetailers(
                     retailers.filter(
                       (r) =>
-                        !r.assignedCollectorId &&
                         r.UserName?.toLowerCase().includes(
                           e.target.value?.toLowerCase()
                         )
