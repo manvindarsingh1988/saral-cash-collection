@@ -69,25 +69,25 @@ export const mockApi = {
     return currentUser;
   },
 
-  getCollectors: async () => {
-    return users.filter(u => u.role === 'Collector');
-  },
+  // getCollectors: async () => {
+  //   return users.filter(u => u.role === 'Collector');
+  // },
 
-  getRetailUsers: async () => {
-    return users.filter(u => u.role === 'RetailUser');
-  },
+  // getRetailUsers: async () => {
+  //   return users.filter(u => u.role === 'RetailUser');
+  // },
 
-  createCollector: async (email, password) => {
-    const newId = String(users.length + 1);
-    const newCollector = {
-      id: newId,
-      email,
-      password,
-      role: 'Collector'
-    };
-    users.push(newCollector);
-    return { user: newCollector };
-  },
+  // createCollector: async (email, password) => {
+  //   const newId = String(users.length + 1);
+  //   const newCollector = {
+  //     id: newId,
+  //     email,
+  //     password,
+  //     role: 'Collector'
+  //   };
+  //   users.push(newCollector);
+  //   return { user: newCollector };
+  // },
 
   assignCollector: async (retailUserId, collectorId) => {
     const retailUser = users.find(u => u.id === retailUserId);
@@ -204,7 +204,7 @@ export const mockApi = {
   },
 
   getRetailUsers: async () => {
-    const response = await fetch(`${API_URL}/GetRetailUsers`);
+    const response = await fetch(`${API_URL}/GetRetailerUsers`);
     if (!response.ok) {
       console.error(`Failed to fetch: ${response.statusText}`);
     }
@@ -214,7 +214,7 @@ export const mockApi = {
   },
 
   getCollectors: async () => {
-    const response = await fetch(`${API_URL}/GetCollectors`);
+    const response = await fetch(`${API_URL}/GetCollectorUsers`);
     if (!response.ok) {
       console.error(`Failed to fetch: ${response.statusText}`);
     }
@@ -307,7 +307,7 @@ export const mockApi = {
     return data;
   },
 
-  saveUser: async (user) => {
+  saveCollectorUser: async (user) => {
     const response = await fetch(`${API_URL}/SaveUser`, {
       method: 'POST',
       headers: {

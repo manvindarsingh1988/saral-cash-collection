@@ -2,11 +2,28 @@ import React, { useState } from "react";
 import { mockApi } from "../../lib/mockApi";
 
 export default function AddCollector() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [formData, setFormData] = useState({
+    firstName: "",
+    middleName: "",
+    lastName: "",
+    dateOfBirth: "",
+    mobile: "",
+    address: "",
+    counterLocation: "",
+    pinCode: "",
+    city: "",
+    stateName: "",
+    commission: "",
+  });
+
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  const handleChange = (e) => {
+    const { id, value } = e.target;
+    setFormData((prev) => ({ ...prev, [id]: value }));
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -15,11 +32,22 @@ export default function AddCollector() {
       setError(null);
       setSuccess(false);
 
-      await mockApi.createCollector(email, password);
+      await mockApi.saveCollectorUser(formData);
 
       setSuccess(true);
-      setEmail("");
-      setPassword("");
+      setFormData({
+        firstName: "",
+        middleName: "",
+        lastName: "",
+        dateOfBirth: "",
+        mobile: "",
+        address: "",
+        counterLocation: "",
+        pinCode: "",
+        city: "",
+        stateName: "",
+        commission: "",
+      });
     } catch (error) {
       setError(error.message);
     } finally {
@@ -27,20 +55,14 @@ export default function AddCollector() {
     }
   };
 
-  console.log("AddCollector");
-
   return (
     <div>
-      <h1 className="text-2xl font-semibold text-gray-900">
-        Add New Collector
-      </h1>
+      <h1 className="text-2xl font-semibold text-gray-900">Add New Collector</h1>
 
-      <div className="mt-6 max-w-md">
-        <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="mt-6 max-w-2xl">
+        <form onSubmit={handleSubmit} className="space-y-4">
           {error && (
-            <div className="rounded-md bg-red-50 p-4 text-sm text-red-700">
-              {error}
-            </div>
+            <div className="rounded-md bg-red-50 p-4 text-sm text-red-700">{error}</div>
           )}
           {success && (
             <div className="rounded-md bg-green-50 p-4 text-sm text-green-700">
@@ -48,39 +70,33 @@ export default function AddCollector() {
             </div>
           )}
 
-          <div>
-            <label
-              htmlFor="email"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Email address
-            </label>
-            <input
-              type="email"
-              id="email"
-              required
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </div>
-
-          <div>
-            <label
-              htmlFor="password"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Password
-            </label>
-            <input
-              type="password"
-              id="password"
-              required
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </div>
+          {[
+            { id: "firstName", label: "First Name" },
+            { id: "middleName", label: "Middle Name" },
+            { id: "lastName", label: "Last Name" },
+            { id: "dateOfBirth", label: "Date of Birth", type: "date" },
+            { id: "mobile", label: "Mobile", type: "tel" },
+            { id: "address", label: "Address" },
+            { id: "counterLocation", label: "Counter Location" },
+            { id: "pinCode", label: "PIN Code" },
+            { id: "city", label: "City" },
+            { id: "stateName", label: "State" },
+            { id: "commission", label: "Commission (%)", type: "number" },
+          ].map(({ id, label, type = "text" }) => (
+            <div key={id}>
+              <label htmlFor={id} className="block text-sm font-medium text-gray-700">
+                {label}
+              </label>
+              <input
+                type={type}
+                id={id}
+                required
+                value={formData[id]}
+                onChange={handleChange}
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 px-1"
+              />
+            </div>
+          ))}
 
           <button
             type="submit"
