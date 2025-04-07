@@ -1,4 +1,7 @@
-// Mock data
+import config from './config.json';
+
+const API_URL = config.api.endpoint; // Default to localhost if not set
+
 const users = [
   { id: '1', email: 'admin@example.com', password: 'admin123', role: 'Admin' },
   { id: '2', email: 'collector1@example.com', password: 'pass123', role: 'Collector' },
@@ -32,6 +35,16 @@ let currentUser = null;
 // Mock API functions
 export const mockApi = {
   signIn: async (email, password) => {
+    const response = await fetch(`${API_URL}/Login?userId=${email}&password=${password}`); // Simulate network delay
+    
+    if (!response.ok) {
+      throw new Error(`Failed to fetch: ${response.statusText}`);
+    }
+    else{
+      const data = await response.json();
+      console.log(data);
+    }
+
     const user = users.find(u => u.email === email && u.password === password);
     if (!user) {
       throw new Error('Invalid email or password');
@@ -166,5 +179,148 @@ export const mockApi = {
 
     transactions.push(newTransaction);
     return { transaction: newTransaction };
+  },
+
+  // ************ Actual API calls ************
+
+  getMasterData: async () => {
+    const response = await fetch(`${API_URL}/GetMasterData`);
+    if (!response.ok) {
+      console.error(`Failed to fetch: ${response.statusText}`);
+    }
+    const data = await response.json();
+    console.log(data);
+    return data;
+  },
+
+  getMappedUsersByCollectorId: async (collectorId) => {
+    const response = await fetch(`${API_URL}/GetMappedUsersByCollectorId?usersId=${collectorId}`);
+    if (!response.ok) {
+      console.error(`Failed to fetch: ${response.statusText}`);
+    }
+    const data = await response.json();
+    console.log(data);
+    return data;
+  },
+
+  getRetailUsers: async () => {
+    const response = await fetch(`${API_URL}/GetRetailUsers`);
+    if (!response.ok) {
+      console.error(`Failed to fetch: ${response.statusText}`);
+    }
+    const data = await response.json();
+    console.log(data);
+    return data;
+  },
+
+  getCollectors: async () => {
+    const response = await fetch(`${API_URL}/GetCollectors`);
+    if (!response.ok) {
+      console.error(`Failed to fetch: ${response.statusText}`);
+    }
+    const data = await response.json();
+    console.log(data);
+    return data;
+  },
+
+  getMappedUsers: async () => {
+    const response = await fetch(`${API_URL}/GetMappedUsers`);
+    if (!response.ok) {
+      console.error(`Failed to fetch: ${response.statusText}`);
+    }
+    const data = await response.json();
+    console.log(data);
+    return data;
+  },
+
+  getMappedCollectorsByRetailerId: async (retailerId) => {
+    const response = await fetch(`${API_URL}/GetMappedCollectorsByRetailerId?userId=${retailerId}`);
+    if (!response.ok) {
+      console.error(`Failed to fetch: ${response.statusText}`);
+    }
+    const data = await response.json();
+    console.log(data);
+    return data;
+  },
+
+  getLiabilityAmountOfAllRetailers: async (date) => {
+    const response = await fetch(`${API_URL}/GetLiabilityAmountOfAllRetailers?date=${date}`);
+    if (!response.ok) {
+      console.error(`Failed to fetch: ${response.statusText}`);
+    }
+    const data = await response.json();
+    console.log(data);
+    return data;
+  },
+
+  addLedgeInfo: async (data) => {
+    const response = await fetch(`${API_URL}/AddLedgeInfo`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      console.error(`Failed to fetch: ${response.statusText}`);
+    }
+    const result = await response.json();
+    console.log(result);
+    return result;
+  },
+
+  updateLedgerInfo: async (data) => {
+    const response = await fetch(`${API_URL}/UpdateLedgerInfo`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      console.error(`Failed to fetch: ${response.statusText}`);
+    }
+    const result = await response.json();
+    console.log(result);
+    return result;
+  },
+
+  getLadgerInfoByRetailerid: async (date, retailerId) => {
+    const response = await fetch(`${API_URL}/GetLadgerInfoByRetailerid?date=${date}&retailerId=${retailerId}`);
+    if (!response.ok) {
+      console.error(`Failed to fetch: ${response.statusText}`);
+    }
+    const data = await response.json();
+    console.log(data);
+    return data;
+  },
+
+  getLadgerInfoByRetaileridAndCollectorId: async (date, retailerId, collectorId) => {
+    const response = await fetch(`${API_URL}/GetLadgerInfoByRetaileridAndCollectorId?date=${date}&retailerId=${retailerId}&collectorId=${collectorId}`);
+    if (!response.ok) {
+      console.error(`Failed to fetch: ${response.statusText}`);
+    }
+    const data = await response.json();
+    console.log(data);
+    return data;
+  },
+
+  saveUser: async (user) => {
+    const response = await fetch(`${API_URL}/SaveUser`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(user),
+    });
+
+    if (!response.ok) {
+      console.error(`Failed to fetch: ${response.statusText}`);
+    }
+    const data = await response.json();
+    console.log(data);
+    return data;
   }
 };
