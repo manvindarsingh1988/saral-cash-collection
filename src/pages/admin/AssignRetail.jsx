@@ -6,6 +6,7 @@ export default function AssignRetail() {
   const [collectors, setCollectors] = useState([]);
   const [selectedCollector, setSelectedCollector] = useState(null);
   const [unassignedRetailers, setUnassignedRetailers] = useState([]);
+  const [mappedRetailers, setMappedRetailers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
@@ -19,8 +20,10 @@ export default function AssignRetail() {
       setLoading(true);
       setError(null);
 
-      const retailData = await mockApi.getRetailUsers();
-      const collectorData = await mockApi.getCollectors();
+      const [retailData, collectorData] = await Promise.all([
+        mockApi.getRetailUsers(),
+        mockApi.getCollectors(),
+      ]);
 
       setRetailers(retailData);
       setCollectors(collectorData);
@@ -38,17 +41,27 @@ export default function AssignRetail() {
     }
   };
 
-  const handleCollectorSelect = (collectorId) => {
+  const handleCollectorSelect = async (collectorId) => {
     const collector = collectors.find((c) => c.Id === collectorId);
     setSelectedCollector(collector);
     // Update unassigned retailers list
+    const mappedRetailData = await mockApi.getMappedUsersByCollectorId(
+      collector.Id
+    );
+    console.log("Mapped Retail Data:", mappedRetailData);
+    setMappedRetailers(mappedRetailData);
     setUnassignedRetailers(retailers.filter((r) => !r.assignedCollectorId));
   };
 
   const handleAssign = async (retailerId) => {
     try {
       setError(null);
-      await mockApi.assignCollector(retailerId, selectedCollector.Id);
+      console.log("Assigning collector:", selectedCollector);
+      console.log("Retailer ID:", retailerId);
+      await mockApi.alignCollectorWithRetailerUser({
+        RetailerId: retailerId,
+        CollectorId: selectedCollector.Id,
+      });
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
       fetchUsers();
@@ -114,132 +127,134 @@ export default function AssignRetail() {
       </div>
 
       {selectedCollector && (
-        <div className="mt-8">
-          <h2 className="mt-8 text-lg font-medium text-gray-900">
-            Assigned Retail Users
-          </h2>
+        <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
+          {/* Assigned Retail Users */}
+          <div>
+            <h2 className="text-lg font-medium text-gray-900">
+              Assigned Retail Users
+            </h2>
 
-          <div className="mt-4">
-            <input
-              type="text"
-              placeholder="Search assigned retailer..."
-              className="mb-4 block w-full rounded-md border-gray-300 px-4 py-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-black"
-              onChange={(e) => {
-                const filtered = retailers.filter(
-                  (r) =>
-                    r.assignedCollectorId === selectedCollector.Id &&
-                    r.UserName.toLowerCase().includes(
-                      e.target.value.toLowerCase()
-                    )
-                );
-                setRetailers((prev) => [
-                  ...prev.filter(
-                    (r) => r.assignedCollectorId !== selectedCollector.Id
-                  ),
-                  ...filtered,
-                ]);
-              }}
-            />
+            <div className="mt-4">
+              <input
+                type="text"
+                placeholder="Search assigned retailer..."
+                className="mb-4 block w-full rounded-md border-gray-300 px-4 py-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-black"
+                onChange={(e) => {
+                  const filtered = retailers.filter(
+                    (r) =>
+                      r.assignedCollectorId === selectedCollector.Id &&
+                      r.UserName.toLowerCase().includes(
+                        e.target.value.toLowerCase()
+                      )
+                  );
+                  setRetailers((prev) => [
+                    ...prev.filter(
+                      (r) => r.assignedCollectorId !== selectedCollector.Id
+                    ),
+                    ...filtered,
+                  ]);
+                }}
+              />
 
-            <div className="overflow-y-auto" style={{ height: "250px" }}>
-              <table className="min-w-full divide-y divide-gray-200 bg-white shadow-md rounded-lg">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Username
-                    </th>
-                    <th className="px-6 py-3"></th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200">
-                  {retailers
-                    .filter(
-                      (r) => r.assignedCollectorId === selectedCollector.Id
+              <div className="overflow-y-auto" style={{ height: "400px" }}>
+                <table className="min-w-full divide-y divide-gray-200 bg-white shadow-md rounded-lg">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Username
+                      </th>
+                      <th className="px-3 py-3"></th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200">
+                    {mappedRetailers.map((mappedRetailer) => (
+                        <tr key={mappedRetailer.RetailerId}>
+                          <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {mappedRetailer.RetailerUserName}
+                          </td>
+                          <td className="px-3 py-4 whitespace-nowrap text-right text-sm font-medium">
+                            <button
+                              onClick={() => handleUnassign(mappedRetailer.RetailerId)}
+                              className="text-red-600 hover:text-red-900"
+                            >
+                              Remove
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                  </tbody>
+                </table>
+
+                {retailers.filter(
+                  (r) => r.assignedCollectorId === selectedCollector.Id
+                ).length === 0 && (
+                  <div className="mt-4 text-sm text-gray-500">
+                    No assigned retailers found.
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Available Retail Users */}
+          <div>
+            <h2 className="text-lg font-medium text-gray-900">
+              Available Retail Users
+            </h2>
+
+            <div className="mt-4">
+              <input
+                type="text"
+                placeholder="Search retailer..."
+                className="mb-4 block w-full rounded-md border-gray-300 px-4 py-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-black"
+                onChange={(e) =>
+                  setUnassignedRetailers(
+                    retailers.filter(
+                      (r) =>
+                        !r.assignedCollectorId &&
+                        r.UserName?.toLowerCase().includes(
+                          e.target.value?.toLowerCase()
+                        )
                     )
-                    .map((retailer) => (
+                  )
+                }
+              />
+
+              <div className="overflow-y-auto" style={{ height: "400px" }}>
+                <table className="min-w-full divide-y divide-gray-200 bg-white shadow-md rounded-lg">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Username
+                      </th>
+                      <th className="px-3 py-3"></th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200">
+                    {unassignedRetailers.map((retailer) => (
                       <tr key={retailer.Id}>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-900">
                           {retailer.UserName}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <td className="px-3 py-4 whitespace-nowrap text-right text-sm font-medium">
                           <button
-                            onClick={() => handleUnassign(retailer.Id)}
-                            className="text-red-600 hover:text-red-900"
+                            onClick={() => handleAssign(retailer.Id)}
+                            className="text-indigo-600 hover:text-indigo-900"
                           >
-                            Remove
+                            Assign
                           </button>
                         </td>
                       </tr>
                     ))}
-                </tbody>
-              </table>
+                  </tbody>
+                </table>
 
-              {retailers.filter(
-                (r) => r.assignedCollectorId === selectedCollector.Id
-              ).length === 0 && (
-                <div className="mt-4 text-sm text-gray-500">
-                  No assigned retailers found.
-                </div>
-              )}
-            </div>
-          </div>
-
-          <h2 className="mt-8 text-lg font-medium text-gray-900">
-            Available Retail Users
-          </h2>
-
-          <div className="mt-4">
-            <input
-              type="text"
-              placeholder="Search retailer..."
-              className="mb-4 block w-full rounded-md border-gray-300 px-4 py-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-black"
-              onChange={(e) =>
-                setUnassignedRetailers(
-                  retailers.filter(
-                    (r) =>
-                      !r.assignedCollectorId &&
-                      r.UserName?.toLowerCase().includes(
-                        e.target.value?.toLowerCase()
-                      )
-                  )
-                )
-              }
-            />
-
-            <div className="overflow-y-auto" style={{ height: "250px" }}>
-              <table className="min-w-full divide-y divide-gray-200 bg-white shadow-md rounded-lg">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Username
-                    </th>
-                    <th className="px-6 py-3"></th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200">
-                  {unassignedRetailers.map((retailer) => (
-                    <tr key={retailer.Id}>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {retailer.UserName}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <button
-                          onClick={() => handleAssign(retailer.Id)}
-                          className="text-indigo-600 hover:text-indigo-900"
-                        >
-                          Assign
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-
-              {unassignedRetailers.length === 0 && (
-                <div className="mt-4 text-sm text-gray-500">
-                  No retailers found.
-                </div>
-              )}
+                {unassignedRetailers.length === 0 && (
+                  <div className="mt-4 text-sm text-gray-500">
+                    No retailers found.
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>

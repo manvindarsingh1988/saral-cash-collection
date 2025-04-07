@@ -228,7 +228,7 @@ export const mockApi = {
 
   getMappedUsersByCollectorId: async (collectorId) => {
     const response = await fetch(
-      `${API_URL}/GetMappedUsersByCollectorId?usersId=${collectorId}`
+      `${API_URL}/GetMappedUsersByCollectorId?userId=${collectorId}`
     );
     if (!response.ok) {
       console.error(`Failed to fetch: ${response.statusText}`);
@@ -370,4 +370,21 @@ export const mockApi = {
     console.log(data);
     return data;
   },
+
+  alignCollectorWithRetailerUser: async (data) => {
+    const response = await fetch(`${API_URL}/AlignCollectorWithRetailerUser`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      console.error(`Failed to fetch: ${response.statusText}`);
+    }
+    const result = await response.json();
+    console.log(result);
+    return result;
+  }
 };
