@@ -57,12 +57,16 @@ export default function AddCollector() {
 
   return (
     <div>
-      <h1 className="text-2xl font-semibold text-gray-900">Add New Collector</h1>
+      <h1 className="text-2xl font-semibold text-gray-900">
+        Add New Collector
+      </h1>
 
-      <div className="mt-6 max-w-2xl">
+      <div className="mt-6">
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && (
-            <div className="rounded-md bg-red-50 p-4 text-sm text-red-700">{error}</div>
+            <div className="rounded-md bg-red-50 p-4 text-sm text-red-700">
+              {error}
+            </div>
           )}
           {success && (
             <div className="rounded-md bg-green-50 p-4 text-sm text-green-700">
@@ -70,33 +74,38 @@ export default function AddCollector() {
             </div>
           )}
 
-          {[
-            { id: "firstName", label: "First Name" },
-            { id: "middleName", label: "Middle Name" },
-            { id: "lastName", label: "Last Name" },
-            { id: "dateOfBirth", label: "Date of Birth", type: "date" },
-            { id: "mobile", label: "Mobile", type: "tel" },
-            { id: "address", label: "Address" },
-            { id: "counterLocation", label: "Counter Location" },
-            { id: "pinCode", label: "PIN Code" },
-            { id: "city", label: "City" },
-            { id: "stateName", label: "State" },
-            { id: "commission", label: "Commission (%)", type: "number" },
-          ].map(({ id, label, type = "text" }) => (
-            <div key={id}>
-              <label htmlFor={id} className="block text-sm font-medium text-gray-700">
-                {label}
-              </label>
-              <input
-                type={type}
-                id={id}
-                required
-                value={formData[id]}
-                onChange={handleChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 px-1"
-              />
-            </div>
-          ))}
+          <div className="grid grid-cols-2 gap-4">
+            {[
+              { id: "firstName", label: "First Name" },
+              { id: "middleName", label: "Middle Name" },
+              { id: "lastName", label: "Last Name" },
+              { id: "dateOfBirth", label: "Date of Birth", type: "date" },
+              { id: "mobile", label: "Mobile", type: "tel" },
+              { id: "address", label: "Address" },
+              { id: "counterLocation", label: "Counter Location" },
+              { id: "pinCode", label: "PIN Code" },
+              { id: "city", label: "City" },
+              { id: "stateName", label: "State" },
+              { id: "commission", label: "Commission (%)", type: "number" },
+            ].map(({ id, label, type = "text" }) => (
+              <div key={id}>
+                <label
+                  htmlFor={id}
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  {label}
+                </label>
+                <input
+                  type={type}
+                  id={id}
+                  required
+                  value={formData[id]}
+                  onChange={handleChange}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 px-1"
+                />
+              </div>
+            ))}
+          </div>
 
           <button
             type="submit"
