@@ -37,7 +37,7 @@ export default function AssignRetail() {
   }
 
   const handleCollectorSelect = (collectorId) => {
-    const collector = collectors.find(c => c.id === collectorId)
+    const collector = collectors.find(c => c.Id === collectorId)
     setSelectedCollector(collector)
     // Update unassigned retailers list
     setUnassignedRetailers(retailers.filter(r => !r.assignedCollectorId))
@@ -46,7 +46,7 @@ export default function AssignRetail() {
   const handleAssign = async (retailerId) => {
     try {
       setError(null)
-      await mockApi.assignCollector(retailerId, selectedCollector.id)
+      await mockApi.assignCollector(retailerId, selectedCollector.Id)
       setSuccess(true)
       setTimeout(() => setSuccess(false), 3000)
       fetchUsers()
@@ -94,13 +94,13 @@ export default function AssignRetail() {
         <select
           id="collector"
           className="mt-1 block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-base focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
-          value={selectedCollector?.id || ''}
+          value={selectedCollector?.Id || ''}
           onChange={(e) => handleCollectorSelect(e.target.value)}
         >
           <option value="">Select a collector</option>
           {collectors.map((collector) => (
-            <option key={collector.id} value={collector.id}>
-              {collector.email}
+            <option key={collector.Id} value={collector.Id}>
+              {collector.UserName}
             </option>
           ))}
         </select>
@@ -111,12 +111,12 @@ export default function AssignRetail() {
           <h2 className="text-lg font-medium text-gray-900">Assigned Retail Users</h2>
           <div className="mt-4 space-y-4">
             {retailers
-              .filter(r => r.assignedCollectorId === selectedCollector.id)
+              .filter(r => r.assignedCollectorId === selectedCollector.Id)
               .map(retailer => (
-                <div key={retailer.id} className="flex items-center justify-between bg-white p-4 rounded-lg shadow">
-                  <span>{retailer.email}</span>
+                <div key={retailer.Id} className="flex items-center justify-between bg-white p-4 rounded-lg shadow">
+                  <span>{retailer.UserName}</span>
                   <button
-                    onClick={() => handleUnassign(retailer.id)}
+                    onClick={() => handleUnassign(retailer.Id)}
                     className="text-red-600 hover:text-red-900"
                   >
                     Remove
@@ -129,10 +129,10 @@ export default function AssignRetail() {
           <h2 className="mt-8 text-lg font-medium text-gray-900">Available Retail Users</h2>
           <div className="mt-4 space-y-4">
             {unassignedRetailers.map(retailer => (
-              <div key={retailer.id} className="flex items-center justify-between bg-white p-4 rounded-lg shadow">
-                <span>{retailer.email}</span>
+              <div key={retailer.Id} className="flex items-center justify-between bg-white p-4 rounded-lg shadow">
+                <span>{retailer.UserName}</span>
                 <button
-                  onClick={() => handleAssign(retailer.id)}
+                  onClick={() => handleAssign(retailer.Id)}
                   className="text-indigo-600 hover:text-indigo-900"
                 >
                   Assign

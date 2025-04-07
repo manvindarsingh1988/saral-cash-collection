@@ -11,19 +11,19 @@ import CollectorLayout from "./CollectorLayout";
 export default function UserSpecificDashboard({ children }) {
   const user = mockApi.getCurrentUser();
 
-  if (user.role === "Admin") {
+  if ((user.role || user.UserType) === "Admin") {
     return (
       <AdminLayout>
         <AdminDashboard />
       </AdminLayout>
     );
-  } else if (user.role === "Collector") {
+  } else if ((user.role || user.UserType) === "Collector") {
     return (
       <CollectorLayout>
         <CollectorDashboard />
       </CollectorLayout>
     );
-  } else if (user.role === "RetailUser") {
+  } else if ((user.role || user.UserType) === "RetailUser") {
     return (
       <RetailUserLayout>
         <RetailDashboard />

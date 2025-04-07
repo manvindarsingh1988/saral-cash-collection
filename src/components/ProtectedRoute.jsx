@@ -16,7 +16,7 @@ export default function ProtectedRoute({ children }) {
   useEffect(() => {
     const user = mockApi.getCurrentUser();
 
-    if (!user || !user.role) {
+    if (!(user?.role || user?.UserType)) {
       navigate("/signin");
     } else {
       setUser(user);
@@ -25,7 +25,7 @@ export default function ProtectedRoute({ children }) {
 
   if (!user) return <Navigate to="/signin" replace />;
 
-  if (routesForRoles[user.role].includes(location.pathname)) {
+  if (routesForRoles[user.role || user.UserType].includes(location.pathname)) {
     return children;
   } else {
     return <Navigate to="/" replace />;
