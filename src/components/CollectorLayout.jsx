@@ -1,6 +1,6 @@
 import React from "react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
-import { mockApi } from "../lib/mockApi";
+import { apiBase } from "../lib/apiBase";
 
 export default function CollectorLayout({ children }) {
   const location = useLocation();
@@ -11,7 +11,7 @@ export default function CollectorLayout({ children }) {
   };
 
   const handleSignOut = async () => {
-    await mockApi.signOut();
+    await apiBase.signOut();
     navigate("/signin");
   };
 

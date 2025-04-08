@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { mockApi } from "../../lib/mockApi";
+import { apiBase } from "../../lib/apiBase";
 
 export default function AssignRetail() {
   const [retailers, setRetailers] = useState([]);
@@ -22,8 +22,8 @@ export default function AssignRetail() {
       setError(null);
 
       const [retailData, collectorData] = await Promise.all([
-        mockApi.getRetailUsers(),
-        mockApi.getCollectors(),
+        apiBase.getRetailUsers(),
+        apiBase.getCollectors(),
       ]);
 
       setRetailers(retailData);
@@ -46,7 +46,7 @@ export default function AssignRetail() {
     const collector = collectors.find((c) => c.Id === collectorId);
     setSelectedCollector(collector);
     // Update unassigned retailers list
-    const mappedRetailData = await mockApi.getMappedUsersByCollectorId(
+    const mappedRetailData = await apiBase.getMappedUsersByCollectorId(
       collector.Id
     );
     console.log("Mapped Retail Data:", mappedRetailData);
@@ -63,7 +63,7 @@ export default function AssignRetail() {
       setError(null);
       console.log("Assigning collector:", selectedCollector);
       console.log("Retailer ID:", retailerId);
-      await mockApi.alignCollectorWithRetailerUser({
+      await apiBase.alignCollectorWithRetailerUser({
         RetailerId: retailerId,
         CollectorId: selectedCollector.Id,
       });
@@ -78,7 +78,7 @@ export default function AssignRetail() {
   const handleUnassign = async (retailerId) => {
     try {
       setError(null);
-      await mockApi.assignCollector(retailerId, null);
+      await apiBase.assignCollector(retailerId, null);
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
       fetchUsers();

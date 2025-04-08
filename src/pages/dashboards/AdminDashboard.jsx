@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { mockApi } from "../../lib/mockApi";
+import { apiBase } from "../../lib/apiBase";
 import { formatIndianNumber } from "../../lib/utils";
 
 export default function AdminDashboard() {
@@ -26,7 +26,7 @@ export default function AdminDashboard() {
 
   const fetchStats = async () => {
     try {
-      const data = await mockApi.getStats();
+      const data = await apiBase.getStats();
       setStats(data);
     } catch (err) {
       setError(err.message);
@@ -41,7 +41,7 @@ export default function AdminDashboard() {
 
   const fetchLiabilities = async (date) => {
     try {
-      const data = await mockApi.getLiabilityAmountOfAllRetailers(date);
+      const data = await apiBase.getLiabilityAmountOfAllRetailers(date);
       setLiabilities(data);
 
       const totalAmt = data.reduce((sum, item) => sum + (item.Amt || 0), 0);

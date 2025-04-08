@@ -55,7 +55,7 @@ const transactions = [
 let currentUser = null;
 
 // Mock API functions
-export const mockApi = {
+export const apiBase = {
   signIn: async (email, password) => {
     const response = await fetch(
       `${API_URL}/Login?userId=${email}&password=${password}`
@@ -124,7 +124,7 @@ export const mockApi = {
   },
 
   getStats: async () => {
-    const user = mockApi.getCurrentUser();
+    const user = apiBase.getCurrentUser();
 
     if (!user) {
       throw new Error("Not authenticated");
@@ -191,7 +191,7 @@ export const mockApi = {
   },
 
   createTransaction: async (amount) => {
-    const user = mockApi.getCurrentUser();
+    const user = apiBase.getCurrentUser();
     if (!user || user.role !== "RetailUser") {
       throw new Error("Unauthorized");
     }

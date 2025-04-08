@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { mockApi } from "../../lib/mockApi";
+import { apiBase } from "../../lib/apiBase";
 
 export default function AddUser() {
   const [formData, setFormData] = useState({
@@ -33,7 +33,7 @@ export default function AddUser() {
       setError(null);
       setSuccess(false);
 
-      await mockApi.saveCollectorUser(formData);
+      await apiBase.saveCollectorUser(formData);
 
       setSuccess(true);
       setFormData({

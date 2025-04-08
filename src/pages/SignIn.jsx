@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { mockApi } from '../lib/mockApi'
+import { apiBase } from '../lib/apiBase'
 
 export default function SignIn() {
   const navigate = useNavigate()
@@ -14,7 +14,7 @@ export default function SignIn() {
     try {
       setLoading(true)
       setError(null)
-      await mockApi.signIn(email, password)
+      await apiBase.signIn(email, password)
       navigate('/')
     } catch (error) {
       setError(error.message)
@@ -79,14 +79,14 @@ export default function SignIn() {
                 Forgot your password?
               </Link>
             </div>
-            <div className="text-sm">
+            {/* <div className="text-sm">
               <Link
                 to="/signup"
                 className="font-medium text-indigo-600 hover:text-indigo-500"
               >
                 Don't have an account? Sign up
               </Link>
-            </div>
+            </div> */}
           </div>
 
           <button

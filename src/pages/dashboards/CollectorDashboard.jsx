@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { mockApi } from '../../lib/mockApi'
+import { apiBase } from '../../lib/apiBase'
 
 export default function CollectorDashboard() {
   const [stats, setStats] = useState(null)
@@ -12,7 +12,7 @@ export default function CollectorDashboard() {
 
   const fetchStats = async () => {
     try {
-      const data = await mockApi.getStats()
+      const data = await apiBase.getStats()
       setStats(data)
     } catch (err) {
       setError(err.message)
@@ -23,7 +23,7 @@ export default function CollectorDashboard() {
 
   const handleUpdateStatus = async (transactionId, currentStatus) => {
     try {
-      await mockApi.updateTransactionStatus(
+      await apiBase.updateTransactionStatus(
         transactionId,
         currentStatus === 'Done' ? 'InProgress' : 'Done'
       )

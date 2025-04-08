@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { mockApi } from "../../lib/mockApi";
+import { apiBase } from "../../lib/apiBase";
 
 export default function RetailDashboard() {
   const [stats, setStats] = useState(null);
@@ -14,7 +14,7 @@ export default function RetailDashboard() {
 
   const fetchStats = async () => {
     try {
-      const data = await mockApi.getStats();
+      const data = await apiBase.getStats();
       setStats(data);
     } catch (err) {
       setError(err.message);
@@ -27,7 +27,7 @@ export default function RetailDashboard() {
     e.preventDefault();
     try {
       setError(null);
-      await mockApi.createTransaction(Number(amount));
+      await apiBase.createTransaction(Number(amount));
       setSuccess(true);
       setAmount("");
       setTimeout(() => setSuccess(false), 3000);

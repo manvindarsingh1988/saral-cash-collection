@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { mockApi } from '../lib/mockApi'
+import { apiBase } from '../lib/apiBase'
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState('')

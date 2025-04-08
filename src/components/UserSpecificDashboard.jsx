@@ -1,5 +1,5 @@
 import React from "react";
-import { mockApi } from "../lib/mockApi";
+import { apiBase } from "../lib/apiBase";
 import AdminDashboard from "../pages/dashboards/AdminDashboard";
 import CollectorDashboard from "../pages/dashboards/CollectorDashboard";
 import RetailDashboard from "../pages/dashboards/RetailDashboard";
@@ -9,7 +9,7 @@ import CollectorLayout from "./CollectorLayout";
 
 
 export default function UserSpecificDashboard({ children }) {
-  const user = mockApi.getCurrentUser();
+  const user = apiBase.getCurrentUser();
 
   if ((user.role || user.UserType) === "Admin") {
     return (

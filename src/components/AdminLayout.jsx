@@ -1,6 +1,6 @@
 import React from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { mockApi } from "../lib/mockApi";
+import { apiBase } from "../lib/apiBase";
 
 export default function AdminLayout({ children }) {
   console.log("AdminLayout.jsx");
@@ -13,7 +13,7 @@ export default function AdminLayout({ children }) {
   };
 
   const handleSignOut = async () => {
-    await mockApi.signOut();
+    await apiBase.signOut();
     navigate("/signin");
   };
 

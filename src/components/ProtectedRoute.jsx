@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Navigate, useNavigate, useLocation } from "react-router-dom";
-import { mockApi } from "../lib/mockApi";
+import { apiBase } from "../lib/apiBase";
 
 const routesForRoles = {
   Admin: ["/", "/add-user", "/assign-retail"],
@@ -9,12 +9,12 @@ const routesForRoles = {
 };
 
 export default function ProtectedRoute({ children }) {
-  const [user, setUser] = useState(() => mockApi.getCurrentUser());
+  const [user, setUser] = useState(() => apiBase.getCurrentUser());
   const navigate = useNavigate();
   const location = useLocation();
 
   useEffect(() => {
-    const user = mockApi.getCurrentUser();
+    const user = apiBase.getCurrentUser();
 
     if (!(user?.role || user?.UserType)) {
       navigate("/signin");

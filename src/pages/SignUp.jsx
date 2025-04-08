@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { mockApi } from '../lib/mockApi'
+import { apiBase } from '../lib/apiBase'
 
 export default function SignUp() {
   const navigate = useNavigate()
@@ -14,7 +14,7 @@ export default function SignUp() {
     try {
       setLoading(true)
       setError(null)
-      await mockApi.createCollector(email, password)
+      await apiBase.createCollector(email, password)
       navigate('/signin')
     } catch (error) {
       setError(error.message)
