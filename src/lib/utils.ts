@@ -1,5 +1,5 @@
 export function formatIndianNumber(number: number): string {
-  const numStr = number.toString();
+  const numStr = (number || "0").toString();
   // If the number is less than 1000, return it as is
   if (numStr.length <= 3) {
     return numStr;

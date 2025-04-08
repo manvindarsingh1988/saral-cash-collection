@@ -1,168 +1,152 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { apiBase } from "../../lib/apiBase";
+import { formatIndianNumber } from "../../lib/utils";
 
-export default function RetailDashboard() {
-  const [stats, setStats] = useState(null);
-  const [amount, setAmount] = useState("");
-  const [error, setError] = useState(null);
-  const [success, setSuccess] = useState(false);
-  const [loading, setLoading] = useState(true);
+export default function RetailDashboard({ retailUserId = "RU00118" }) {
+  const [selectedDate, setSelectedDate] = useState("");
+  const [liability, setLiability] = useState(null);
+  const [ledger, setLedger] = useState(null);
+  const [filters, setFilters] = useState({
+    CollectorId: "",
+    Amount: "",
+    TransactionType: "",
+    WorkFlow: "",
+    Date: "",
+    GivenOn: "",
+    Comment: "",
+  });
 
-  useEffect(() => {
-    fetchStats();
-  }, []);
+  const fetchData = async (date) => {
+    if (!retailUserId || !date) return;
 
-  const fetchStats = async () => {
     try {
-      const data = await apiBase.getStats();
-      setStats(data);
+      const ledgerData = await apiBase.getLadgerInfoByRetailerid(date, retailUserId);
+      const liabilityData = await apiBase.GetLiabilityAmountByRetailerId(retailUserId, date);
+      console.log("Response:", ledgerData, liabilityData);
+      setLiability(liabilityData); 
+      setLedger(ledgerData);
     } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
+      console.error("Error:", err);
+      setLiability(null);
+      setLedger(null);
     }
   };
 
-  const handleCreateTransaction = async (e) => {
-    e.preventDefault();
-    try {
-      setError(null);
-      await apiBase.createTransaction(Number(amount));
-      setSuccess(true);
-      setAmount("");
-      setTimeout(() => setSuccess(false), 3000);
-      fetchStats(); // Refresh stats instead of reloading the page
-    } catch (error) {
-      setError(error.message);
-    }
+  const handleFilterChange = (key, value) => {
+    setFilters((prev) => ({ ...prev, [key]: value }));
   };
 
-  if (loading) {
-    return <div>Loading...</div>;
-  }
-
-  if (error) {
-    return <div className="text-red-600">{error}</div>;
-  }
-
-  if (!stats) {
-    return <div>No data available</div>;
-  }
-
-  console.log("RetailDashboard.jsx");
+  const filteredData = (ledger || []).filter((item) => {
+    return Object.entries(filters).every(([key, value]) => {
+      if (!value) return true;
+      const itemValue = item[key];
+      if (itemValue === null || itemValue === undefined) return false;
+      return itemValue.toString().toLowerCase().includes(value.toLowerCase());
+    });
+  });
 
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-semibold text-gray-900">Retail Dashboard</h1>
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-        <div className="bg-white overflow-hidden shadow rounded-lg">
-          <div className="px-4 py-5 sm:p-6">
-            <dt className="text-sm font-medium text-gray-500 truncate">
-              Total Liability Amount
-            </dt>
-            <dd className="mt-1 text-3xl font-semibold text-gray-900">
-              ${stats.totalLiability}
-            </dd>
-          </div>
+
+      <div className="bg-white shadow rounded-lg p-6">
+        <div className="mb-4 flex items-center gap-4">
+          <input
+            type="date"
+            value={selectedDate}
+            onChange={(e) => setSelectedDate(e.target.value)}
+            className="border rounded px-2 py-1 border-gray-300"
+          />
+          <button
+            onClick={() => fetchData(selectedDate)}
+            className="bg-blue-600 text-white px-4 py-1.5 rounded hover:bg-blue-700"
+          >
+            Search
+          </button>
         </div>
 
-        <div className="bg-white overflow-hidden shadow rounded-lg">
-          <div className="px-4 py-5 sm:p-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">
-              Add New Liability
-            </h3>
-            <form onSubmit={handleCreateTransaction} className="space-y-4">
-              {error && (
-                <div className="rounded-md bg-red-50 p-4 text-sm text-red-700">
-                  {error}
-                </div>
-              )}
-              {success && (
-                <div className="rounded-md bg-green-50 p-4 text-sm text-green-700">
-                  Transaction created successfully!
-                </div>
-              )}
-              <div>
-                <label
-                  htmlFor="amount"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Amount ($)
-                </label>
-                <input
-                  type="number"
-                  id="amount"
-                  min="0"
-                  step="0.01"
-                  required
-                  value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                />
+        {liability && (
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-6">
+              <div className="bg-white shadow rounded-lg p-4">
+                <dt className="text-sm font-medium text-gray-500">Amount</dt>
+                <dd className="mt-1 text-3xl font-semibold text-gray-900">
+                  ₹{formatIndianNumber(liability.Amt)}
+                </dd>
               </div>
-              <button
-                type="submit"
-                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-              >
-                Add Liability
-              </button>
-            </form>
-          </div>
-        </div>
-      </div>
+              <div className="bg-white shadow rounded-lg p-4">
+                <dt className="text-sm font-medium text-gray-500">Handover</dt>
+                <dd className="mt-1 text-3xl font-semibold text-gray-900">
+                  ₹{formatIndianNumber(liability.HandoverAmt)}
+                </dd>
+              </div>
+              <div className="bg-white shadow rounded-lg p-4">
+                <dt className="text-sm font-medium text-gray-500">Status</dt>
+                <dd className="mt-1 text-2xl font-semibold text-gray-900">
+                  {liability.Status}
+                </dd>
+              </div>
+            </div>
 
-      <div className="bg-white shadow rounded-lg">
-        <div className="px-4 py-5 sm:p-6">
-          <h3 className="text-lg font-medium text-gray-900">
-            Transaction History
-          </h3>
-          <div className="mt-4">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead>
-                <tr>
-                  <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Date
-                  </th>
-                  <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Amount
-                  </th>
-                  <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
-                  </th>
-                  <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Handover Date
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {stats.transactions.map((transaction) => (
-                  <tr key={transaction.id}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {transaction.date}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      ${transaction.amount}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span
-                        className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                          transaction.status === "Done"
-                            ? "bg-green-100 text-green-800"
-                            : "bg-yellow-100 text-yellow-800"
-                        }`}
-                      >
-                        {transaction.status}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {transaction.handoverDate || "-"}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
+            {ledger?.length > 0 && (
+              <div className="max-h-[400px] overflow-y-auto border border-gray-200 rounded">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50 sticky top-0 z-10">
+                    <tr>
+                      {[
+                        "CollectorId",
+                        "Amount",
+                        "TransactionType",
+                        "WorkFlow",
+                        "Date",
+                        "GivenOn",
+                        "Comment",
+                      ].map((col) => (
+                        <th
+                          key={col}
+                          className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                        >
+                          <div className="flex flex-col">
+                            <span>{col}</span>
+                            <input
+                              type="text"
+                              value={filters[col]}
+                              onChange={(e) =>
+                                handleFilterChange(col, e.target.value)
+                              }
+                              className="mt-1 px-2 py-1 border border-gray-300 rounded text-xs"
+                            />
+                          </div>
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {filteredData.map((item, index) => (
+                      <tr key={index}>
+                        <td className="px-6 py-4 text-sm text-gray-900">{item.CollectorId}</td>
+                        <td className="px-6 py-4 text-sm text-gray-900">₹{formatIndianNumber(item.Amount)}</td>
+                        <td className="px-6 py-4 text-sm text-gray-900">{item.TransactionType}</td>
+                        <td className="px-6 py-4 text-sm text-gray-900">{item.WorkFlow}</td>
+                        <td className="px-6 py-4 text-sm text-gray-900">
+                          {new Date(item.Date).toLocaleDateString()}
+                        </td>
+                        <td className="px-6 py-4 text-sm text-gray-900">
+                          {new Date(item.GivenOn).toLocaleDateString()}
+                        </td>
+                        <td className="px-6 py-4 text-sm text-gray-900">{item.Comment}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </>
+        )}
+
+        {!ledger && selectedDate && (
+          <div className="text-gray-500 mt-4">No data available for selected date.</div>
+        )}
       </div>
     </div>
   );
