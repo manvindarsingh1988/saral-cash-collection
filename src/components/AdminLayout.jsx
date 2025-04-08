@@ -39,12 +39,12 @@ export default function AdminLayout({ children }) {
                     Dashboard
                   </Link>
                   <Link
-                    to="/add-collector"
+                    to="/add-user"
                     className={`${isActive(
-                      "/add-collector"
+                      "/add-user"
                     )} text-white rounded-md px-3 py-2 text-sm font-medium`}
                   >
-                    Add Collector
+                    Add User
                   </Link>
                   <Link
                     to="/assign-retail"

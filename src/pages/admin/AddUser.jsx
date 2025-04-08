@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import { mockApi } from "../../lib/mockApi";
 
-export default function AddCollector() {
+export default function AddUser() {
   const [formData, setFormData] = useState({
+    userTypeId: "12", // Default to Collector
     firstName: "",
     middleName: "",
     lastName: "",
@@ -36,6 +37,7 @@ export default function AddCollector() {
 
       setSuccess(true);
       setFormData({
+        userTypeId: "12",
         firstName: "",
         middleName: "",
         lastName: "",
@@ -58,7 +60,7 @@ export default function AddCollector() {
   return (
     <div>
       <h1 className="text-2xl font-semibold text-gray-900">
-        Add New Collector
+        Add New User
       </h1>
 
       <div className="mt-6">
@@ -70,9 +72,29 @@ export default function AddCollector() {
           )}
           {success && (
             <div className="rounded-md bg-green-50 p-4 text-sm text-green-700">
-              Collector account created successfully!
+              Account created successfully!
             </div>
           )}
+
+          {/* User Type Selector */}
+          <div>
+            <label
+              htmlFor="userTypeId"
+              className="block text-sm font-medium text-gray-700"
+            >
+              User Type
+            </label>
+            <select
+              id="userTypeId"
+              value={formData.userTypeId}
+              onChange={handleChange}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+              required
+            >
+              <option value="12">Collector</option>
+              <option value="13">Cashier</option>
+            </select>
+          </div>
 
           <div className="grid grid-cols-2 gap-4">
             {[
@@ -112,7 +134,7 @@ export default function AddCollector() {
             disabled={loading}
             className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
           >
-            {loading ? "Creating..." : "Create Collector Account"}
+            {loading ? "Creating..." : "Create Account"}
           </button>
         </form>
       </div>

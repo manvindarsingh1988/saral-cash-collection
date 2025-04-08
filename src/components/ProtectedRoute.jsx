@@ -3,7 +3,7 @@ import { Navigate, useNavigate, useLocation } from "react-router-dom";
 import { mockApi } from "../lib/mockApi";
 
 const routesForRoles = {
-  Admin: ["/", "/add-collector", "/assign-retail"],
+  Admin: ["/", "/add-user", "/assign-retail"],
   Collector: ["/"],
   RetailUser: ["/"],
 };

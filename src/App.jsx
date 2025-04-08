@@ -6,11 +6,11 @@ import {
 import SignIn from "./pages/SignIn";
 import SignUp from "./pages/SignUp";
 import ForgotPassword from "./pages/ForgotPassword";
-import AddCollector from "./pages/admin/AddCollector";
 import AssignRetail from "./pages/admin/AssignRetail";
 import AdminLayout from "./components/AdminLayout";
 import UserSpecificDashboard from "./components/UserSpecificDashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
+import AddUser from "./pages/admin/AddUser";
 
 function App() {
   return (
@@ -28,11 +28,11 @@ function App() {
           }
         />
         <Route
-          path="/add-collector"
+          path="/add-user"
           element={
             <ProtectedRoute>
               <AdminLayout>
-                <AddCollector />
+                <AddUser />
               </AdminLayout>
             </ProtectedRoute>
           }
