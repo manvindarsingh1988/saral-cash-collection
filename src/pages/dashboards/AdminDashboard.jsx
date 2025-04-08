@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { mockApi } from "../../lib/mockApi";
+import { formatIndianNumber } from "../../lib/utils";
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState(null);
@@ -108,7 +109,7 @@ export default function AdminDashboard() {
                       Total Liability Amount
                     </dt>
                     <dd className="mt-1 text-3xl font-semibold text-gray-900">
-                      ₹{summary.totalAmt}
+                      ₹{formatIndianNumber(summary.totalAmt)}
                     </dd>
                   </div>
                 </div>
@@ -118,7 +119,7 @@ export default function AdminDashboard() {
                       Total Handover Amount
                     </dt>
                     <dd className="mt-1 text-3xl font-semibold text-gray-900">
-                      ₹{summary.totalHandover}
+                      ₹{formatIndianNumber(summary.totalHandover)}
                     </dd>
                   </div>
                 </div>
@@ -167,7 +168,7 @@ export default function AdminDashboard() {
                           {item.RetailUserName}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          ₹{item.Amt}
+                          ₹{formatIndianNumber(item.Amt)}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                           ₹{item.HandoverAmt}
