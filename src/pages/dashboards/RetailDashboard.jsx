@@ -146,7 +146,7 @@ export default function RetailDashboard({ retailUserId = "RU00118" }) {
 
               {ledger?.length > 0 && (
                 <div className="max-h-[400px] overflow-y-auto border border-gray-200 rounded">
-                  <table className="min-w-full divide-y divide-gray-200">
+                  <table className="min-w-full divide-y divide-gray-200 table-fixed">
                     <thead className="bg-gray-50 sticky top-0 z-10">
                       <tr>
                         {[
@@ -160,7 +160,7 @@ export default function RetailDashboard({ retailUserId = "RU00118" }) {
                         ].map((col) => (
                           <th
                             key={col}
-                            className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                            className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap"
                           >
                             <div className="flex flex-col">
                               <span>{col}</span>
@@ -170,39 +170,39 @@ export default function RetailDashboard({ retailUserId = "RU00118" }) {
                                 onChange={(e) =>
                                   handleFilterChange(col, e.target.value)
                                 }
-                                className="mt-1 px-2 py-1 border border-gray-300 rounded text-xs"
+                                className="mt-1 px-1 py-0.5 border border-gray-300 rounded text-xs"
                               />
                             </div>
                           </th>
                         ))}
                       </tr>
                     </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
+                    <tbody className="bg-white divide-y divide-gray-200 text-sm">
                       {filteredData.map((item, index) => (
                         <tr
                           key={index}
                           onClick={() => openEditLedger(item)}
                           className="cursor-pointer hover:bg-gray-100"
                         >
-                          <td className="px-6 py-4 text-sm text-gray-900">
+                          <td className="px-2 py-2 whitespace-nowrap">
                             {item.CollectorId}
                           </td>
-                          <td className="px-6 py-4 text-sm text-gray-900">
+                          <td className="px-2 py-2 whitespace-nowrap">
                             ₹{formatIndianNumber(item.Amount)}
                           </td>
-                          <td className="px-6 py-4 text-sm text-gray-900">
+                          <td className="px-2 py-2 whitespace-nowrap">
                             {item.TransactionType}
                           </td>
-                          <td className="px-6 py-4 text-sm text-gray-900">
+                          <td className="px-2 py-2 whitespace-nowrap">
                             {item.WorkFlow}
                           </td>
-                          <td className="px-6 py-4 text-sm text-gray-900">
+                          <td className="px-2 py-2 whitespace-nowrap">
                             {new Date(item.Date).toLocaleDateString()}
                           </td>
-                          <td className="px-6 py-4 text-sm text-gray-900">
+                          <td className="px-2 py-2 whitespace-nowrap">
                             {new Date(item.GivenOn).toLocaleDateString()}
                           </td>
-                          <td className="px-6 py-4 text-sm text-gray-900">
+                          <td className="px-2 py-2 whitespace-nowrap max-w-[150px] truncate">
                             {item.Comment}
                           </td>
                         </tr>
