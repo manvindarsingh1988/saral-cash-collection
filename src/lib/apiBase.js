@@ -322,7 +322,7 @@ export const apiBase = {
   },
 
   updateLedgerInfo: async (data) => {
-    const response = await fetch(`${API_URL}/UpdateLedgerInfo`, {
+    const response = await fetch(`${API_URL}/UpdateLadgerInfo`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

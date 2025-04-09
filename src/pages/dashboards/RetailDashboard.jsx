@@ -67,7 +67,7 @@ export default function RetailDashboard({ retailUserId = "RU00118" }) {
       };
 
       if (editData?.Id) {
-        await apiBase.updateLedgerInfo(editData.Id, payload);
+        await apiBase.updateLedgerInfo(payload);
       } else {
         await apiBase.addLedgeInfo(payload);
       }

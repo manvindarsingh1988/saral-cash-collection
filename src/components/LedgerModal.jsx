@@ -18,7 +18,6 @@ export default function LedgerModal({
 
   useEffect(() => {
     if (initialData) {
-      // Convert dates to yyyy-MM-dd format for input compatibility
       const formattedData = { ...initialData };
       ["Date", "GivenOn"].forEach((field) => {
         if (formattedData[field]) {
@@ -48,17 +47,32 @@ export default function LedgerModal({
       <div className="bg-white p-6 rounded shadow-lg space-y-4 w-full max-w-md">
         <h2 className="text-lg font-semibold">Ledger Entry</h2>
         {Object.keys(formData).map((key) => {
-          const label = key.replace(/([A-Z])/g, " $1").trim();
-          let inputType = "text";
-          if (["Amount", "TransactionType", "WorkFlow"].includes(key)) {
-            inputType = "number";
-          } else if (["Date", "GivenOn"].includes(key)) {
-            inputType = "date";
-          }
+          if (["Id", "RetailerId", "RetailerName"].includes(key)) return; // Add any keys to exclude here
 
-          return (
-            <div key={key} className="flex flex-col">
-              <label className="text-sm text-gray-600">{label}</label>
+          const label = key.replace(/([A-Z])/g, " $1").trim();
+          let inputElement;
+
+          if (key === "TransactionType") {
+            inputElement = (
+              <select
+                name={key}
+                value={formData[key]}
+                onChange={handleChange}
+                className="border px-2 py-1 rounded"
+              >
+                <option value="" disabled hidden>Select Type</option>
+                <option value="1">Cash</option>
+                <option value="2">Bank Account/UPI</option>
+              </select>
+            );
+          } else {
+            const inputType = ["Amount", "WorkFlow"].includes(key)
+              ? "number"
+              : ["Date", "GivenOn"].includes(key)
+              ? "date"
+              : "text";
+
+            inputElement = (
               <input
                 name={key}
                 type={inputType}
@@ -66,9 +80,17 @@ export default function LedgerModal({
                 onChange={handleChange}
                 className="border px-2 py-1 rounded"
               />
+            );
+          }
+
+          return (
+            <div key={key} className="flex flex-col">
+              <label className="text-sm text-gray-600">{label}</label>
+              {inputElement}
             </div>
           );
         })}
+
         <div className="flex justify-end gap-2">
           <button onClick={onClose} className="px-4 py-1 rounded border">
             Cancel
