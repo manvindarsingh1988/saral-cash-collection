@@ -1,140 +1,310 @@
-import React, { useState, useEffect } from 'react'
-import { apiBase } from '../../lib/apiBase'
+import React, { useEffect, useState } from "react";
+import { apiBase } from "../../lib/apiBase";
+import { formatIndianNumber } from "../../lib/utils";
+import CollectorLedgerModal from "../../components/CollectorLedgerModal";
 
-export default function CollectorDashboard() {
-  const [stats, setStats] = useState(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
+const columns = [
+  { key: "Id", label: "ID", width: "50px" },
+  { key: "CollectorName", label: "Collector", width: "150px" },
+  { key: "Amount", label: "Amount", width: "100px" },
+  { key: "TransactionTypes", label: "Transaction Type", width: "120px" },
+  { key: "WorkFlows", label: "Workflow", width: "120px" },
+  { key: "Date", label: "Transaction Date", width: "100px" },
+  { key: "GivenOn", label: "Given On", width: "100px" },
+  { key: "Comment", label: "Remarks", width: "150px" },
+];
+
+export default function CollectorDashboard({ collectorUserId = "RU004084" }) {
+  const [isModalOpen, setModalOpen] = useState(false);
+  const [editData, setEditData] = useState(null);
+  const [selectedDate, setSelectedDate] = useState("");
+  const [selectedRetailerId, setSelectedRetailerId] = useState("");
+  const [ledger, setLedger] = useState(null);
+  const [masterData, setMasterData] = useState(null);
+  const [retailers, setRetailers] = useState([]);
+  const [filters, setFilters] = useState({
+    CollectorId: "",
+    Amount: "",
+    TransactionTypes: "",
+    WorkFlows: "",
+    Date: "",
+    GivenOn: "",
+    Comment: "",
+  });
 
   useEffect(() => {
-    fetchStats()
-  }, [])
+    const loadMasterData = async () => {
+      try {
+        const [master, retailers] = await Promise.all([
+          apiBase.getMasterData(),
+          apiBase.getMappedUsersByCollectorId(collectorUserId),
+        ]);
+        setMasterData(master);
+        setRetailers(retailers);
+      } catch (err) {
+        console.error("Failed to load master data:", err);
+      }
+    };
 
-  const fetchStats = async () => {
+    loadMasterData();
+  }, []);
+
+  const fetchData = async (date) => {
+    if (!collectorUserId || !date || !selectedRetailerId) {
+      alert("Please select a date and retailer.");
+      return;
+    }
+
     try {
-      const data = await apiBase.getStats()
-      setStats(data)
+      const ledgerData = await apiBase.getLadgerInfoByRetaileridAndCollectorId(
+        date,
+        selectedRetailerId,
+        collectorUserId
+      );
+      setLedger(ledgerData);
     } catch (err) {
-      setError(err.message)
-    } finally {
-      setLoading(false)
+      console.error("Fetch failed:", err);
+      setLedger(null);
     }
-  }
+  };
 
-  const handleUpdateStatus = async (transactionId, currentStatus) => {
+  const getMasterValue = (type, id) => {
+    const list = masterData?.[type] || [];
+    return list.find((x) => x.Id == id)?.Description || id;
+  };
+
+  const handleFilterChange = (key, value) => {
+    setFilters((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const openAddLedger = () => {
+    setEditData(null);
+    setModalOpen(true);
+  };
+
+  const openEditLedger = (data) => {
+    setEditData(data);
+    setModalOpen(true);
+  };
+
+  const handleLedgerSubmit = async (data) => {
     try {
-      await apiBase.updateTransactionStatus(
-        transactionId,
-        currentStatus === 'Done' ? 'InProgress' : 'Done'
-      )
-      fetchStats() // Refresh stats instead of reloading the page
-    } catch (error) {
-      console.error('Error updating status:', error)
+      data.RetailerId = collectorUserId;
+      const payload = {
+        ...data,
+        Amount: parseFloat(data.Amount),
+        TransactionType: parseInt(data.TransactionType),
+        WorkFlow: parseInt(data.WorkFlow),
+        Date: new Date(data.Date).toISOString(),
+        GivenOn: new Date(data.GivenOn).toISOString(),
+      };
+
+      if (editData?.Id) {
+        await apiBase.updateLedgerInfo(payload);
+      } else {
+        await apiBase.addLedgeInfo(payload);
+      }
+
+      await fetchData(selectedDate);
+    } catch (err) {
+      console.error("Submission failed:", err);
     }
-  }
+  };
 
-  if (loading) {
-    return <div>Loading...</div>
-  }
+  const filteredData = (ledger || []).filter((item) => {
+    return Object.entries(filters).every(([key, value]) => {
+      if (key === "WorkFlows") {
+        key = "WorkFlow";
+      } else if (key === "TransactionTypes") {
+        key = "TransactionType";
+      }
 
-  if (error) {
-    return <div className="text-red-600">{error}</div>
-  }
+      if (!value) return true;
+      const itemValue = item[key];
+      if (itemValue === null || itemValue === undefined) return false;
+      return itemValue.toString().toLowerCase().includes(value.toLowerCase());
+    });
+  });
 
-  if (!stats) {
-    return <div>No data available</div>
-  }
+  const totalLedgerAmount = (ledger || []).reduce(
+    (sum, item) => sum + (item.Amount || 0),
+    0
+  );
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-semibold text-gray-900">Collector Dashboard</h1>
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-        <div className="bg-white overflow-hidden shadow rounded-lg">
-          <div className="px-4 py-5 sm:p-6">
-            <dt className="text-sm font-medium text-gray-500 truncate">
-              Total Collected Amount
-            </dt>
-            <dd className="mt-1 text-3xl font-semibold text-gray-900">
-              ${stats.totalCollected}
-            </dd>
+    <>
+      <div className="space-y-6">
+        <h1 className="text-2xl font-semibold text-gray-900">
+          Collector Dashboard
+        </h1>
+
+        <div className="bg-white shadow rounded-lg p-6">
+          <div className="mb-4 flex flex-wrap items-center gap-4">
+            <input
+              type="date"
+              value={selectedDate}
+              onChange={(e) => setSelectedDate(e.target.value)}
+              className="border rounded px-2 py-1 border-gray-300"
+            />
+
+            <select
+              value={selectedRetailerId}
+              onChange={(e) => setSelectedRetailerId(e.target.value)}
+              className="border rounded px-2 py-1 border-gray-300"
+            >
+              <option value="" disabled>
+                Select Retailer
+              </option>
+              {retailers.map((r) => (
+                <option key={r.RetailerUserId} value={r.RetailerUserIdUserId}>
+                  {r.RetailerUserName}
+                </option>
+              ))}
+            </select>
+
+            <button
+              onClick={() => fetchData(selectedDate)}
+              className="bg-blue-600 text-white px-4 py-1.5 rounded hover:bg-blue-700"
+            >
+              Search
+            </button>
           </div>
-        </div>
-        <div className="bg-white overflow-hidden shadow rounded-lg">
-          <div className="px-4 py-5 sm:p-6">
-            <dt className="text-sm font-medium text-gray-500 truncate">
-              Pending Collection
-            </dt>
-            <dd className="mt-1 text-3xl font-semibold text-gray-900">
-              ${stats.pendingCollection}
-            </dd>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-6 mb-6">
+            <div className="bg-white shadow rounded-lg p-4">
+              <dt className="text-sm font-medium text-gray-500">Handover</dt>
+              <dd className="mt-1 text-3xl font-semibold text-gray-900">
+                ₹{formatIndianNumber(totalLedgerAmount)}
+              </dd>
+            </div>
+            <div className="bg-white shadow rounded-lg p-4">
+              <dt className="text-sm font-medium text-gray-500">
+                Total Entries
+              </dt>
+              <dd className="mt-1 text-3xl font-semibold text-gray-900">
+                {ledger?.length || 0}
+              </dd>
+            </div>
           </div>
+
+          <div className="flex justify-end mb-2">
+            <button
+              onClick={openAddLedger}
+              className="bg-green-600 text-white px-4 py-1.5 rounded hover:bg-green-700"
+            >
+              Add Ledger Entry
+            </button>
+          </div>
+
+          {ledger?.length > 0 ? (
+            <div className="overflow-y-auto border border-gray-200 rounded max-h-[600px]">
+              <table className="w-full table-auto divide-y divide-gray-200 text-sm">
+                <thead className="bg-gray-50 sticky top-0 z-10">
+                  <tr>
+                    {columns.map(({ key, label, width }) => (
+                      <th
+                        key={key}
+                        className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase"
+                        style={{ width, whiteSpace: "nowrap" }}
+                      >
+                        <div className="flex flex-col min-w-fit">
+                          <span>{label}</span>
+                          {["TransactionTypes", "WorkFlows"].includes(key) &&
+                          masterData ? (
+                            <select
+                              value={filters[key]}
+                              onChange={(e) =>
+                                handleFilterChange(key, e.target.value)
+                              }
+                              className="mt-1 px-1 py-0.5 border border-gray-300 rounded text-xs"
+                              style={{ width }}
+                            >
+                              <option value="">All</option>
+                              {masterData[key]?.map((opt) => (
+                                <option key={opt.Id} value={opt.Id}>
+                                  {opt.Description}
+                                </option>
+                              ))}
+                            </select>
+                          ) : (
+                            <input
+                              type="text"
+                              style={{ width }}
+                              value={filters[key] || ""}
+                              onChange={(e) =>
+                                handleFilterChange(key, e.target.value)
+                              }
+                              className="mt-1 px-1 py-0.5 border border-gray-300 rounded text-xs"
+                              placeholder="Filter"
+                            />
+                          )}
+                        </div>
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {filteredData.map((item) => (
+                    <tr
+                      title="Click to edit"
+                      key={item.Id}
+                      onClick={() => openEditLedger(item)}
+                      className="cursor-pointer hover:bg-gray-100"
+                    >
+                      <td className="px-2 py-2">
+                        <a
+                          title="Click to edit"
+                          className="text-blue-600 underline hover:text-blue-800"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            openEditLedger(item);
+                          }}
+                        >
+                          {item.Id}
+                        </a>
+                      </td>
+                      <td className="px-2 py-2">{item.CollectorName}</td>
+                      <td className="px-2 py-2">
+                        ₹{formatIndianNumber(item.Amount)}
+                      </td>
+                      <td className="px-2 py-2">
+                        {getMasterValue(
+                          "TransactionTypes",
+                          item.TransactionType
+                        )}
+                      </td>
+                      <td className="px-2 py-2">
+                        {getMasterValue("WorkFlows", item.WorkFlow)}
+                      </td>
+                      <td className="px-2 py-2">
+                        {new Date(item.Date).toLocaleDateString()}
+                      </td>
+                      <td className="px-2 py-2">
+                        {new Date(item.GivenOn).toLocaleDateString()}
+                      </td>
+                      <td className="px-2 py-2 break-words max-w-[200px]">
+                        {item.Comment}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : selectedDate ? (
+            <div className="text-gray-500 mt-4">
+              No data available for selected date.
+            </div>
+          ) : null}
         </div>
       </div>
 
-      <div className="bg-white shadow rounded-lg">
-        <div className="px-4 py-5 sm:p-6">
-          <h3 className="text-lg font-medium text-gray-900">Collection History</h3>
-          <div className="mt-4">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead>
-                <tr>
-                  <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Date
-                  </th>
-                  <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Retail User
-                  </th>
-                  <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Amount
-                  </th>
-                  <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
-                  </th>
-                  <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {stats.transactions.map((transaction) => (
-                  <tr key={transaction.id}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {transaction.date}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {transaction.retailUserId}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      ${transaction.amount}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        transaction.status === 'Done' 
-                          ? 'bg-green-100 text-green-800' 
-                          : 'bg-yellow-100 text-yellow-800'
-                      }`}>
-                        {transaction.status}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      <button
-                        onClick={() => handleUpdateStatus(transaction.id, transaction.status)}
-                        className={`px-3 py-1 rounded-md text-sm font-medium ${
-                          transaction.status === 'Done'
-                            ? 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200'
-                            : 'bg-green-100 text-green-800 hover:bg-green-200'
-                        }`}
-                      >
-                        {transaction.status === 'Done' ? 'Mark as Pending' : 'Mark as Collected'}
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </div>
-  )
+      <CollectorLedgerModal
+        masterData={masterData}
+        isOpen={isModalOpen}
+        onClose={() => setModalOpen(false)}
+        onSubmit={handleLedgerSubmit}
+        initialData={editData}
+      />
+    </>
+  );
 }
