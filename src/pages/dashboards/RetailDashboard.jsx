@@ -167,7 +167,7 @@ export default function RetailDashboard({ retailUserId = "RU00118" }) {
             </button>
           </div>
 
-          {liability && (
+          {liability && liability.Amt > 0 && (
             <>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-6">
                 <div className="bg-white shadow rounded-lg p-4">
@@ -196,6 +196,7 @@ export default function RetailDashboard({ retailUserId = "RU00118" }) {
 
               <div className="flex justify-end mb-2">
                 <button
+                  disabled={computedStatus === "Pending"}
                   onClick={openAddLedger}
                   className="bg-green-600 text-white px-4 py-1.5 rounded hover:bg-green-700"
                 >
@@ -253,13 +254,13 @@ export default function RetailDashboard({ retailUserId = "RU00118" }) {
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
                       {filteredData.map((item) => (
-                        <tr
+                        <tr title="Click to edit"
                           key={item.Id}
                           onClick={() => openEditLedger(item)}
                           className="cursor-pointer hover:bg-gray-100"
                         >
                           <td className="px-2 py-2">
-                            <a
+                            <a title="Click to edit"
                               className="text-blue-600 underline hover:text-blue-800"
                               onClick={(e) => {
                                 e.preventDefault();
@@ -300,7 +301,7 @@ export default function RetailDashboard({ retailUserId = "RU00118" }) {
             </>
           )}
 
-          {!ledger && selectedDate && (
+          {((!ledger && selectedDate) || (liability && liability.Amt <= 0)) && (
             <div className="text-gray-500 mt-4">
               No data available for selected date.
             </div>
