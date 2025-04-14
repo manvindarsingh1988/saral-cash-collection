@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { apiBase } from "../../lib/apiBase";
 import { formatIndianNumber } from "../../lib/utils";
-import LedgerModal from "../../components/LedgerModal";
+import RetailerLedgerModal from "../../components/RetailerLedgerModal";
 
 const columns = [
   { key: "Id", label: "ID", width: "50px" },
@@ -308,7 +308,7 @@ export default function RetailDashboard({ retailUserId = "RU00118" }) {
         </div>
       </div>
 
-      <LedgerModal
+      <RetailerLedgerModal
         collectors={collectors}
         masterData={masterData}
         isOpen={isModalOpen}

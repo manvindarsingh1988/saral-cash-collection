@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 
-export default function LedgerModal({
+export default function RetailerLedgerModal({
   collectors,
   masterData,
   isOpen,
