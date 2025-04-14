@@ -36,8 +36,13 @@ export default function RetailDashboard({ retailUserId = "RU00118" }) {
   useEffect(() => {
     const loadMasterData = async () => {
       try {
-        const data = await apiBase.getMasterData();
-        setMasterData(data);
+        const [masterData, collectorData] = await Promise.all([
+          apiBase.getMasterData(),
+          apiBase.getMappedCollectorsByRetailerId(retailUserId),
+        ]);
+
+        setMasterData(masterData);
+        setCollectors(collectorData);
       } catch (err) {
         console.error("Failed to load master data:", err);
       }
@@ -50,13 +55,11 @@ export default function RetailDashboard({ retailUserId = "RU00118" }) {
     if (!retailUserId || !date) return;
 
     try {
-      const [ledgerData, liabilityData, collectors] = await Promise.all([
+      const [ledgerData, liabilityData] = await Promise.all([
         apiBase.getLadgerInfoByRetailerid(date, retailUserId),
         apiBase.GetLiabilityAmountByRetailerId(retailUserId, date),
-        apiBase.getMappedCollectorsByRetailerId(retailUserId),
       ]);
 
-      setCollectors(collectors);
       setLiability(liabilityData);
       setLedger(ledgerData);
     } catch (err) {
@@ -124,11 +127,16 @@ export default function RetailDashboard({ retailUserId = "RU00118" }) {
     });
   });
 
-  const totalLedgerAmount = (ledger || []).reduce((sum, item) => sum + (item.Amount || 0), 0);
+  const totalLedgerAmount = (ledger || []).reduce(
+    (sum, item) => sum + (item.Amount || 0),
+    0
+  );
 
   const approvedAmount = (ledger || [])
     .filter((item) => {
-      const approvedId = masterData?.WorkFlows?.find(x => x.Description.toLowerCase() === "approved")?.Id;
+      const approvedId = masterData?.WorkFlows?.find(
+        (x) => x.Description.toLowerCase() === "approved"
+      )?.Id;
       return item.WorkFlow === approvedId;
     })
     .reduce((sum, item) => sum + (item.Amount || 0), 0);
@@ -163,13 +171,17 @@ export default function RetailDashboard({ retailUserId = "RU00118" }) {
             <>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-6">
                 <div className="bg-white shadow rounded-lg p-4">
-                  <dt className="text-sm font-medium text-gray-500">Liability</dt>
+                  <dt className="text-sm font-medium text-gray-500">
+                    Liability
+                  </dt>
                   <dd className="mt-1 text-3xl font-semibold text-gray-900">
                     ₹{formatIndianNumber(liability.Amt)}
                   </dd>
                 </div>
                 <div className="bg-white shadow rounded-lg p-4">
-                  <dt className="text-sm font-medium text-gray-500">Handover</dt>
+                  <dt className="text-sm font-medium text-gray-500">
+                    Handover
+                  </dt>
                   <dd className="mt-1 text-3xl font-semibold text-gray-900">
                     ₹{formatIndianNumber(totalLedgerAmount)}
                   </dd>
@@ -204,8 +216,9 @@ export default function RetailDashboard({ retailUserId = "RU00118" }) {
                           >
                             <div className="flex flex-col min-w-fit">
                               <span>{label}</span>
-                              {["TransactionTypes", "WorkFlows"].includes(key) &&
-                              masterData ? (
+                              {["TransactionTypes", "WorkFlows"].includes(
+                                key
+                              ) && masterData ? (
                                 <select
                                   value={filters[key]}
                                   onChange={(e) =>
@@ -245,7 +258,14 @@ export default function RetailDashboard({ retailUserId = "RU00118" }) {
                           onClick={() => openEditLedger(item)}
                           className="cursor-pointer hover:bg-gray-100"
                         >
-                          <td className="px-2 py-2">{item.Id}</td>
+                          <td className="px-2 py-2">
+                            <a
+                              href="javascript:void(0);"
+                              onClick={() => openEditLedger(item)}
+                            >
+                              {item.Id}
+                            </a>
+                          </td>
                           <td className="px-2 py-2">{item.CollectorName}</td>
                           <td className="px-2 py-2">
                             ₹{formatIndianNumber(item.Amount)}

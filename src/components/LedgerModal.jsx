@@ -49,7 +49,7 @@ export default function LedgerModal({
       <div className="bg-white p-6 rounded shadow-lg space-y-4 w-full max-w-md">
         <h2 className="text-lg font-semibold">Ledger Entry</h2>
         {Object.keys(formData).map((key) => {
-          if (["Id", "RetailerId", "RetailerName"].includes(key)) return null;
+          if (["Id", "RetailerId", "RetailerName", "CollectorName"].includes(key)) return null;
 
           const label = key.replace(/([A-Z])/g, " $1").trim();
           let inputElement;
@@ -66,8 +66,8 @@ export default function LedgerModal({
                   Select Collector
                 </option>
                 {collectors?.map((collector) => (
-                  <option key={collector.id} value={collector.id}>
-                    {collector.name}
+                  <option key={collector.CollectorUserId} value={collector.CollectorUserId}>
+                    {collector.CollectorUserName}
                   </option>
                 ))}
               </select>
