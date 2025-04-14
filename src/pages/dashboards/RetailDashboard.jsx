@@ -3,6 +3,17 @@ import { apiBase } from "../../lib/apiBase";
 import { formatIndianNumber } from "../../lib/utils";
 import LedgerModal from "../../components/LedgerModal";
 
+const columns = [
+  { key: "Id", label: "ID", width: "50px" },
+  { key: "CollectorName", label: "Collector", width: "150px" },
+  { key: "Amount", label: "Amount", width: "100px" },
+  { key: "TransactionTypes", label: "Transaction Type", width: "120px" },
+  { key: "WorkFlows", label: "Workflow", width: "120px" },
+  { key: "Date", label: "Transaction Date", width: "100px" },
+  { key: "GivenOn", label: "Given On", width: "100px" },
+  { key: "Comment", label: "Remarks", width: "150px" },
+];
+
 export default function RetailDashboard({ retailUserId = "RU00118" }) {
   const [isModalOpen, setModalOpen] = useState(false);
   const [editData, setEditData] = useState(null);
@@ -14,8 +25,8 @@ export default function RetailDashboard({ retailUserId = "RU00118" }) {
   const [filters, setFilters] = useState({
     CollectorId: "",
     Amount: "",
-    TransactionType: "",
-    WorkFlow: "",
+    TransactionTypes: "",
+    WorkFlows: "",
     Date: "",
     GivenOn: "",
     Comment: "",
@@ -46,7 +57,7 @@ export default function RetailDashboard({ retailUserId = "RU00118" }) {
 
   const getMasterValue = (type, id) => {
     const list = masterData?.[type] || [];
-    return list.find((x) => x.Id === id)?.Description || id;
+    return list.find((x) => x.Id == id)?.Description || id;
   };
 
   const handleFilterChange = (key, value) => {
@@ -89,6 +100,12 @@ export default function RetailDashboard({ retailUserId = "RU00118" }) {
 
   const filteredData = (ledger || []).filter((item) => {
     return Object.entries(filters).every(([key, value]) => {
+      if (key === "WorkFlows" ){
+        key = "WorkFlow";
+      } else if (key === "TransactionTypes") {
+        key = "TransactionType";
+      }
+
       if (!value) return true;
       const itemValue = item[key];
       if (itemValue === null || itemValue === undefined) return false;
@@ -129,7 +146,9 @@ export default function RetailDashboard({ retailUserId = "RU00118" }) {
                   </dd>
                 </div>
                 <div className="bg-white shadow rounded-lg p-4">
-                  <dt className="text-sm font-medium text-gray-500">Handover</dt>
+                  <dt className="text-sm font-medium text-gray-500">
+                    Handover
+                  </dt>
                   <dd className="mt-1 text-3xl font-semibold text-gray-900">
                     ₹{formatIndianNumber(liability.HandoverAmt)}
                   </dd>
@@ -152,37 +171,30 @@ export default function RetailDashboard({ retailUserId = "RU00118" }) {
               </div>
 
               {ledger?.length > 0 && (
-                <div className="max-h-[400px] overflow-y-auto border border-gray-200 rounded">
-                  <table className="min-w-full divide-y divide-gray-200 table-fixed">
+                <div className="overflow-y-auto border border-gray-200 rounded max-h-[600px]">
+                  <table className="w-full table-auto divide-y divide-gray-200 text-sm">
                     <thead className="bg-gray-50 sticky top-0 z-10">
                       <tr>
-                        {[
-                          "Id",
-                          "CollectorId",
-                          "Amount",
-                          "TransactionTypes",
-                          "WorkFlows",
-                          "Date",
-                          "GivenOn",
-                          "Comment",
-                        ].map((col) => (
+                        {columns.map(({ key, label, width }) => (
                           <th
-                            key={col}
-                            className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap"
+                            key={key}
+                            className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase"
+                            style={{ width, whiteSpace: "nowrap" }}
                           >
-                            <div className="flex flex-col">
-                              <span>{col}</span>
-                              {["TransactionTypes", "WorkFlows"].includes(col) &&
+                            <div className="flex flex-col min-w-fit">
+                              <span>{label}</span>
+                              {["TransactionTypes", "WorkFlows"].includes(key) &&
                               masterData ? (
                                 <select
-                                  value={filters[col]}
+                                  value={filters[key]}
                                   onChange={(e) =>
-                                    handleFilterChange(col, e.target.value)
+                                    handleFilterChange(key, e.target.value)
                                   }
                                   className="mt-1 px-1 py-0.5 border border-gray-300 rounded text-xs"
+                                  style={{ width}}
                                 >
                                   <option value="">All</option>
-                                  {masterData[col]?.map((opt) => (
+                                  {masterData[key]?.map((opt) => (
                                     <option key={opt.Id} value={opt.Id}>
                                       {opt.Description}
                                     </option>
@@ -191,11 +203,13 @@ export default function RetailDashboard({ retailUserId = "RU00118" }) {
                               ) : (
                                 <input
                                   type="text"
-                                  value={filters[col]}
+                                  style={{ width}}
+                                  value={filters[key] || ""}
                                   onChange={(e) =>
-                                    handleFilterChange(col, e.target.value)
+                                    handleFilterChange(key, e.target.value)
                                   }
                                   className="mt-1 px-1 py-0.5 border border-gray-300 rounded text-xs"
+                                  placeholder="Filter"
                                 />
                               )}
                             </div>
@@ -203,35 +217,35 @@ export default function RetailDashboard({ retailUserId = "RU00118" }) {
                         ))}
                       </tr>
                     </thead>
-                    <tbody className="bg-white divide-y divide-gray-200 text-sm">
+
+                    <tbody className="bg-white divide-y divide-gray-200">
                       {filteredData.map((item) => (
                         <tr
                           key={item.Id}
                           onClick={() => openEditLedger(item)}
                           className="cursor-pointer hover:bg-gray-100"
                         >
-                          <td className="px-2 py-2 whitespace-nowrap">
-                            {item.Id}
-                          </td>
-                          <td className="px-2 py-2 whitespace-nowrap">
-                            {item.CollectorName}
-                          </td>
-                          <td className="px-2 py-2 whitespace-nowrap">
+                          <td className="px-2 py-2">{item.Id}</td>
+                          <td className="px-2 py-2">{item.CollectorName}</td>
+                          <td className="px-2 py-2">
                             ₹{formatIndianNumber(item.Amount)}
                           </td>
-                          <td className="px-2 py-2 whitespace-nowrap">
-                            {getMasterValue("TransactionTypes", item.TransactionType)}
+                          <td className="px-2 py-2">
+                            {getMasterValue(
+                              "TransactionTypes",
+                              item.TransactionType
+                            )}
                           </td>
-                          <td className="px-2 py-2 whitespace-nowrap">
+                          <td className="px-2 py-2">
                             {getMasterValue("WorkFlows", item.WorkFlow)}
                           </td>
-                          <td className="px-2 py-2 whitespace-nowrap">
+                          <td className="px-2 py-2">
                             {new Date(item.Date).toLocaleDateString()}
                           </td>
-                          <td className="px-2 py-2 whitespace-nowrap">
+                          <td className="px-2 py-2">
                             {new Date(item.GivenOn).toLocaleDateString()}
                           </td>
-                          <td className="px-2 py-2 whitespace-nowrap max-w-[150px] truncate">
+                          <td className="px-2 py-2 break-words max-w-[200px]">
                             {item.Comment}
                           </td>
                         </tr>
