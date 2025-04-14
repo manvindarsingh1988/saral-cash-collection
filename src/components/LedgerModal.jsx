@@ -47,7 +47,7 @@ export default function LedgerModal({
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-30 z-50">
       <div className="bg-white p-6 rounded shadow-lg space-y-4 w-full max-w-md">
-        <h2 className="text-lg font-semibold">Ledger Entry</h2>
+        <h2 className="text-lg font-semibold">{!initialData ? "Add" : "Update"} Ledger Entry</h2>
         {Object.keys(formData).map((key) => {
           if (["Id", "RetailerId", "RetailerName", "CollectorName"].includes(key)) return null;
 

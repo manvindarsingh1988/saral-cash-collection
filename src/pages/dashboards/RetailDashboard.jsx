@@ -260,8 +260,11 @@ export default function RetailDashboard({ retailUserId = "RU00118" }) {
                         >
                           <td className="px-2 py-2">
                             <a
-                              href="javascript:void(0);"
-                              onClick={() => openEditLedger(item)}
+                              className="text-blue-600 underline hover:text-blue-800"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                openEditLedger(item);
+                              }}
                             >
                               {item.Id}
                             </a>
