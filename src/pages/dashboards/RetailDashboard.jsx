@@ -4,9 +4,13 @@ import { formatIndianNumber } from "../../lib/utils";
 import LedgerModal from "../../components/LedgerModal";
 
 export default function RetailDashboard({ retailUserId = "RU00118" }) {
+  const [isModalOpen, setModalOpen] = useState(false);
+  const [editData, setEditData] = useState(null);
   const [selectedDate, setSelectedDate] = useState("");
   const [liability, setLiability] = useState(null);
   const [ledger, setLedger] = useState(null);
+  const [masterData, setMasterData] = useState(null);
+  const [collectors, setCollectors] = useState([]);
   const [filters, setFilters] = useState({
     CollectorId: "",
     Amount: "",
@@ -16,21 +20,21 @@ export default function RetailDashboard({ retailUserId = "RU00118" }) {
     GivenOn: "",
     Comment: "",
   });
-  const [isModalOpen, setModalOpen] = useState(false);
-  const [editData, setEditData] = useState(null);
 
   const fetchData = async (date) => {
     if (!retailUserId || !date) return;
 
     try {
-      const ledgerData = await apiBase.getLadgerInfoByRetailerid(
-        date,
-        retailUserId
-      );
-      const liabilityData = await apiBase.GetLiabilityAmountByRetailerId(
-        retailUserId,
-        date
-      );
+      const [ledgerData, liabilityData, masterData, collectors] =
+        await Promise.all([
+          apiBase.getLadgerInfoByRetailerid(date, retailUserId),
+          apiBase.GetLiabilityAmountByRetailerId(retailUserId, date),
+          apiBase.getMasterData(),
+          apiBase.getMappedCollectorsByRetailerId(retailUserId),
+        ]);
+
+      setCollectors(collectors);
+      setMasterData(masterData);
       setLiability(liabilityData);
       setLedger(ledgerData);
     } catch (err) {
@@ -38,6 +42,11 @@ export default function RetailDashboard({ retailUserId = "RU00118" }) {
       setLiability(null);
       setLedger(null);
     }
+  };
+
+  const getMasterValue = (type, id) => {
+    const list = masterData?.[type] || [];
+    return list.find((x) => x.Id === id)?.Description || id;
   };
 
   const handleFilterChange = (key, value) => {
@@ -120,9 +129,7 @@ export default function RetailDashboard({ retailUserId = "RU00118" }) {
                   </dd>
                 </div>
                 <div className="bg-white shadow rounded-lg p-4">
-                  <dt className="text-sm font-medium text-gray-500">
-                    Handover
-                  </dt>
+                  <dt className="text-sm font-medium text-gray-500">Handover</dt>
                   <dd className="mt-1 text-3xl font-semibold text-gray-900">
                     ₹{formatIndianNumber(liability.HandoverAmt)}
                   </dd>
@@ -150,10 +157,11 @@ export default function RetailDashboard({ retailUserId = "RU00118" }) {
                     <thead className="bg-gray-50 sticky top-0 z-10">
                       <tr>
                         {[
+                          "Id",
                           "CollectorId",
                           "Amount",
-                          "TransactionType",
-                          "WorkFlow",
+                          "TransactionTypes",
+                          "WorkFlows",
                           "Date",
                           "GivenOn",
                           "Comment",
@@ -164,37 +172,58 @@ export default function RetailDashboard({ retailUserId = "RU00118" }) {
                           >
                             <div className="flex flex-col">
                               <span>{col}</span>
-                              <input
-                                type="text"
-                                value={filters[col]}
-                                onChange={(e) =>
-                                  handleFilterChange(col, e.target.value)
-                                }
-                                className="mt-1 px-1 py-0.5 border border-gray-300 rounded text-xs"
-                              />
+                              {["TransactionTypes", "WorkFlows"].includes(col) &&
+                              masterData ? (
+                                <select
+                                  value={filters[col]}
+                                  onChange={(e) =>
+                                    handleFilterChange(col, e.target.value)
+                                  }
+                                  className="mt-1 px-1 py-0.5 border border-gray-300 rounded text-xs"
+                                >
+                                  <option value="">All</option>
+                                  {masterData[col]?.map((opt) => (
+                                    <option key={opt.Id} value={opt.Id}>
+                                      {opt.Description}
+                                    </option>
+                                  ))}
+                                </select>
+                              ) : (
+                                <input
+                                  type="text"
+                                  value={filters[col]}
+                                  onChange={(e) =>
+                                    handleFilterChange(col, e.target.value)
+                                  }
+                                  className="mt-1 px-1 py-0.5 border border-gray-300 rounded text-xs"
+                                />
+                              )}
                             </div>
                           </th>
                         ))}
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200 text-sm">
-                      {filteredData.map((item, index) => (
+                      {filteredData.map((item) => (
                         <tr
-                          key={index}
+                          key={item.Id}
                           onClick={() => openEditLedger(item)}
                           className="cursor-pointer hover:bg-gray-100"
                         >
                           <td className="px-2 py-2 whitespace-nowrap">
-                            {item.CollectorId}
+                            {item.Id}
+                          </td>
+                          <td className="px-2 py-2 whitespace-nowrap">
+                            {item.CollectorName}
                           </td>
                           <td className="px-2 py-2 whitespace-nowrap">
                             ₹{formatIndianNumber(item.Amount)}
                           </td>
                           <td className="px-2 py-2 whitespace-nowrap">
-                            {item.TransactionType}
+                            {getMasterValue("TransactionTypes", item.TransactionType)}
                           </td>
                           <td className="px-2 py-2 whitespace-nowrap">
-                            {item.WorkFlow}
+                            {getMasterValue("WorkFlows", item.WorkFlow)}
                           </td>
                           <td className="px-2 py-2 whitespace-nowrap">
                             {new Date(item.Date).toLocaleDateString()}
@@ -221,7 +250,10 @@ export default function RetailDashboard({ retailUserId = "RU00118" }) {
           )}
         </div>
       </div>
+
       <LedgerModal
+        collectors={collectors}
+        masterData={masterData}
         isOpen={isModalOpen}
         onClose={() => setModalOpen(false)}
         onSubmit={handleLedgerSubmit}

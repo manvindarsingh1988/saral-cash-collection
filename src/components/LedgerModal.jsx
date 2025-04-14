@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 
 export default function LedgerModal({
+  collectors,
+  masterData,
   isOpen,
   onClose,
   onSubmit,
@@ -47,12 +49,12 @@ export default function LedgerModal({
       <div className="bg-white p-6 rounded shadow-lg space-y-4 w-full max-w-md">
         <h2 className="text-lg font-semibold">Ledger Entry</h2>
         {Object.keys(formData).map((key) => {
-          if (["Id", "RetailerId", "RetailerName"].includes(key)) return; // Add any keys to exclude here
+          if (["Id", "RetailerId", "RetailerName"].includes(key)) return null;
 
           const label = key.replace(/([A-Z])/g, " $1").trim();
           let inputElement;
 
-          if (key === "TransactionType") {
+          if (key === "CollectorId") {
             inputElement = (
               <select
                 name={key}
@@ -60,11 +62,36 @@ export default function LedgerModal({
                 onChange={handleChange}
                 className="border px-2 py-1 rounded"
               >
-                <option value="" disabled hidden>Select Type</option>
-                <option value="1">Cash</option>
-                <option value="2">Bank Account/UPI</option>
+                <option value="" disabled hidden>
+                  Select Collector
+                </option>
+                {collectors?.map((collector) => (
+                  <option key={collector.id} value={collector.id}>
+                    {collector.name}
+                  </option>
+                ))}
               </select>
             );
+          } else if (key === "TransactionType") {
+            inputElement = (
+              <select
+                name={key}
+                value={formData[key]}
+                onChange={handleChange}
+                className="border px-2 py-1 rounded"
+              >
+                <option value="" disabled hidden>
+                  Select Transaction Type
+                </option>
+                {masterData?.TransactionTypes?.map((type) => (
+                  <option key={type.Id} value={type.Id}>
+                    {type.Description}
+                  </option>
+                ))}
+              </select>
+            );
+          } else if(key === "WorkFlow") {
+            ""
           } else {
             const inputType = ["Amount", "WorkFlow"].includes(key)
               ? "number"
