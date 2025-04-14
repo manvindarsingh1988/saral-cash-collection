@@ -72,26 +72,25 @@ export default function LedgerModal({
                 ))}
               </select>
             );
-          } else if (key === "TransactionType") {
+          } else if (key === "TransactionType" || key === "WorkFlow") {
             inputElement = (
               <select
+                disabled={key === "WorkFlow"}
                 name={key}
-                value={formData[key]}
+                value={"Workflow" ? "1" : formData[key]}
                 onChange={handleChange}
                 className="border px-2 py-1 rounded"
               >
                 <option value="" disabled hidden>
-                  Select Transaction Type
+                  Select {key} Type
                 </option>
-                {masterData?.TransactionTypes?.map((type) => (
+                {masterData?.[key + "s"]?.map((type) => (
                   <option key={type.Id} value={type.Id}>
                     {type.Description}
                   </option>
                 ))}
               </select>
             );
-          } else if(key === "WorkFlow") {
-            ""
           } else {
             const inputType = ["Amount", "WorkFlow"].includes(key)
               ? "number"

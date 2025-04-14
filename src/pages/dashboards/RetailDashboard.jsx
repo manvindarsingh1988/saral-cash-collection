@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { apiBase } from "../../lib/apiBase";
 import { formatIndianNumber } from "../../lib/utils";
 import LedgerModal from "../../components/LedgerModal";
@@ -32,20 +32,31 @@ export default function RetailDashboard({ retailUserId = "RU00118" }) {
     Comment: "",
   });
 
+  // Load master data once on mount
+  useEffect(() => {
+    const loadMasterData = async () => {
+      try {
+        const data = await apiBase.getMasterData();
+        setMasterData(data);
+      } catch (err) {
+        console.error("Failed to load master data:", err);
+      }
+    };
+
+    loadMasterData();
+  }, []);
+
   const fetchData = async (date) => {
     if (!retailUserId || !date) return;
 
     try {
-      const [ledgerData, liabilityData, masterData, collectors] =
-        await Promise.all([
-          apiBase.getLadgerInfoByRetailerid(date, retailUserId),
-          apiBase.GetLiabilityAmountByRetailerId(retailUserId, date),
-          apiBase.getMasterData(),
-          apiBase.getMappedCollectorsByRetailerId(retailUserId),
-        ]);
+      const [ledgerData, liabilityData, collectors] = await Promise.all([
+        apiBase.getLadgerInfoByRetailerid(date, retailUserId),
+        apiBase.GetLiabilityAmountByRetailerId(retailUserId, date),
+        apiBase.getMappedCollectorsByRetailerId(retailUserId),
+      ]);
 
       setCollectors(collectors);
-      setMasterData(masterData);
       setLiability(liabilityData);
       setLedger(ledgerData);
     } catch (err) {
@@ -100,7 +111,7 @@ export default function RetailDashboard({ retailUserId = "RU00118" }) {
 
   const filteredData = (ledger || []).filter((item) => {
     return Object.entries(filters).every(([key, value]) => {
-      if (key === "WorkFlows" ){
+      if (key === "WorkFlows") {
         key = "WorkFlow";
       } else if (key === "TransactionTypes") {
         key = "TransactionType";
@@ -112,6 +123,18 @@ export default function RetailDashboard({ retailUserId = "RU00118" }) {
       return itemValue.toString().toLowerCase().includes(value.toLowerCase());
     });
   });
+
+  const totalLedgerAmount = (ledger || []).reduce((sum, item) => sum + (item.Amount || 0), 0);
+
+  const approvedAmount = (ledger || [])
+    .filter((item) => {
+      const approvedId = masterData?.WorkFlows?.find(x => x.Description.toLowerCase() === "approved")?.Id;
+      return item.WorkFlow === approvedId;
+    })
+    .reduce((sum, item) => sum + (item.Amount || 0), 0);
+
+  const computedStatus =
+    liability && approvedAmount === liability.Amt ? "Approved" : "Pending";
 
   return (
     <>
@@ -140,23 +163,21 @@ export default function RetailDashboard({ retailUserId = "RU00118" }) {
             <>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-6">
                 <div className="bg-white shadow rounded-lg p-4">
-                  <dt className="text-sm font-medium text-gray-500">Amount</dt>
+                  <dt className="text-sm font-medium text-gray-500">Liability</dt>
                   <dd className="mt-1 text-3xl font-semibold text-gray-900">
                     ₹{formatIndianNumber(liability.Amt)}
                   </dd>
                 </div>
                 <div className="bg-white shadow rounded-lg p-4">
-                  <dt className="text-sm font-medium text-gray-500">
-                    Handover
-                  </dt>
+                  <dt className="text-sm font-medium text-gray-500">Handover</dt>
                   <dd className="mt-1 text-3xl font-semibold text-gray-900">
-                    ₹{formatIndianNumber(liability.HandoverAmt)}
+                    ₹{formatIndianNumber(totalLedgerAmount)}
                   </dd>
                 </div>
                 <div className="bg-white shadow rounded-lg p-4">
                   <dt className="text-sm font-medium text-gray-500">Status</dt>
                   <dd className="mt-1 text-2xl font-semibold text-gray-900">
-                    {liability.Status}
+                    {computedStatus}
                   </dd>
                 </div>
               </div>
@@ -191,7 +212,7 @@ export default function RetailDashboard({ retailUserId = "RU00118" }) {
                                     handleFilterChange(key, e.target.value)
                                   }
                                   className="mt-1 px-1 py-0.5 border border-gray-300 rounded text-xs"
-                                  style={{ width}}
+                                  style={{ width }}
                                 >
                                   <option value="">All</option>
                                   {masterData[key]?.map((opt) => (
@@ -203,7 +224,7 @@ export default function RetailDashboard({ retailUserId = "RU00118" }) {
                               ) : (
                                 <input
                                   type="text"
-                                  style={{ width}}
+                                  style={{ width }}
                                   value={filters[key] || ""}
                                   onChange={(e) =>
                                     handleFilterChange(key, e.target.value)
@@ -217,7 +238,6 @@ export default function RetailDashboard({ retailUserId = "RU00118" }) {
                         ))}
                       </tr>
                     </thead>
-
                     <tbody className="bg-white divide-y divide-gray-200">
                       {filteredData.map((item) => (
                         <tr
