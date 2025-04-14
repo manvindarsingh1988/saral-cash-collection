@@ -19,6 +19,7 @@ export default function CollectorDashboard({ collectorUserId = "RU004084" }) {
   const [editData, setEditData] = useState(null);
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedRetailerId, setSelectedRetailerId] = useState("");
+  const [liability, setLiability] = useState(null);
   const [ledger, setLedger] = useState(null);
   const [masterData, setMasterData] = useState(null);
   const [retailers, setRetailers] = useState([]);
@@ -49,18 +50,23 @@ export default function CollectorDashboard({ collectorUserId = "RU004084" }) {
     loadMasterData();
   }, []);
 
-  const fetchData = async (date) => {
-    if (!collectorUserId || !date || !selectedRetailerId) {
+  const fetchData = async () => {
+    if (!collectorUserId || !selectedDate || !selectedRetailerId) {
       alert("Please select a date and retailer.");
       return;
     }
 
     try {
-      const ledgerData = await apiBase.getLadgerInfoByRetaileridAndCollectorId(
-        date,
-        selectedRetailerId,
-        collectorUserId
-      );
+      const [ledgerData, liabilityData] = await Promise.all([
+        apiBase.getLadgerInfoByRetaileridAndCollectorId(
+          selectedDate,
+          selectedRetailerId,
+          collectorUserId
+        ),
+        apiBase.GetLiabilityAmountByRetailerId(selectedRetailerId, selectedDate),
+      ]);
+
+      setLiability(liabilityData);
       setLedger(ledgerData);
     } catch (err) {
       console.error("Fetch failed:", err);
@@ -89,7 +95,7 @@ export default function CollectorDashboard({ collectorUserId = "RU004084" }) {
 
   const handleLedgerSubmit = async (data) => {
     try {
-      data.RetailerId = collectorUserId;
+      data.RetailerId = selectedRetailerId;
       const payload = {
         ...data,
         Amount: parseFloat(data.Amount),
@@ -105,7 +111,8 @@ export default function CollectorDashboard({ collectorUserId = "RU004084" }) {
         await apiBase.addLedgeInfo(payload);
       }
 
-      await fetchData(selectedDate);
+      await fetchData();
+      setModalOpen(false);
     } catch (err) {
       console.error("Submission failed:", err);
     }
@@ -130,6 +137,18 @@ export default function CollectorDashboard({ collectorUserId = "RU004084" }) {
     (sum, item) => sum + (item.Amount || 0),
     0
   );
+
+  const approvedAmount = (ledger || [])
+    .filter((item) => {
+      const approvedId = masterData?.WorkFlows?.find(
+        (x) => x.Description.toLowerCase() === "approved"
+      )?.Id;
+      return item.WorkFlow === approvedId;
+    })
+    .reduce((sum, item) => sum + (item.Amount || 0), 0);
+
+  const computedStatus =
+    liability && approvedAmount === liability.Amt ? "Approved" : "Pending";
 
   return (
     <>
@@ -156,7 +175,7 @@ export default function CollectorDashboard({ collectorUserId = "RU004084" }) {
                 Select Retailer
               </option>
               {retailers.map((r) => (
-                <option key={r.RetailerUserId} value={r.RetailerUserIdUserId}>
+                <option key={r.RetailerUserId} value={r.RetailerUserId}>
                   {r.RetailerUserName}
                 </option>
               ))}
@@ -170,131 +189,142 @@ export default function CollectorDashboard({ collectorUserId = "RU004084" }) {
             </button>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-6 mb-6">
-            <div className="bg-white shadow rounded-lg p-4">
-              <dt className="text-sm font-medium text-gray-500">Handover</dt>
-              <dd className="mt-1 text-3xl font-semibold text-gray-900">
-                ₹{formatIndianNumber(totalLedgerAmount)}
-              </dd>
-            </div>
-            <div className="bg-white shadow rounded-lg p-4">
-              <dt className="text-sm font-medium text-gray-500">
-                Total Entries
-              </dt>
-              <dd className="mt-1 text-3xl font-semibold text-gray-900">
-                {ledger?.length || 0}
-              </dd>
-            </div>
-          </div>
+          {liability && liability.Amt > 0 && (
+            <>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-6">
+                <div className="bg-white shadow rounded-lg p-4">
+                  <dt className="text-sm font-medium text-gray-500">
+                    Liability
+                  </dt>
+                  <dd className="mt-1 text-3xl font-semibold text-gray-900">
+                    ₹{formatIndianNumber(liability.Amt)}
+                  </dd>
+                </div>
+                <div className="bg-white shadow rounded-lg p-4">
+                  <dt className="text-sm font-medium text-gray-500">
+                    Handover
+                  </dt>
+                  <dd className="mt-1 text-3xl font-semibold text-gray-900">
+                    ₹{formatIndianNumber(totalLedgerAmount)}
+                  </dd>
+                </div>
+                <div className="bg-white shadow rounded-lg p-4">
+                  <dt className="text-sm font-medium text-gray-500">Status</dt>
+                  <dd className="mt-1 text-2xl font-semibold text-gray-900">
+                    {computedStatus}
+                  </dd>
+                </div>
+              </div>
+              <div className="flex justify-end mb-2">
+                <button
+                  onClick={openAddLedger}
+                  className="bg-green-600 text-white px-4 py-1.5 rounded hover:bg-green-700"
+                >
+                  Add Ledger Entry
+                </button>
+              </div>
 
-          <div className="flex justify-end mb-2">
-            <button
-              onClick={openAddLedger}
-              className="bg-green-600 text-white px-4 py-1.5 rounded hover:bg-green-700"
-            >
-              Add Ledger Entry
-            </button>
-          </div>
-
-          {ledger?.length > 0 ? (
-            <div className="overflow-y-auto border border-gray-200 rounded max-h-[600px]">
-              <table className="w-full table-auto divide-y divide-gray-200 text-sm">
-                <thead className="bg-gray-50 sticky top-0 z-10">
-                  <tr>
-                    {columns.map(({ key, label, width }) => (
-                      <th
-                        key={key}
-                        className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase"
-                        style={{ width, whiteSpace: "nowrap" }}
-                      >
-                        <div className="flex flex-col min-w-fit">
-                          <span>{label}</span>
-                          {["TransactionTypes", "WorkFlows"].includes(key) &&
-                          masterData ? (
-                            <select
-                              value={filters[key]}
-                              onChange={(e) =>
-                                handleFilterChange(key, e.target.value)
-                              }
-                              className="mt-1 px-1 py-0.5 border border-gray-300 rounded text-xs"
-                              style={{ width }}
-                            >
-                              <option value="">All</option>
-                              {masterData[key]?.map((opt) => (
-                                <option key={opt.Id} value={opt.Id}>
-                                  {opt.Description}
-                                </option>
-                              ))}
-                            </select>
-                          ) : (
-                            <input
-                              type="text"
-                              style={{ width }}
-                              value={filters[key] || ""}
-                              onChange={(e) =>
-                                handleFilterChange(key, e.target.value)
-                              }
-                              className="mt-1 px-1 py-0.5 border border-gray-300 rounded text-xs"
-                              placeholder="Filter"
-                            />
-                          )}
-                        </div>
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {filteredData.map((item) => (
-                    <tr
-                      title="Click to edit"
-                      key={item.Id}
-                      onClick={() => openEditLedger(item)}
-                      className="cursor-pointer hover:bg-gray-100"
-                    >
-                      <td className="px-2 py-2">
-                        <a
-                          title="Click to edit"
-                          className="text-blue-600 underline hover:text-blue-800"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            openEditLedger(item);
-                          }}
+              <div className="overflow-y-auto border border-gray-200 rounded max-h-[600px]">
+                <table className="w-full table-auto divide-y divide-gray-200 text-sm">
+                  <thead className="bg-gray-50 sticky top-0 z-10">
+                    <tr>
+                      {columns.map(({ key, label, width }) => (
+                        <th
+                          key={key}
+                          className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase"
+                          style={{ width, whiteSpace: "nowrap" }}
                         >
-                          {item.Id}
-                        </a>
-                      </td>
-                      <td className="px-2 py-2">{item.CollectorName}</td>
-                      <td className="px-2 py-2">
-                        ₹{formatIndianNumber(item.Amount)}
-                      </td>
-                      <td className="px-2 py-2">
-                        {getMasterValue(
-                          "TransactionTypes",
-                          item.TransactionType
-                        )}
-                      </td>
-                      <td className="px-2 py-2">
-                        {getMasterValue("WorkFlows", item.WorkFlow)}
-                      </td>
-                      <td className="px-2 py-2">
-                        {new Date(item.Date).toLocaleDateString()}
-                      </td>
-                      <td className="px-2 py-2">
-                        {new Date(item.GivenOn).toLocaleDateString()}
-                      </td>
-                      <td className="px-2 py-2 break-words max-w-[200px]">
-                        {item.Comment}
-                      </td>
+                          <div className="flex flex-col min-w-fit">
+                            <span>{label}</span>
+                            {["TransactionTypes", "WorkFlows"].includes(key) &&
+                            masterData ? (
+                              <select
+                                value={filters[key]}
+                                onChange={(e) =>
+                                  handleFilterChange(key, e.target.value)
+                                }
+                                className="mt-1 px-1 py-0.5 border border-gray-300 rounded text-xs"
+                                style={{ width }}
+                              >
+                                <option value="">All</option>
+                                {masterData[key]?.map((opt) => (
+                                  <option key={opt.Id} value={opt.Id}>
+                                    {opt.Description}
+                                  </option>
+                                ))}
+                              </select>
+                            ) : (
+                              <input
+                                type="text"
+                                style={{ width }}
+                                value={filters[key] || ""}
+                                onChange={(e) =>
+                                  handleFilterChange(key, e.target.value)
+                                }
+                                className="mt-1 px-1 py-0.5 border border-gray-300 rounded text-xs"
+                                placeholder="Filter"
+                              />
+                            )}
+                          </div>
+                        </th>
+                      ))}
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          ) : selectedDate ? (
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {filteredData.map((item) => (
+                      <tr
+                        title="Click to edit"
+                        key={item.Id}
+                        onClick={() => openEditLedger(item)}
+                        className="cursor-pointer hover:bg-gray-100"
+                      >
+                        <td className="px-2 py-2">
+                          <a
+                            title="Click to edit"
+                            className="text-blue-600 underline hover:text-blue-800"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              openEditLedger(item);
+                            }}
+                          >
+                            {item.Id}
+                          </a>
+                        </td>
+                        <td className="px-2 py-2">{item.CollectorName}</td>
+                        <td className="px-2 py-2">
+                          ₹{formatIndianNumber(item.Amount)}
+                        </td>
+                        <td className="px-2 py-2">
+                          {getMasterValue(
+                            "TransactionTypes",
+                            item.TransactionType
+                          )}
+                        </td>
+                        <td className="px-2 py-2">
+                          {getMasterValue("WorkFlows", item.WorkFlow)}
+                        </td>
+                        <td className="px-2 py-2">
+                          {new Date(item.Date).toLocaleDateString()}
+                        </td>
+                        <td className="px-2 py-2">
+                          {new Date(item.GivenOn).toLocaleDateString()}
+                        </td>
+                        <td className="px-2 py-2 break-words max-w-[200px]">
+                          {item.Comment}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
+          )}
+
+          {((!ledger && selectedDate) || (liability && liability.Amt <= 0)) && (
             <div className="text-gray-500 mt-4">
               No data available for selected date.
             </div>
-          ) : null}
+          )}
         </div>
       </div>
 

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 
 export default function CollectorLedgerModal({
+  collectorId,
   masterData,
   isOpen,
   onClose,
@@ -8,7 +9,7 @@ export default function CollectorLedgerModal({
   initialData,
 }) {
   const [formData, setFormData] = useState({
-    CollectorId: "",
+    CollectorId: collectorId,
     Amount: "",
     TransactionType: "",
     WorkFlow: "",
@@ -49,42 +50,27 @@ export default function CollectorLedgerModal({
         <h2 className="text-lg font-semibold">
           {!initialData ? "Add" : "Update"} Ledger Entry
         </h2>
+
         {Object.keys(formData).map((key) => {
           if (
-            ["Id", "RetailerId", "RetailerName", "CollectorName"].includes(key)
+            [
+              "Id",
+              "RetailerId",
+              "RetailerName",
+              "CollectorName",
+              "CollectorId",
+            ].includes(key)
           )
             return null;
 
           const label = key.replace(/([A-Z])/g, " $1").trim();
           let inputElement;
 
-          if (key === "CollectorId") {
+          if (key === "TransactionType" || key === "WorkFlow") {
             inputElement = (
               <select
                 name={key}
                 value={formData[key]}
-                onChange={handleChange}
-                className="border px-2 py-1 rounded"
-              >
-                <option value="" disabled hidden>
-                  Select Collector
-                </option>
-                {collectors?.map((collector) => (
-                  <option
-                    key={collector.CollectorUserId}
-                    value={collector.CollectorUserId}
-                  >
-                    {collector.CollectorUserName}
-                  </option>
-                ))}
-              </select>
-            );
-          } else if (key === "TransactionType" || key === "WorkFlow") {
-            inputElement = (
-              <select
-                disabled={key === "WorkFlow"}
-                name={key}
-                value={"Workflow" ? "1" : formData[key]}
                 onChange={handleChange}
                 className="border px-2 py-1 rounded"
               >
@@ -99,7 +85,7 @@ export default function CollectorLedgerModal({
               </select>
             );
           } else {
-            const inputType = ["Amount", "WorkFlow"].includes(key)
+            const inputType = ["Amount"].includes(key)
               ? "number"
               : ["Date", "GivenOn"].includes(key)
               ? "date"
