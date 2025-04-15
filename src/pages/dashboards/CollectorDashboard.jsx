@@ -63,7 +63,10 @@ export default function CollectorDashboard({ collectorUserId = "RU004084" }) {
           selectedRetailerId,
           collectorUserId
         ),
-        apiBase.GetLiabilityAmountByRetailerId(selectedRetailerId, selectedDate),
+        apiBase.GetLiabilityAmountByRetailerId(
+          selectedRetailerId,
+          selectedDate
+        ),
       ]);
 
       setLiability(liabilityData);
@@ -217,6 +220,7 @@ export default function CollectorDashboard({ collectorUserId = "RU004084" }) {
               </div>
               <div className="flex justify-end mb-2">
                 <button
+                  disabled={computedStatus === "Approved"}
                   onClick={openAddLedger}
                   className="bg-green-600 text-white px-4 py-1.5 rounded hover:bg-green-700"
                 >
