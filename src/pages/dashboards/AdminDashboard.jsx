@@ -1,6 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { apiBase } from "../../lib/apiBase";
 import { formatIndianNumber } from "../../lib/utils";
+import LadgerDetailsDialog from "../../components/LedgerDetailsDialog";
+
+const columns = [
+  { heading: "Retailer Name", key: "RetailUserName", width: "w-48" },
+  { heading: "Amount", key: "Amt", width: "w-32" },
+  { heading: "Handover Amount", key: "HandoverAmt", width: "w-36" },
+  { heading: "Status", key: "Status", width: "w-28" },
+  { heading: "Action", key: "Action", width: "w-32", isAction: true }, // NEW
+];
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState(null);
@@ -19,6 +28,9 @@ export default function AdminDashboard() {
     totalHandover: 0,
     totalTransactions: 0,
   });
+
+  const [openDialog, setOpenDialog] = useState(false);
+  const [selectedRetailer, setSelectedRetailer] = useState(null);
 
   useEffect(() => {
     fetchStats();
@@ -62,12 +74,17 @@ export default function AdminDashboard() {
 
   const filteredLiabilities = liabilities.filter((item) => {
     return Object.entries(filters).every(([key, value]) => {
-      if (!value) return true; // Ignore empty filters
+      if (!value) return true;
       const itemValue = item[key];
-      if (itemValue === null || itemValue === undefined) return false; // Ignore nulls
+      if (itemValue === null || itemValue === undefined) return false;
       return itemValue.toString().toLowerCase().includes(value.toLowerCase());
     });
   });
+
+  const handleMoreDetails = (retailUserId) => {
+    setSelectedRetailer(retailUserId);
+    setOpenDialog(true);
+  };
 
   if (loading) return <div>Loading...</div>;
   if (error) return <div className="text-red-600">{error}</div>;
@@ -77,7 +94,6 @@ export default function AdminDashboard() {
     <div className="space-y-6">
       <h1 className="text-2xl font-semibold text-gray-900">Admin Dashboard</h1>
 
-      {/* Date Filter */}
       <div className="bg-white shadow rounded-lg">
         <div className="px-4 py-5 sm:p-6">
           <h3 className="text-lg font-medium text-gray-900 mb-4">
@@ -101,7 +117,6 @@ export default function AdminDashboard() {
 
           {selectedDate && (
             <>
-              {/* Summary Tiles (Moved Below Table) */}
               <div className="grid grid-cols-1 gap-6 sm:grid-cols-3 mt-4 mb-4">
                 <div className="bg-white overflow-hidden shadow rounded-lg">
                   <div className="px-4 py-5 sm:p-6">
@@ -134,48 +149,62 @@ export default function AdminDashboard() {
                   </div>
                 </div>
               </div>
-              <div className="max-h-[400px] overflow-y-auto border border-gray-200 rounded">
+
+              <div className="overflow-x-auto max-h-[400px] border border-gray-200 rounded">
                 <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50 sticky top-0">
+                  <thead className="bg-gray-50 sticky top-0 z-10">
                     <tr>
-                      {["RetailUserName", "Amt", "HandoverAmt", "Status"].map(
-                        (col) => (
-                          <th
-                            key={col}
-                            className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                          >
+                      {columns.map((col) => (
+                        <th
+                          key={col.key}
+                          className={`px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider ${col.width}`}
+                        >
+                          {col.isAction ? (
+                            col.heading
+                          ) : (
                             <div className="flex flex-col">
-                              <span>{col}</span>
+                              <span>{col.heading}</span>
                               <input
                                 type="text"
                                 placeholder="Filter..."
-                                value={filters[col]}
+                                value={filters[col.key] || ""}
                                 onChange={(e) =>
-                                  handleFilterChange(col, e.target.value)
+                                  handleFilterChange(col.key, e.target.value)
                                 }
                                 className="mt-1 px-2 py-1 border border-gray-300 rounded text-xs"
                               />
                             </div>
-                          </th>
-                        )
-                      )}
+                          )}
+                        </th>
+                      ))}
                     </tr>
                   </thead>
+
                   <tbody className="bg-white divide-y divide-gray-200">
                     {filteredLiabilities.map((item) => (
                       <tr key={item.RetailUserId}>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {item.RetailUserName}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          ₹{formatIndianNumber(item.Amt)}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          ₹{item.HandoverAmt}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {item.Status}
-                        </td>
+                        {columns.map((col) => (
+                          <td
+                            key={col.key}
+                            className={`px-4 py-4 whitespace-nowrap text-sm text-gray-900 ${col.width}`}
+                          >
+                            {col.isAction ? (
+                              <button
+                                onClick={() =>
+                                  handleMoreDetails(item.RetailUserId)
+                                }
+                                className="text-blue-600 underline"
+                              >
+                                More Details
+                              </button>
+                            ) : col.key === "Amt" ||
+                              col.key === "HandoverAmt" ? (
+                              `₹${formatIndianNumber(item[col.key])}`
+                            ) : (
+                              item[col.key]
+                            )}
+                          </td>
+                        ))}
                       </tr>
                     ))}
                   </tbody>
@@ -185,6 +214,17 @@ export default function AdminDashboard() {
           )}
         </div>
       </div>
+
+      {openDialog && selectedRetailer && (
+        <LadgerDetailsDialog
+          retailerId={selectedRetailer}
+          date={selectedDate}
+          onClose={() => {
+            setOpenDialog(false);
+            setSelectedRetailer(null);
+          }}
+        />
+      )}
     </div>
   );
 }
