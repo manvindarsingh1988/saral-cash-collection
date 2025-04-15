@@ -115,7 +115,7 @@ export default function AdminDashboard() {
             </button>
           </div>
 
-          {selectedDate && (
+          {liabilities?.length > 0 && (
             <>
               <div className="grid grid-cols-1 gap-6 sm:grid-cols-3 mt-4 mb-4">
                 <div className="bg-white overflow-hidden shadow rounded-lg">

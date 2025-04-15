@@ -4,12 +4,17 @@ import { apiBase } from "../lib/apiBase";
 export default function LadgerDetailsDialog({ retailerId, date, onClose }) {
   const [ladgerData, setLadgerData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [masterData, setMasterData] = useState({});
 
   useEffect(() => {
     const fetchLadger = async () => {
       try {
-        const data = await apiBase.getLadgerInfoByRetailerid(date, retailerId);
-        setLadgerData(data || []);
+        const [retailerData, masterData] = await Promise.all([
+          await apiBase.getLadgerInfoByRetailerid(date, retailerId),
+          apiBase.getMasterData(),
+        ]);
+        setLadgerData(retailerData || []);
+        setMasterData(masterData || {});
       } catch (err) {
         console.error("Failed to fetch ladger info", err);
       } finally {
@@ -20,8 +25,16 @@ export default function LadgerDetailsDialog({ retailerId, date, onClose }) {
     fetchLadger();
   }, [retailerId, date]);
 
+  const getMasterValue = (type, id) => {
+    const list = masterData?.[type] || [];
+    return list.find((x) => x.Id == id)?.Description || id;
+  };
+
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 m-0 p-0" style={{marginTop: "0px"}}>
+    <div
+      className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 m-0 p-0"
+      style={{ marginTop: "0px" }}
+    >
       <div className="bg-white p-6 rounded shadow max-w-5xl w-full max-h-[80vh] overflow-y-auto relative">
         <h2 className="text-xl font-semibold mb-4">Ledger Info</h2>
         <button
@@ -56,7 +69,7 @@ export default function LadgerDetailsDialog({ retailerId, date, onClose }) {
                     <td className="px-4 py-2 border">{entry.CollectorName}</td>
                     <td className="px-4 py-2 border">{entry.Amount}</td>
                     <td className="px-4 py-2 border">
-                      {entry.TransactionType}
+                      {getMasterValue("TransactionTypes", entry.TransactionType)}
                     </td>
                     <td className="px-4 py-2 border">
                       {entry.Date?.split("T")[0]}
