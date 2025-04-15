@@ -5,7 +5,7 @@ import { apiBase } from "../lib/apiBase";
 const routesForRoles = {
   Admin: ["/", "/add-user", "/assign-retail"],
   Collector: ["/"],
-  RetailUser: ["/"],
+  Retailer: ["/"],
 };
 
 export default function ProtectedRoute({ children }) {

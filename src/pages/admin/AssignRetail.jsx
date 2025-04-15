@@ -166,7 +166,7 @@ export default function AssignRetail() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200">
-                    {selectedMappedRetailers.map((mappedRetailer) => (
+                    {selectedMappedRetailers?.length> 0 && selectedMappedRetailers.map((mappedRetailer) => (
                         <tr key={mappedRetailer.RetailerId}>
                           <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-900">
                             {mappedRetailer.RetailerUserName}

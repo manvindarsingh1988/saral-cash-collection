@@ -23,7 +23,7 @@ export default function UserSpecificDashboard({ children }) {
         <CollectorDashboard />
       </CollectorLayout>
     );
-  } else if ((user.role || user.UserType) === "RetailUser") {
+  } else if ((user.role || user.UserType) === "Retailer") {
     return (
       <RetailUserLayout>
         <RetailDashboard />

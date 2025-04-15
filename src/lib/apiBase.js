@@ -20,14 +20,14 @@ const users = [
     id: "4",
     email: "retail1@example.com",
     password: "pass123",
-    role: "RetailUser",
+    role: "Retailer",
     assignedCollectorId: "2",
   },
   {
     id: "5",
     email: "retail2@example.com",
     password: "pass123",
-    role: "RetailUser",
+    role: "Retailer",
     assignedCollectorId: null,
   },
 ];
@@ -61,17 +61,15 @@ export const apiBase = {
       `${API_URL}/Login?userId=${email}&password=${password}`
     );
 
-    let user;
-    if (!response.ok || !response.json()?.IsFailed) {
+    let user = await response.json();
+    if (!response.ok || user?.IsFailed) {
       console.error(`Failed to fetch: ${response.statusText}`);
 
       user = users.find((u) => u.email === email && u.password === password);
       if (!user) {
         throw new Error("Invalid email or password");
       }
-    } else {
-      user = await response.json();
-    }
+    } 
 
     currentUser = user;
     localStorage.setItem("mockUser", JSON.stringify(user));
@@ -95,26 +93,6 @@ export const apiBase = {
     return currentUser;
   },
 
-  // getCollectors: async () => {
-  //   return users.filter(u => u.role === 'Collector');
-  // },
-
-  // getRetailUsers: async () => {
-  //   return users.filter(u => u.role === 'RetailUser');
-  // },
-
-  // createCollector: async (email, password) => {
-  //   const newId = String(users.length + 1);
-  //   const newCollector = {
-  //     id: newId,
-  //     email,
-  //     password,
-  //     role: 'Collector'
-  //   };
-  //   users.push(newCollector);
-  //   return { user: newCollector };
-  // },
-
   assignCollector: async (retailUserId, collectorId) => {
     const retailUser = users.find((u) => u.id === retailUserId);
     if (retailUser) {
@@ -131,7 +109,7 @@ export const apiBase = {
     }
 
     switch (user.role || user.UserType) {
-      case "RetailUser":
+      case "Retailer":
         const retailTransactions = transactions.filter(
           (t) => t.retailUserId === user.id
         );
@@ -141,7 +119,7 @@ export const apiBase = {
             0
           ),
           transactions: retailTransactions,
-          role: "RetailUser",
+          role: "Retailer",
         };
 
       case "Collector":
@@ -162,7 +140,7 @@ export const apiBase = {
       case "Admin":
         return {
           totalCollectors: users.filter((u) => u.role === "Collector").length,
-          totalRetailUsers: users.filter((u) => u.role === "RetailUser").length,
+          totalRetailUsers: users.filter((u) => u.role === "Retailer").length,
           totalTransactions: transactions.length,
           totalAmount: transactions.reduce((sum, t) => sum + t.amount, 0),
           pendingAmount: transactions
@@ -192,7 +170,7 @@ export const apiBase = {
 
   createTransaction: async (amount) => {
     const user = apiBase.getCurrentUser();
-    if (!user || user.role !== "RetailUser") {
+    if (!user || user.role !== "Retailer") {
       throw new Error("Unauthorized");
     }
 
