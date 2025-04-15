@@ -4,7 +4,7 @@ import { formatIndianNumber } from "../../lib/utils";
 import RetailerLedgerModal from "../../components/RetailerLedgerModal";
 
 const columns = [
-  { key: "Id", label: "ID", width: "50px" },
+  { key: "Id", label: "ID", width: "40px" },
   { key: "CollectorName", label: "Collector", width: "150px" },
   { key: "Amount", label: "Amount", width: "100px" },
   { key: "TransactionTypes", label: "Transaction Type", width: "120px" },
@@ -12,6 +12,7 @@ const columns = [
   { key: "Date", label: "Transaction Date", width: "100px" },
   { key: "GivenOn", label: "Given On", width: "100px" },
   { key: "Comment", label: "Remarks", width: "150px" },
+  { key: "Actions", label: "Actions", width: "60px" },
 ];
 
 export default function RetailDashboard({ retailUserId = "RU00118" }) {
@@ -112,6 +113,18 @@ export default function RetailDashboard({ retailUserId = "RU00118" }) {
     }
   };
 
+  const handleDeleteLedger = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this ledger entry?"))
+      return;
+
+    try {
+      await apiBase.deleteLedgerInfo(id); // Make sure this API exists
+      await fetchData(selectedDate);
+    } catch (err) {
+      console.error("Delete failed:", err);
+    }
+  };
+
   const filteredData = (ledger || []).filter((item) => {
     return Object.entries(filters).every(([key, value]) => {
       if (key === "WorkFlows") {
@@ -180,7 +193,7 @@ export default function RetailDashboard({ retailUserId = "RU00118" }) {
                 </div>
                 <div className="bg-white shadow rounded-lg p-4">
                   <dt className="text-sm font-medium text-gray-500">
-                    Handover
+                    Total clear amount
                   </dt>
                   <dd className="mt-1 text-3xl font-semibold text-gray-900">
                     ₹{formatIndianNumber(totalLedgerAmount)}
@@ -196,7 +209,7 @@ export default function RetailDashboard({ retailUserId = "RU00118" }) {
 
               <div className="flex justify-end mb-2">
                 <button
-                  disabled={computedStatus === "Pending"}
+                  disabled={computedStatus !== "Pending"}
                   onClick={openAddLedger}
                   className="bg-green-600 text-white px-4 py-1.5 rounded hover:bg-green-700"
                 >
@@ -254,13 +267,15 @@ export default function RetailDashboard({ retailUserId = "RU00118" }) {
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
                       {filteredData.map((item) => (
-                        <tr title="Click to edit"
+                        <tr
+                          title="Click to edit"
                           key={item.Id}
                           onClick={() => openEditLedger(item)}
                           className="cursor-pointer hover:bg-gray-100"
                         >
                           <td className="px-2 py-2">
-                            <a title="Click to edit"
+                            <a
+                              title="Click to edit"
                               className="text-blue-600 underline hover:text-blue-800"
                               onClick={(e) => {
                                 e.preventDefault();
@@ -291,6 +306,19 @@ export default function RetailDashboard({ retailUserId = "RU00118" }) {
                           </td>
                           <td className="px-2 py-2 break-words max-w-[200px]">
                             {item.Comment}
+                          </td>
+                          <td className="px-2 py-2">
+                            {getMasterValue("WorkFlows", item.WorkFlow) === "Initiate" && (
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation(); // Prevent triggering row edit
+                                  handleDeleteLedger(item.Id);
+                                }}
+                                className="text-red-600 hover:text-red-800 text-xs"
+                              >
+                                Delete
+                              </button>
+                            )}
                           </td>
                         </tr>
                       ))}
