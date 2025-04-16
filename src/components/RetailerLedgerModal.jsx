@@ -47,9 +47,18 @@ export default function RetailerLedgerModal({
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-30 z-50">
       <div className="bg-white p-6 rounded shadow-lg space-y-4 w-full max-w-md">
-        <h2 className="text-lg font-semibold">{!initialData ? "Add" : "Update"} Ledger Entry</h2>
+        <h2 className="text-lg font-semibold">
+          {!initialData ? "Add" : "Update"} Ledger Entry
+        </h2>
         {Object.keys(formData).map((key) => {
-          if (["Id", "RetailerId", "RetailerName", "CollectorName"].includes(key)) return null;
+          if (
+            ["Id", "RetailerId", "RetailerName", "CollectorName"].includes(key)
+          )
+            return null;
+
+          if (key === "CollectorId" && formData["TransactionType"] === "2") {
+            return null;
+          }
 
           const label = key.replace(/([A-Z])/g, " $1").trim();
           let inputElement;
@@ -66,7 +75,10 @@ export default function RetailerLedgerModal({
                   Select Collector
                 </option>
                 {collectors?.map((collector) => (
-                  <option key={collector.CollectorUserId} value={collector.CollectorUserId}>
+                  <option
+                    key={collector.CollectorUserId}
+                    value={collector.CollectorUserId}
+                  >
                     {collector.CollectorUserName}
                   </option>
                 ))}
@@ -77,7 +89,7 @@ export default function RetailerLedgerModal({
               <select
                 disabled={key === "WorkFlow"}
                 name={key}
-                value={"Workflow" ? "1" : formData[key]}
+                value={formData[key]} // ✅ FIXED
                 onChange={handleChange}
                 className="border px-2 py-1 rounded"
               >

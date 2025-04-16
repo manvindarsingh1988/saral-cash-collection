@@ -99,6 +99,8 @@ export default function RetailDashboard({ retailUserId = "RU00118" }) {
         WorkFlow: parseInt(data.WorkFlow),
         Date: new Date(data.Date).toISOString(),
         GivenOn: new Date(data.GivenOn).toISOString(),
+        CollectorId: data.TransactionType == "2" ? "" : data.CollectorId,
+        CollectorName: data.TransactionType == "2" ? "" : data.CollectorName,
       };
 
       if (editData?.Id) {
