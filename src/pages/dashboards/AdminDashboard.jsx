@@ -8,7 +8,7 @@ const columns = [
   { heading: "Amount", key: "Amt", width: "w-32" },
   { heading: "Handover Amount", key: "HandoverAmt", width: "w-36" },
   { heading: "Status", key: "Status", width: "w-28" },
-  { heading: "Action", key: "Action", width: "w-32", isAction: true }, // NEW
+  { heading: "Action", key: "Action", width: "w-32", isAction: true },
 ];
 
 export default function AdminDashboard() {
@@ -37,6 +37,7 @@ export default function AdminDashboard() {
 
   const fetchLiabilities = async (date) => {
     try {
+      setLoading(true);
       const data = await apiBase.getLiabilityAmountOfAllRetailers(date);
       setLiabilities(data);
 
@@ -51,8 +52,11 @@ export default function AdminDashboard() {
         totalHandover,
         totalTransactions: data.length,
       });
+      setLoading(false);
     } catch (err) {
       console.error("Error fetching liabilities:", err);
+      setError(err.message || "Failed to fetch liabilities");
+      setLoading(false);
     }
   };
 
