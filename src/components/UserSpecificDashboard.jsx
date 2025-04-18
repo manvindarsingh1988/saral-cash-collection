@@ -7,23 +7,22 @@ import AdminLayout from "./AdminLayout";
 import RetailUserLayout from "./RetailUserLayout";
 import CollectorLayout from "./CollectorLayout";
 
-
-export default function UserSpecificDashboard({ children }) {
+export default function UserSpecificDashboard() {
   const user = apiBase.getCurrentUser();
 
-  if ((user.role || user.UserType) === "Admin") {
+  if (user.UserType === "Admin" || user.UserType === "Cashier") {
     return (
       <AdminLayout>
         <AdminDashboard />
       </AdminLayout>
     );
-  } else if ((user.role || user.UserType) === "Collector") {
+  } else if (user.UserType === "Collector") {
     return (
       <CollectorLayout>
         <CollectorDashboard />
       </CollectorLayout>
     );
-  } else if ((user.role || user.UserType) === "Retailer") {
+  } else if (user.UserType === "Retailer") {
     return (
       <RetailUserLayout>
         <RetailDashboard />
