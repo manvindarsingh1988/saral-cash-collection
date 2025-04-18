@@ -70,9 +70,6 @@ export default function AdminDashboard() {
     setOpenDialog(true);
   };
 
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div className="text-red-600">{error}</div>;
-
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-semibold text-gray-900">Admin Dashboard</h1>
@@ -97,6 +94,9 @@ export default function AdminDashboard() {
               Search
             </button>
           </div>
+
+          {loading && <div>Loading...</div>}
+          {error && <div className="text-red-600">{error}</div>}
 
           {liabilities?.length > 0 && (
             <>
