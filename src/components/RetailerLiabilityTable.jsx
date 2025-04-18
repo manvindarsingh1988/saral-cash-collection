@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { formatIndianNumber } from "../lib/utils";
 
 const columns = [
@@ -9,13 +9,18 @@ const columns = [
   { heading: "Action", key: "Action", width: "w-32", isAction: true },
 ];
 
+export default function RetailerLiabilityTable({ data }) {
+  const [filters, setFilters] = useState({
+    RetailUserName: "",
+    Amt: "",
+    HandoverAmt: "",
+    Status: "",
+  });
 
-export default function RetailerLiabilityTable({
-  data,
-  filters,
-  onFilterChange,
-  onMoreDetails,
-}) {
+  const onFilterChange = (key, value) => {
+    setFilters((prev) => ({ ...prev, [key]: value }));
+  };
+
   const filteredData = data.filter((item) => {
     return Object.entries(filters).every(([key, value]) => {
       if (!value) return true;
@@ -24,6 +29,11 @@ export default function RetailerLiabilityTable({
       return itemValue.toString().toLowerCase().includes(value.toLowerCase());
     });
   });
+
+  const onMoreDetails = (retailUserId) => {
+    setSelectedRetailer(retailUserId);
+    setOpenDialog(true);
+  };
 
   return (
     <div className="overflow-x-auto max-h-[300px] border border-gray-200 rounded">
@@ -42,7 +52,7 @@ export default function RetailerLiabilityTable({
                     <span>{col.heading}</span>
                     <input
                       type="text"
-                      placeholder="Filter..."
+                      placeholder={`Filter ${col.heading}...`}
                       value={filters[col.key] || ""}
                       onChange={(e) => onFilterChange(col.key, e.target.value)}
                       className="mt-1 px-2 py-1 border border-gray-300 rounded text-xs"

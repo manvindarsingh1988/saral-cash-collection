@@ -52,8 +52,8 @@ export default function CollectorLedgerTable({ data }) {
                   type="text"
                   value={filters[col.key] || ""}
                   onChange={(e) => handleFilterChange(col.key, e.target.value)}
-                  placeholder={`Filter ${col.heading}`}
-                  className="w-full border border-gray-300 rounded px-2 py-1 text-sm"
+                  placeholder={`Filter ${col.heading}...`}
+                  className="w-full border border-gray-300 rounded px-2 py-1 text-sx"
                 />
               </th>
             ))}

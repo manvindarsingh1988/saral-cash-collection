@@ -12,12 +12,6 @@ export default function AdminDashboard() {
   const [selectedDate, setSelectedDate] = useState("");
   const [collectorLedgers, setCollectorLedgers] = useState([]);
 
-  const [filters, setFilters] = useState({
-    RetailUserName: "",
-    Amt: "",
-    HandoverAmt: "",
-    Status: "",
-  });
   const [summary, setSummary] = useState({
     totalAmt: 0,
     totalHandover: 0,
@@ -26,10 +20,6 @@ export default function AdminDashboard() {
 
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedRetailer, setSelectedRetailer] = useState(null);
-
-  const handleFilterChange = (key, value) => {
-    setFilters((prev) => ({ ...prev, [key]: value }));
-  };
 
   const fetchLiabilities = async (date) => {
     try {
@@ -64,31 +54,14 @@ export default function AdminDashboard() {
     }
   };
 
-  const filteredLiabilities = liabilities.filter((item) => {
-    return Object.entries(filters).every(([key, value]) => {
-      if (!value) return true;
-      const itemValue = item[key];
-      if (itemValue === null || itemValue === undefined) return false;
-      return itemValue.toString().toLowerCase().includes(value.toLowerCase());
-    });
-  });
-
-  const handleMoreDetails = (retailUserId) => {
-    setSelectedRetailer(retailUserId);
-    setOpenDialog(true);
-  };
-
   return (
     <div className="space-y-6">
       {/* <h1 className="text-2xl font-semibold text-gray-900">Admin Dashboard</h1> */}
 
       <div className="bg-white shadow rounded-lg">
         <div className="px-4 py-5 sm:p-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">
-            Retailer Liabilities
-          </h3>
-
           <div className="flex items-center gap-4 mb-4">
+            Search Data
             <input
               type="date"
               value={selectedDate}
@@ -108,9 +81,12 @@ export default function AdminDashboard() {
 
           {liabilities?.length > 0 && (
             <>
+              <h3 className="text-lg font-medium text-gray-900 mb-4">
+                Retailer Liabilities
+              </h3>
               <div className="grid grid-cols-1 gap-6 sm:grid-cols-3 mt-4 mb-4">
                 <div className="bg-white overflow-hidden shadow rounded-lg">
-                  <div className="px-4 py-5 sm:p-6">
+                  <div className="px-4 py-5 sm:p-3">
                     <dt className="text-sm font-medium text-gray-500 truncate">
                       Total Liability Amount
                     </dt>
@@ -120,7 +96,7 @@ export default function AdminDashboard() {
                   </div>
                 </div>
                 <div className="bg-white overflow-hidden shadow rounded-lg">
-                  <div className="px-4 py-5 sm:p-6">
+                  <div className="px-4 py-5 sm:p-3">
                     <dt className="text-sm font-medium text-gray-500 truncate">
                       Total Handover Amount
                     </dt>
@@ -130,7 +106,7 @@ export default function AdminDashboard() {
                   </div>
                 </div>
                 <div className="bg-white overflow-hidden shadow rounded-lg">
-                  <div className="px-4 py-5 sm:p-6">
+                  <div className="px-4 py-5 sm:p-3">
                     <dt className="text-sm font-medium text-gray-500 truncate">
                       Total Transactions
                     </dt>
@@ -141,21 +117,14 @@ export default function AdminDashboard() {
                 </div>
               </div>
 
-              <RetailerLiabilityTable
-                data={liabilities}
-                filters={filters}
-                onFilterChange={handleFilterChange}
-                onMoreDetails={handleMoreDetails}
-              />
+              <RetailerLiabilityTable data={liabilities} />
 
               {collectorLedgers && (
-                <div className="bg-white shadow rounded-lg px-4 py-5 sm:p-6 mt-4">
+                <div className="bg-white rounded-lg py-2 mt-2">
                   <h3 className="text-lg font-medium text-gray-900 mb-4">
                     Collector Ledger Info
                   </h3>
-                  <CollectorLedgerTable
-                    data={collectorLedgers}
-                  />
+                  <CollectorLedgerTable data={collectorLedgers} />
                 </div>
               )}
             </>
