@@ -86,22 +86,31 @@ export default function RetailerLedgerModal({
             );
           } else if (key === "TransactionType" || key === "WorkFlow") {
             inputElement = (
-              <select
-                disabled={key === "WorkFlow"}
-                name={key}
-                value={formData[key]} // ✅ FIXED
-                onChange={handleChange}
-                className="border px-2 py-1 rounded"
-              >
-                <option value="" disabled hidden>
-                  Select {key} Type
-                </option>
-                {masterData?.[key + "s"]?.map((type) => (
-                  <option key={type.Id} value={type.Id}>
-                    {type.Description}
+              <>
+                <select
+                  disabled={key === "WorkFlow"}
+                  name={key}
+                  value={formData[key]} // ✅ FIXED
+                  onChange={handleChange}
+                  className="border px-2 py-1 rounded"
+                >
+                  <option value="" disabled hidden>
+                    Select {key} Type
                   </option>
-                ))}
-              </select>
+                  {masterData?.[key + "s"]?.map((type) => (
+                    <option key={type.Id} value={type.Id}>
+                      {type.Description}
+                    </option>
+                  ))}
+                </select>
+                {key === "TransactionType" &&
+                  formData["TransactionType"] === "2" && (
+                    <p className="text-xs text-gray-500 mt-1">
+                      <strong>Note:</strong> Please mention transaction details
+                      in comment to avoid rejection.
+                    </p>
+                  )}
+              </>
             );
           } else {
             const inputType = ["Amount", "WorkFlow"].includes(key)
