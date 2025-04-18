@@ -93,7 +93,7 @@ export default function AdminDashboard() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-semibold text-gray-900">Admin Dashboard</h1>
+      {/* <h1 className="text-2xl font-semibold text-gray-900">Admin Dashboard</h1> */}
 
       <div className="bg-white shadow rounded-lg">
         <div className="px-4 py-5 sm:p-6">
@@ -154,7 +154,7 @@ export default function AdminDashboard() {
                 </div>
               </div>
 
-              <div className="overflow-x-auto max-h-[400px] border border-gray-200 rounded">
+              <div className="overflow-x-auto max-h-[300px] border border-gray-200 rounded">
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50 sticky top-0 z-10">
                     <tr>
@@ -215,8 +215,8 @@ export default function AdminDashboard() {
                 </table>
               </div>
 
-              {collectorLedgers.length > 0 && (
-                <div className="bg-white shadow rounded-lg px-4 py-5 sm:p-6 mt-8">
+              {collectorLedgers && (
+                <div className="bg-white shadow rounded-lg px-4 py-5 sm:p-6 mt-4">
                   <h3 className="text-lg font-medium text-gray-900 mb-4">
                     Collector Ledger Info
                   </h3>
