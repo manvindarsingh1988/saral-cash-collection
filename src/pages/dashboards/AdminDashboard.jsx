@@ -5,21 +5,6 @@ import LadgerDetailsDialog from "../../components/LedgerDetailsDialog";
 import RetailerLiabilityTable from "../../components/RetailerLiabilityTable";
 import CollectorLedgerTable from "../../components/CollectorLedgerTable";
 
-const retailerColumns = [
-  { heading: "Retailer Name", key: "RetailUserName", width: "w-48" },
-  { heading: "Amount", key: "Amt", width: "w-32" },
-  { heading: "Handover Amount", key: "HandoverAmt", width: "w-36" },
-  { heading: "Status", key: "Status", width: "w-28" },
-  { heading: "Action", key: "Action", width: "w-32", isAction: true },
-];
-
-const collectorColumns = [
-  { heading: "Collector Name", key: "CollectorName", width: "w-48" },
-  { heading: "Amount", key: "Amt", width: "w-32" },
-  { heading: "Handover Amount", key: "HandoverAmt", width: "w-36" },
-  { heading: "Status", key: "Status", width: "w-28" },
-];
-
 export default function AdminDashboard() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -157,7 +142,6 @@ export default function AdminDashboard() {
               </div>
 
               <RetailerLiabilityTable
-                columns={retailerColumns}
                 data={liabilities}
                 filters={filters}
                 onFilterChange={handleFilterChange}
@@ -170,7 +154,6 @@ export default function AdminDashboard() {
                     Collector Ledger Info
                   </h3>
                   <CollectorLedgerTable
-                    columns={collectorColumns}
                     data={collectorLedgers}
                   />
                 </div>

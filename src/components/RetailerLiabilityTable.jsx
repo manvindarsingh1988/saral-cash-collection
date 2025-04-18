@@ -1,8 +1,16 @@
 import React from "react";
 import { formatIndianNumber } from "../lib/utils";
 
+const columns = [
+  { heading: "Retailer Name", key: "RetailUserName", width: "w-48" },
+  { heading: "Amount", key: "Amt", width: "w-32" },
+  { heading: "Handover Amount", key: "HandoverAmt", width: "w-36" },
+  { heading: "Status", key: "Status", width: "w-28" },
+  { heading: "Action", key: "Action", width: "w-32", isAction: true },
+];
+
+
 export default function RetailerLiabilityTable({
-  columns,
   data,
   filters,
   onFilterChange,
