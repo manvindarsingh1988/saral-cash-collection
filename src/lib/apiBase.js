@@ -17,7 +17,7 @@ export const apiBase = {
       if (!user) {
         throw new Error("Invalid email or password");
       }
-    } 
+    }
 
     currentUser = user;
     localStorage.setItem("currentUser", JSON.stringify(user));
@@ -40,7 +40,6 @@ export const apiBase = {
 
     return currentUser;
   },
-
 
   // ************ Actual API calls ************
 
@@ -120,6 +119,18 @@ export const apiBase = {
     return data;
   },
 
+  getLadgerInfosCreatedByCollectors: async (date) => {
+    const response = await fetch(
+      `${API_URL}/GetLadgerInfosCreatedByCollectors?date=${date}`
+    );
+    if (!response.ok) {
+      console.error(`Failed to fetch: ${response.statusText}`);
+    }
+    const data = await response.json();
+    console.log(data);
+    return data;
+  },
+
   GetLiabilityAmountByRetailerId: async (retailerId, date) => {
     const response = await fetch(
       `${API_URL}/GetLiabilityAmountByRetailerId?userId=${retailerId}&date=${date}`
@@ -167,12 +178,9 @@ export const apiBase = {
   },
 
   deleteLedgerInfo: async (ledgerId) => {
-    const response = await fetch(
-      `${API_URL}/DeleteLadgerInfo?id=${ledgerId}`,
-      {
-        method: "DELETE",
-      }
-    );
+    const response = await fetch(`${API_URL}/DeleteLadgerInfo?id=${ledgerId}`, {
+      method: "DELETE",
+    });
 
     if (!response.ok) {
       console.error(`Failed to fetch: ${response.statusText}`);
@@ -254,5 +262,5 @@ export const apiBase = {
     const result = await response.json();
     console.log(result);
     return result;
-  }
+  },
 };

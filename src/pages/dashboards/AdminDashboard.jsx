@@ -3,7 +3,7 @@ import { apiBase } from "../../lib/apiBase";
 import { formatIndianNumber } from "../../lib/utils";
 import LadgerDetailsDialog from "../../components/LedgerDetailsDialog";
 
-const columns = [
+const retailerColumns = [
   { heading: "Retailer Name", key: "RetailUserName", width: "w-48" },
   { heading: "Amount", key: "Amt", width: "w-32" },
   { heading: "Handover Amount", key: "HandoverAmt", width: "w-36" },
@@ -11,11 +11,20 @@ const columns = [
   { heading: "Action", key: "Action", width: "w-32", isAction: true },
 ];
 
+const collectorColumns = [
+  { heading: "Collector Name", key: "CollectorName", width: "w-48" },
+  { heading: "Amount", key: "Amt", width: "w-32" },
+  { heading: "Handover Amount", key: "HandoverAmt", width: "w-36" },
+  { heading: "Status", key: "Status", width: "w-28" },
+];
+
 export default function AdminDashboard() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [liabilities, setLiabilities] = useState([]);
   const [selectedDate, setSelectedDate] = useState("");
+  const [collectorLedgers, setCollectorLedgers] = useState([]);
+
   const [filters, setFilters] = useState({
     RetailUserName: "",
     Amt: "",
@@ -38,11 +47,19 @@ export default function AdminDashboard() {
   const fetchLiabilities = async (date) => {
     try {
       setLoading(true);
-      const data = await apiBase.getLiabilityAmountOfAllRetailers(date);
-      setLiabilities(data);
+      const [retailerData, collectorData] = await Promise.all([
+        apiBase.getLiabilityAmountOfAllRetailers(date),
+        apiBase.getLadgerInfosCreatedByCollectors(date),
+      ]);
 
-      const totalAmt = data.reduce((sum, item) => sum + (item.Amt || 0), 0);
-      const totalHandover = data.reduce(
+      setLiabilities(retailerData);
+      setCollectorLedgers(collectorData);
+
+      const totalAmt = retailerData.reduce(
+        (sum, item) => sum + (item.Amt || 0),
+        0
+      );
+      const totalHandover = retailerData.reduce(
         (sum, item) => sum + (item.HandoverAmt || 0),
         0
       );
@@ -50,12 +67,12 @@ export default function AdminDashboard() {
       setSummary({
         totalAmt,
         totalHandover,
-        totalTransactions: data.length,
+        totalTransactions: retailerData.length,
       });
       setLoading(false);
     } catch (err) {
-      console.error("Error fetching liabilities:", err);
-      setError(err.message || "Failed to fetch liabilities");
+      console.error("Error fetching data:", err);
+      setError(err.message || "Failed to fetch data");
       setLoading(false);
     }
   };
@@ -141,7 +158,7 @@ export default function AdminDashboard() {
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50 sticky top-0 z-10">
                     <tr>
-                      {columns.map((col) => (
+                      {retailerColumns.map((col) => (
                         <th
                           key={col.key}
                           className={`px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider ${col.width}`}
@@ -170,7 +187,7 @@ export default function AdminDashboard() {
                   <tbody className="bg-white divide-y divide-gray-200">
                     {filteredLiabilities.map((item) => (
                       <tr key={item.RetailUserId}>
-                        {columns.map((col) => (
+                        {retailerColumns.map((col) => (
                           <td
                             key={col.key}
                             className={`px-4 py-4 whitespace-nowrap text-sm text-gray-900 ${col.width}`}
@@ -197,6 +214,46 @@ export default function AdminDashboard() {
                   </tbody>
                 </table>
               </div>
+
+              {collectorLedgers.length > 0 && (
+                <div className="bg-white shadow rounded-lg px-4 py-5 sm:p-6 mt-8">
+                  <h3 className="text-lg font-medium text-gray-900 mb-4">
+                    Collector Ledger Info
+                  </h3>
+                  <div className="overflow-x-auto max-h-[400px] border border-gray-200 rounded">
+                    <table className="min-w-full divide-y divide-gray-200">
+                      <thead className="bg-gray-50 sticky top-0 z-10">
+                        <tr>
+                          {collectorColumns.map((col) => (
+                            <th
+                              key={col.key}
+                              className={`px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider ${col.width}`}
+                            >
+                              {col.heading}
+                            </th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white divide-y divide-gray-200">
+                        {collectorLedgers.map((item, index) => (
+                          <tr key={index}>
+                            {collectorColumns.map((col) => (
+                              <td
+                                key={col.key}
+                                className={`px-4 py-4 whitespace-nowrap text-sm text-gray-900 ${col.width}`}
+                              >
+                                {col.key === "Amt" || col.key === "HandoverAmt"
+                                  ? `₹${formatIndianNumber(item[col.key])}`
+                                  : item[col.key]}
+                              </td>
+                            ))}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
             </>
           )}
         </div>
