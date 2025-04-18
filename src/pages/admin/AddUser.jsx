@@ -3,7 +3,7 @@ import { apiBase } from "../../lib/apiBase";
 
 export default function AddUser() {
   const [formData, setFormData] = useState({
-    userTypeId: "12", // Default to Collector
+    userType: 12,
     firstName: "",
     middleName: "",
     lastName: "",
@@ -37,7 +37,7 @@ export default function AddUser() {
 
       setSuccess(true);
       setFormData({
-        userTypeId: "12",
+        userType: 12,
         firstName: "",
         middleName: "",
         lastName: "",
@@ -85,8 +85,8 @@ export default function AddUser() {
               User Type
             </label>
             <select
-              id="userTypeId"
-              value={formData.userTypeId}
+              id="userType"
+              value={formData.userType}
               onChange={handleChange}
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
               required
