@@ -56,12 +56,10 @@ export default function AdminDashboard() {
 
   return (
     <div className="space-y-6">
-      {/* <h1 className="text-2xl font-semibold text-gray-900">Admin Dashboard</h1> */}
-
       <div className="bg-white shadow rounded-lg">
         <div className="px-4 py-5 sm:p-6">
           <div className="flex items-center gap-4 mb-4">
-            Search Data
+            <label className="text-lg">Search Data</label>
             <input
               type="date"
               value={selectedDate}
@@ -118,15 +116,7 @@ export default function AdminDashboard() {
               </div>
 
               <RetailerLiabilityTable data={liabilities} />
-
-              {collectorLedgers && (
-                <div className="bg-white rounded-lg py-2 mt-2">
-                  <h3 className="text-lg font-medium text-gray-900 mb-4">
-                    Collector Ledger Info
-                  </h3>
-                  <CollectorLedgerTable data={collectorLedgers} />
-                </div>
-              )}
+              <CollectorLedgerTable data={collectorLedgers} />
             </>
           )}
         </div>
