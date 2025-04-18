@@ -166,9 +166,37 @@ export const apiBase = {
     return result;
   },
 
+  deleteLedgerInfo: async (ledgerId) => {
+    const response = await fetch(
+      `${API_URL}/DeleteLadgerInfo?id=${ledgerId}`,
+      {
+        method: "DELETE",
+      }
+    );
+
+    if (!response.ok) {
+      console.error(`Failed to fetch: ${response.statusText}`);
+    }
+    const result = await response.json();
+    console.log(result);
+    return result;
+  },
+
   getLadgerInfoByRetailerid: async (date, retailerId) => {
     const response = await fetch(
       `${API_URL}/GetLadgerInfoByRetailerid?date=${date}&retailerId=${retailerId}`
+    );
+    if (!response.ok) {
+      console.error(`Failed to fetch: ${response.statusText}`);
+    }
+    const data = await response.json();
+    console.log(data);
+    return data;
+  },
+
+  getLedgerInfoByCollectorId: async (date, collectorId) => {
+    const response = await fetch(
+      `${API_URL}/GetLadgerInfoByCollectorId?date=${date}&collectorId=${collectorId}`
     );
     if (!response.ok) {
       console.error(`Failed to fetch: ${response.statusText}`);

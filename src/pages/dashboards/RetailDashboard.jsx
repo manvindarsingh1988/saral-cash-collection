@@ -15,7 +15,7 @@ const columns = [
   { key: "Actions", label: "Actions", width: "60px" },
 ];
 
-export default function RetailDashboard({ retailUserId = "RU00118" }) {
+export default function RetailDashboard({ retailUserId }) {
   const [isModalOpen, setModalOpen] = useState(false);
   const [editData, setEditData] = useState(null);
   const [selectedDate, setSelectedDate] = useState("");
@@ -310,7 +310,8 @@ export default function RetailDashboard({ retailUserId = "RU00118" }) {
                             {item.Comment}
                           </td>
                           <td className="px-2 py-2">
-                            {getMasterValue("WorkFlows", item.WorkFlow) === "Initiate" && (
+                            {getMasterValue("WorkFlows", item.WorkFlow) ===
+                              "Initiate" && (
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation(); // Prevent triggering row edit

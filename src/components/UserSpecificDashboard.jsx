@@ -19,13 +19,13 @@ export default function UserSpecificDashboard() {
   } else if (user.UserType === "Collector") {
     return (
       <CollectorLayout>
-        <CollectorDashboard />
+        <CollectorDashboard collectorUserId={user.Id} />
       </CollectorLayout>
     );
   } else if (user.UserType === "Retailer") {
     return (
       <RetailUserLayout>
-        <RetailDashboard />
+        <RetailDashboard retailUserId={user.Id} />
       </RetailUserLayout>
     );
   }

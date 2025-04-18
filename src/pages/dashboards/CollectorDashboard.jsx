@@ -14,7 +14,7 @@ const columns = [
   { key: "Comment", label: "Remarks", width: "150px" },
 ];
 
-export default function CollectorDashboard({ collectorUserId = "RU004084" }) {
+export default function CollectorDashboard({ collectorUserId }) {
   const [isModalOpen, setModalOpen] = useState(false);
   const [editData, setEditData] = useState(null);
   const [selectedDate, setSelectedDate] = useState("");
