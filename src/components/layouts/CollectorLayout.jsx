@@ -1,10 +1,8 @@
 import React from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
-import { apiBase } from "../lib/apiBase";
+import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
+import { apiBase } from "../../lib/apiBase";
 
-export default function AdminLayout({ children }) {
-  console.log("AdminLayout.jsx");
-
+export default function CollectorLayout({ children }) {
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -29,32 +27,26 @@ export default function AdminLayout({ children }) {
                 </span>
               </div>
               <div className="hidden md:block">
-                <div className="ml-10 flex items-baseline space-x-4">
+                {/* <div className="ml-10 flex items-baseline space-x-4">
                   <Link
-                    to="/"
-                    className={`${isActive(
-                      "/"
-                    )} text-white rounded-md px-3 py-2 text-sm font-medium`}
+                    to="/admin"
+                    className={`${isActive('/admin')} text-white rounded-md px-3 py-2 text-sm font-medium`}
                   >
                     Dashboard
                   </Link>
                   <Link
-                    to="/add-user"
-                    className={`${isActive(
-                      "/add-user"
-                    )} text-white rounded-md px-3 py-2 text-sm font-medium`}
+                    to="/admin/add-collector"
+                    className={`${isActive('/admin/add-collector')} text-white rounded-md px-3 py-2 text-sm font-medium`}
                   >
-                    Add User
+                    Add Collector
                   </Link>
                   <Link
-                    to="/assign-retail"
-                    className={`${isActive(
-                      "/assign-retail"
-                    )} text-white rounded-md px-3 py-2 text-sm font-medium`}
+                    to="/admin/assign-retail"
+                    className={`${isActive('/admin/assign-retail')} text-white rounded-md px-3 py-2 text-sm font-medium`}
                   >
                     Assign Retail Users
                   </Link>
-                </div>
+                </div> */}
               </div>
             </div>
             <div>

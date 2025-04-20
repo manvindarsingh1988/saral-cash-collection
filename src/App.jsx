@@ -7,7 +7,7 @@ import SignIn from "./pages/SignIn";
 import SignUp from "./pages/SignUp";
 import ForgotPassword from "./pages/ForgotPassword";
 import AssignRetail from "./pages/admin/AssignRetail";
-import AdminLayout from "./components/AdminLayout";
+import AdminLayout from "./components/layouts/AdminLayout";
 import UserSpecificDashboard from "./components/UserSpecificDashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AddUser from "./pages/admin/AddUser";

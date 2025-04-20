@@ -1,6 +1,6 @@
 import React from "react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
-import { apiBase } from "../lib/apiBase";
+import { apiBase } from "../../lib/apiBase";
 
 export default function RetailUserLayout({ children }) {
   const location = useLocation();

@@ -3,9 +3,9 @@ import { apiBase } from "../lib/apiBase";
 import AdminDashboard from "../pages/dashboards/AdminDashboard";
 import CollectorDashboard from "../pages/dashboards/CollectorDashboard";
 import RetailDashboard from "../pages/dashboards/RetailDashboard";
-import AdminLayout from "./AdminLayout";
-import RetailUserLayout from "./RetailUserLayout";
-import CollectorLayout from "./CollectorLayout";
+import AdminLayout from "./layouts/AdminLayout";
+import RetailUserLayout from "./layouts/RetailUserLayout";
+import CollectorLayout from "./layouts/CollectorLayout";
 
 export default function UserSpecificDashboard() {
   const user = apiBase.getCurrentUser();
