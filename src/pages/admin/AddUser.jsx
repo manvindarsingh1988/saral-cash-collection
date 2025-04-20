@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { apiBase } from "../../lib/apiBase";
+import { Navigate } from "react-router-dom";
 
 export default function AddUser() {
   const [formData, setFormData] = useState({
@@ -20,6 +21,17 @@ export default function AddUser() {
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    try {
+      const user = apiBase.getCurrentUser();
+      setUser(user);
+    } catch (error) {
+      console.error("Error fetching user:", error);
+      Navigate("/signin");
+    }
+  }, []);
 
   const handleChange = (e) => {
     const { id, value } = e.target;
@@ -59,9 +71,7 @@ export default function AddUser() {
 
   return (
     <div>
-      <h1 className="text-2xl font-semibold text-gray-900">
-        Add New User
-      </h1>
+      <h1 className="text-2xl font-semibold text-gray-900">Add New User</h1>
 
       <div className="mt-6">
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -92,7 +102,11 @@ export default function AddUser() {
               required
             >
               <option value="12">Collector</option>
-              <option value="13">Cashier</option>
+              {user?.UserType === "Cashier" ? (
+                ""
+              ) : (
+                <option value="13">Cashier</option>
+              )}
             </select>
           </div>
 

@@ -6,6 +6,7 @@ const routesForRoles = {
   Admin: ["/", "/add-user", "/assign-retail"],
   Collector: ["/"],
   Retailer: ["/"],
+  Cashier: ["/", "/add-user", "/assign-retail"],
 };
 
 export default function ProtectedRoute({ children }) {
@@ -25,7 +26,7 @@ export default function ProtectedRoute({ children }) {
 
   if (!user) return <Navigate to="/signin" replace />;
 
-  if (routesForRoles[user.role || user.UserType].includes(location.pathname)) {
+  if (routesForRoles[user.UserType].includes(location.pathname)) {
     return children;
   } else {
     return <Navigate to="/" replace />;
