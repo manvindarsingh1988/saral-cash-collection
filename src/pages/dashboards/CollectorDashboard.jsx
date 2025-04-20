@@ -158,40 +158,51 @@ export default function CollectorDashboard({ collectorUserId }) {
   return (
     <>
       <div className="space-y-6">
-        <h1 className="text-2xl font-semibold text-gray-900">
-          Collector Dashboard
-        </h1>
-
         <div className="bg-white shadow rounded-lg p-6">
-          <div className="mb-4 flex flex-wrap items-center gap-4">
-            <input
-              type="date"
-              value={selectedDate}
-              onChange={(e) => setSelectedDate(e.target.value)}
-              className="border rounded px-2 py-1 border-gray-300"
-            />
+          <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-4 shadow-sm mb-6">
+            <div className="flex flex-col sm:flex-row sm:items-end gap-4">
+              {/* Date Picker */}
+              <div className="flex-1">
+                <label className="block text-sm font-medium text-indigo-700 mb-1">
+                  Select Date
+                </label>
+                <input
+                  type="date"
+                  value={selectedDate}
+                  onChange={(e) => setSelectedDate(e.target.value)}
+                  className="w-full px-3 py-2 border border-indigo-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                />
+              </div>
 
-            <select
-              value={selectedRetailerId}
-              onChange={(e) => setSelectedRetailerId(e.target.value)}
-              className="border rounded px-2 py-1 border-gray-300"
-            >
-              <option value="" disabled>
-                Select Retailer
-              </option>
-              {retailers.map((r) => (
-                <option key={r.RetailerUserId} value={r.RetailerUserId}>
-                  {r.RetailerUserName}
-                </option>
-              ))}
-            </select>
+              {/* Retailer Dropdown */}
+              <div className="flex-1">
+                <label className="block text-sm font-medium text-indigo-700 mb-1">
+                  Select Retailer
+                </label>
+                <select
+                  value={selectedRetailerId}
+                  onChange={(e) => setSelectedRetailerId(e.target.value)}
+                  className="w-full px-3 py-2 border border-indigo-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                >
+                  <option value="">Select Retailer</option>
+                  {retailers.map((r) => (
+                    <option key={r.RetailerUserId} value={r.RetailerUserId}>
+                      {r.RetailerUserName}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-            <button
-              onClick={() => fetchData(selectedDate)}
-              className="bg-blue-600 text-white px-4 py-1.5 rounded hover:bg-blue-700"
-            >
-              Search
-            </button>
+              {/* Search Button */}
+              <button
+                onClick={() =>
+                  fetchLiabilities(selectedDate, selectedRetailerId)
+                }
+                className="bg-indigo-600 text-white px-6 py-2 rounded-md hover:bg-indigo-700 transition duration-200 mt-2 sm:mt-0"
+              >
+                🔍 Search
+              </button>
+            </div>
           </div>
 
           {liability && liability.Amt > 0 && (

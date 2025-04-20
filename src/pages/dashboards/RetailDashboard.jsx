@@ -164,24 +164,39 @@ export default function RetailDashboard({ retailUserId }) {
   return (
     <>
       <div className="space-y-6">
-        <h1 className="text-2xl font-semibold text-gray-900">
-          Retail Dashboard
-        </h1>
-
         <div className="bg-white shadow rounded-lg p-6">
-          <div className="mb-4 flex items-center gap-4">
-            <input
-              type="date"
-              value={selectedDate}
-              onChange={(e) => setSelectedDate(e.target.value)}
-              className="border rounded px-2 py-1 border-gray-300"
-            />
-            <button
-              onClick={() => fetchData(selectedDate)}
-              className="bg-blue-600 text-white px-4 py-1.5 rounded hover:bg-blue-700"
-            >
-              Search
-            </button>
+          <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-4 shadow-sm mb-6">
+            <div className="grid grid-cols-1 sm:grid-cols-[auto_auto] gap-4 items-end">
+              {/* Date Picker */}
+              <div>
+                <label
+                  htmlFor="transaction-date"
+                  className="block text-sm font-medium text-indigo-700 mb-1"
+                >
+                  Select Date
+                </label>
+                <input
+                  id="transaction-date"
+                  type="date"
+                  value={selectedDate}
+                  onChange={(e) => setSelectedDate(e.target.value)}
+                  className="w-full border border-indigo-300 rounded-md px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                />
+              </div>
+
+              {/* Search Button */}
+              <div>
+                <label className="invisible block text-sm font-medium">
+                  Search
+                </label>
+                <button
+                  onClick={() => fetchData(selectedDate)}
+                  className="w-full bg-indigo-600 text-white px-4 py-2 rounded-md shadow-sm hover:bg-indigo-700 transition duration-200"
+                >
+                  🔍 Search
+                </button>
+              </div>
+            </div>
           </div>
 
           {liability && liability.Amt > 0 && (
@@ -222,7 +237,7 @@ export default function RetailDashboard({ retailUserId }) {
               </div>
 
               {ledger?.length > 0 && (
-                <div className="overflow-y-auto border border-gray-200 rounded max-h-[600px]">
+                <div className="overflow-y-auto border border-gray-200 rounded h-[400px]">
                   <table className="w-full table-auto divide-y divide-gray-200 text-sm">
                     <thead className="bg-gray-50 sticky top-0 z-10">
                       <tr>
