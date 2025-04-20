@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { apiBase } from "../../lib/apiBase";
+import useDocumentTitle from "../../hooks/useDocumentTitle";
 
 export default function AssignRetail() {
+  useDocumentTitle("Assign Retail Users to Collectors");
   const [retailers, setRetailers] = useState([]);
   const [collectors, setCollectors] = useState([]);
   const [selectedCollector, setSelectedCollector] = useState(null);

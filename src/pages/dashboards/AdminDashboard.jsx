@@ -4,8 +4,10 @@ import { formatIndianNumber } from "../../lib/utils";
 import LadgerDetailsDialog from "../../components/LedgerDetailsDialog";
 import RetailerLiabilityTable from "../../components/RetailerLiabilityTable";
 import CollectorLedgerTable from "../../components/CollectorLedgerTable";
+import useDocumentTitle from "../../hooks/useDocumentTitle";
 
 export default function AdminDashboard() {
+  useDocumentTitle("Admin Dashboard");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [liabilities, setLiabilities] = useState([]);

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { apiBase } from "../../lib/apiBase";
 import { formatIndianNumber } from "../../lib/utils";
 import CollectorLedgerModal from "../../components/CollectorLedgerModal";
+import useDocumentTitle from "../../hooks/useDocumentTitle";
 
 const columns = [
   { key: "Id", label: "ID", width: "50px" },
@@ -15,6 +16,7 @@ const columns = [
 ];
 
 export default function CollectorDashboard({ collectorUserId }) {
+  useDocumentTitle("Collector Dashboard");
   const [isModalOpen, setModalOpen] = useState(false);
   const [editData, setEditData] = useState(null);
   const [selectedDate, setSelectedDate] = useState("");

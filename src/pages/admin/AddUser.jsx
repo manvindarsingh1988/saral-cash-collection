@@ -1,8 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, use } from "react";
 import { apiBase } from "../../lib/apiBase";
 import { Navigate } from "react-router-dom";
+import useDocumentTitle from "../../hooks/useDocumentTitle";
 
 export default function AddUser() {
+  useDocumentTitle("Add User");
   const [formData, setFormData] = useState({
     userType: 12,
     firstName: "",

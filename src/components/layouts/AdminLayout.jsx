@@ -1,9 +1,10 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { apiBase } from "../../lib/apiBase";
+import UserProfileMenu from "../UserProfileMenu";
 
 export default function AdminLayout({ children }) {
-  console.log("AdminLayout.jsx");
+  const [user] = React.useState(() => apiBase.getCurrentUser());
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -57,14 +58,7 @@ export default function AdminLayout({ children }) {
                 </div>
               </div>
             </div>
-            <div>
-              <button
-                onClick={handleSignOut}
-                className="text-white hover:text-gray-200 px-3 py-2 text-sm font-medium"
-              >
-                Sign Out
-              </button>
-            </div>
+            <UserProfileMenu user={user} onSignOut={handleSignOut} />
           </div>
         </div>
       </nav>

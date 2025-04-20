@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { apiBase } from "../../lib/apiBase";
 import { formatIndianNumber } from "../../lib/utils";
 import RetailerLedgerModal from "../../components/RetailerLedgerModal";
+import useDocumentTitle from "../../hooks/useDocumentTitle";
 
 const columns = [
   { key: "Id", label: "ID", width: "40px" },
@@ -16,6 +17,7 @@ const columns = [
 ];
 
 export default function RetailDashboard({ retailUserId }) {
+  useDocumentTitle("Retail Dashboard");
   const [isModalOpen, setModalOpen] = useState(false);
   const [editData, setEditData] = useState(null);
   const [selectedDate, setSelectedDate] = useState("");
