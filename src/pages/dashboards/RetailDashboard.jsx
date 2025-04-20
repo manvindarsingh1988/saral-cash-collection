@@ -166,9 +166,9 @@ export default function RetailDashboard({ retailUserId }) {
       <div className="space-y-6">
         <div className="bg-white shadow rounded-lg p-6">
           <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-4 shadow-sm mb-6">
-            <div className="grid grid-cols-1 sm:grid-cols-[auto_auto] gap-4 items-end">
+            <div className="flex flex-col sm:flex-row sm:items-end gap-4">
               {/* Date Picker */}
-              <div>
+              <div className="flex-1">
                 <label
                   htmlFor="transaction-date"
                   className="block text-sm font-medium text-indigo-700 mb-1"
@@ -180,22 +180,17 @@ export default function RetailDashboard({ retailUserId }) {
                   type="date"
                   value={selectedDate}
                   onChange={(e) => setSelectedDate(e.target.value)}
-                  className="w-full border border-indigo-300 rounded-md px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  className="w-full px-3 py-2 border border-indigo-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                 />
               </div>
 
               {/* Search Button */}
-              <div>
-                <label className="invisible block text-sm font-medium">
-                  Search
-                </label>
-                <button
-                  onClick={() => fetchData(selectedDate)}
-                  className="w-full bg-indigo-600 text-white px-4 py-2 rounded-md shadow-sm hover:bg-indigo-700 transition duration-200"
-                >
-                  🔍 Search
-                </button>
-              </div>
+              <button
+                onClick={() => fetchData(selectedDate)}
+                className="bg-indigo-600 text-white px-6 py-2 rounded-md hover:bg-indigo-700 transition duration-200 mt-2 sm:mt-0"
+              >
+                🔍 Search
+              </button>
             </div>
           </div>
 
