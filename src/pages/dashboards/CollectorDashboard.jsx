@@ -239,7 +239,7 @@ export default function CollectorDashboard({ collectorUserId }) {
                 </button>
               </div>
 
-              <div className="overflow-y-auto border border-gray-200 rounded max-h-[600px]">
+              <div className="overflow-y-auto border border-gray-200 rounded h-[400px]">
                 <table className="w-full table-auto divide-y divide-gray-200 text-sm">
                   <thead className="bg-gray-50 sticky top-0 z-10">
                     <tr>
