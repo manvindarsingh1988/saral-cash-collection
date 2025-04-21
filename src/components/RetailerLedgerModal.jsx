@@ -1,5 +1,15 @@
 import React, { useState, useEffect } from "react";
 
+const allowedFields = [
+  "CollectorId",
+  "Amount",
+  "TransactionType",
+  "WorkFlow",
+  "Date",
+  "GivenOn",
+  "Comment",
+];
+
 export default function RetailerLedgerModal({
   collectors,
   masterData,
@@ -20,15 +30,21 @@ export default function RetailerLedgerModal({
 
   useEffect(() => {
     if (initialData) {
-      const formattedData = { ...initialData };
-      ["Date", "GivenOn"].forEach((field) => {
-        if (formattedData[field]) {
-          formattedData[field] = new Date(formattedData[field])
-            .toISOString()
-            .split("T")[0];
+      const formattedData = {};
+
+      allowedFields.forEach((field) => {
+        if (initialData[field]) {
+          if (["Date", "GivenOn"].includes(field)) {
+            formattedData[field] = new Date(initialData[field])
+              .toISOString()
+              .split("T")[0];
+          } else {
+            formattedData[field] = initialData[field];
+          }
         }
       });
-      setFormData(formattedData);
+
+      setFormData((prev) => ({ ...prev, ...formattedData }));
     }
   }, [initialData]);
 
@@ -38,7 +54,11 @@ export default function RetailerLedgerModal({
   };
 
   const handleSubmit = () => {
-    onSubmit(formData);
+    const filteredData = allowedFields.reduce((obj, key) => {
+      obj[key] = formData[key];
+      return obj;
+    }, {});
+    onSubmit(filteredData);
     onClose();
   };
 
@@ -50,12 +70,7 @@ export default function RetailerLedgerModal({
         <h2 className="text-lg font-semibold">
           {!initialData ? "Add" : "Update"} Ledger Entry
         </h2>
-        {Object.keys(formData).map((key) => {
-          if (
-            ["Id", "RetailerId", "RetailerName", "CollectorName"].includes(key)
-          )
-            return null;
-
+        {allowedFields.map((key) => {
           if (key === "CollectorId" && formData["TransactionType"] === "2") {
             return null;
           }
@@ -90,7 +105,7 @@ export default function RetailerLedgerModal({
                 <select
                   disabled={key === "WorkFlow"}
                   name={key}
-                  value={formData[key]} // ✅ FIXED
+                  value={formData[key]}
                   onChange={handleChange}
                   className="border px-2 py-1 rounded"
                 >

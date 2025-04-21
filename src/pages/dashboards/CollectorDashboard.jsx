@@ -195,9 +195,7 @@ export default function CollectorDashboard({ collectorUserId }) {
 
               {/* Search Button */}
               <button
-                onClick={() =>
-                  fetchLiabilities(selectedDate, selectedRetailerId)
-                }
+                onClick={fetchData}
                 className="bg-indigo-600 text-white px-6 py-2 rounded-md hover:bg-indigo-700 transition duration-200 mt-2 sm:mt-0"
               >
                 🔍 Search

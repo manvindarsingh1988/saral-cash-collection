@@ -12,7 +12,7 @@ const columns = [
   { key: "WorkFlows", label: "Workflow", width: "120px" },
   { key: "Date", label: "Transaction Date", width: "100px" },
   { key: "GivenOn", label: "Given On", width: "100px" },
-  { key: "Comment", label: "Remarks", width: "150px" },
+  { key: "Comment", label: "Remarks", width: "130px" },
   { key: "Actions", label: "Actions", width: "60px" },
 ];
 
@@ -279,7 +279,7 @@ export default function RetailDashboard({ retailUserId }) {
                         ))}
                       </tr>
                     </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
+                    <tbody className="bg-white divide-y divide-gray-200 text-xs">
                       {filteredData.map((item) => (
                         <tr
                           title="Click to edit"
