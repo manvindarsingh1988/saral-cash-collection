@@ -20,8 +20,7 @@ export default function AdminDashboard() {
     totalTransactions: 0,
   });
 
-  const [openDialog, setOpenDialog] = useState(false);
-  const [selectedRetailer, setSelectedRetailer] = useState(null);
+ 
 
   const fetchLiabilities = async (date) => {
     try {
@@ -124,23 +123,12 @@ export default function AdminDashboard() {
                 </div>
               </div>
 
-              <RetailerLiabilityTable data={liabilities} />
+              <RetailerLiabilityTable data={liabilities}  selectedDate={selectedDate}/>
               <CollectorLedgerTable data={collectorLedgers} />
             </>
           )}
         </div>
       </div>
-
-      {openDialog && selectedRetailer && (
-        <LadgerDetailsDialog
-          retailerId={selectedRetailer}
-          date={selectedDate}
-          onClose={() => {
-            setOpenDialog(false);
-            setSelectedRetailer(null);
-          }}
-        />
-      )}
     </div>
   );
 }
