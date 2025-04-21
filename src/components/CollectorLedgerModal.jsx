@@ -1,5 +1,15 @@
 import React, { useState, useEffect } from "react";
 
+const allowedFields = [
+  "CollectorId",
+  "Amount",
+  "TransactionType",
+  "WorkFlow",
+  "Date",
+  "GivenOn",
+  "Comment",
+];
+
 export default function CollectorLedgerModal({
   collectorId,
   masterData,
@@ -8,6 +18,7 @@ export default function CollectorLedgerModal({
   onSubmit,
   initialData,
 }) {
+
   const [formData, setFormData] = useState({
     CollectorId: collectorId,
     Amount: "",
@@ -20,17 +31,21 @@ export default function CollectorLedgerModal({
 
   useEffect(() => {
     if (initialData) {
-      const formattedData = { ...initialData };
-      ["Date", "GivenOn"].forEach((field) => {
-        if (formattedData[field]) {
-          formattedData[field] = new Date(formattedData[field])
+      const filteredData = { ...formData }; // start with default values
+      allowedFields.forEach((field) => {
+        if (field === "CollectorId") {
+          filteredData[field] = collectorId;
+        } else if (["Date", "GivenOn"].includes(field) && initialData[field]) {
+          filteredData[field] = new Date(initialData[field])
             .toISOString()
             .split("T")[0];
+        } else if (initialData[field] !== undefined) {
+          filteredData[field] = initialData[field];
         }
       });
-      setFormData(formattedData);
+      setFormData(filteredData);
     }
-  }, [initialData]);
+  }, [initialData, collectorId]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -51,17 +66,8 @@ export default function CollectorLedgerModal({
           {!initialData ? "Add" : "Update"} Ledger Entry
         </h2>
 
-        {Object.keys(formData).map((key) => {
-          if (
-            [
-              "Id",
-              "RetailerId",
-              "RetailerName",
-              "CollectorName",
-              "CollectorId",
-            ].includes(key)
-          )
-            return null;
+        {allowedFields.map((key) => {
+          if (key === "CollectorId") return null;
 
           const label = key.replace(/([A-Z])/g, " $1").trim();
           let inputElement;
@@ -85,7 +91,7 @@ export default function CollectorLedgerModal({
               </select>
             );
           } else {
-            const inputType = ["Amount"].includes(key)
+            const inputType = key === "Amount"
               ? "number"
               : ["Date", "GivenOn"].includes(key)
               ? "date"
