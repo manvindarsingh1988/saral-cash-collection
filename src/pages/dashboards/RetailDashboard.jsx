@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { apiBase } from "../../lib/apiBase";
 import { formatIndianNumber } from "../../lib/utils";
-import RetailerLedgerModal from "../../components/RetailerLedgerModal";
+import RetailerLedgerModal from "../../components/retailer/RetailerLedgerModal";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
 
 const columns = [
@@ -100,7 +100,7 @@ export default function RetailDashboard({ retailUserId }) {
         TransactionType: parseInt(data.TransactionType),
         WorkFlow: 0,
         Date: new Date(data.Date).toISOString(),
-        GivenOn: new Date(data.GivenOn).toISOString(),
+        GivenOn: new Date(new Date()).toISOString(),
         CollectorId: data.TransactionType == "2" ? "" : data.CollectorId,
         CollectorName: data.TransactionType == "2" ? "" : data.CollectorName,
       };

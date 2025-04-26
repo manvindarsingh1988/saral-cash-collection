@@ -16,6 +16,8 @@ export default function RetailerLedgerModal({
   onSubmit,
   initialData,
 }) {
+  console.log("Initial Data:", initialData);
+
   const [formData, setFormData] = useState({
     CollectorId: "",
     Amount: "",
@@ -70,7 +72,10 @@ export default function RetailerLedgerModal({
         {allowedFields.map((key) => {
           console.log("Key:", key, "Value:", formData[key]);
 
-          if (key === "CollectorId" && formData["TransactionTypes"] === "2") {
+          if (
+            key === "CollectorId" &&
+            (formData["TransactionTypes"] === "2" || !formData["CollectorId"])
+          ) {
             return null;
           }
 
