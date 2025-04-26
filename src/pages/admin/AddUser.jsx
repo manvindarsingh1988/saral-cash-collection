@@ -1,7 +1,20 @@
-import React, { useState, useEffect, use } from "react";
+import React, { useState, useEffect } from "react";
 import { apiBase } from "../../lib/apiBase";
 import { Navigate } from "react-router-dom";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
+
+const formFields = [
+  { id: "firstName", label: "First Name" },
+  { id: "middleName", label: "Middle Name" },
+  { id: "lastName", label: "Last Name" },
+  { id: "dateOfBirth", label: "Date of Birth", type: "date" },
+  { id: "mobile", label: "Mobile", type: "tel" },
+  { id: "address", label: "Address" },
+  { id: "counterLocation", label: "Counter Location" },
+  { id: "pinCode", label: "PIN Code" },
+  { id: "city", label: "City" },
+  { id: "stateName", label: "State" },
+];
 
 export default function AddUser() {
   useDocumentTitle("Add User");
@@ -17,7 +30,7 @@ export default function AddUser() {
     pinCode: "",
     city: "",
     stateName: "",
-    commission: "",
+    commission: "1",
   });
 
   const [error, setError] = useState(null);
@@ -62,7 +75,7 @@ export default function AddUser() {
         pinCode: "",
         city: "",
         stateName: "",
-        commission: "",
+        commission: "1",
       });
     } catch (error) {
       setError(error.message);
@@ -72,10 +85,10 @@ export default function AddUser() {
   };
 
   return (
-    <div>
-      <h1 className="text-2xl font-semibold text-gray-900">Add New User</h1>
+    <div className="flex justify-center mt-4">
+      <div className="bg-white p-6 rounded shadow-lg space-y-6 w-full max-w-2xl">
+        <h1 className="text-2xl font-semibold text-gray-900">Add New User</h1>
 
-      <div className="mt-6">
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && (
             <div className="rounded-md bg-red-50 p-4 text-sm text-red-700">
@@ -91,7 +104,7 @@ export default function AddUser() {
           {/* User Type Selector */}
           <div>
             <label
-              htmlFor="userTypeId"
+              htmlFor="userType"
               className="block text-sm font-medium text-gray-700"
             >
               User Type
@@ -100,7 +113,7 @@ export default function AddUser() {
               id="userType"
               value={formData.userType}
               onChange={handleChange}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+              className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm px-3 py-2 focus:border-indigo-500 focus:ring-indigo-500"
               required
             >
               <option value="12">Collector</option>
@@ -113,19 +126,7 @@ export default function AddUser() {
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            {[
-              { id: "firstName", label: "First Name" },
-              { id: "middleName", label: "Middle Name" },
-              { id: "lastName", label: "Last Name" },
-              { id: "dateOfBirth", label: "Date of Birth", type: "date" },
-              { id: "mobile", label: "Mobile", type: "tel" },
-              { id: "address", label: "Address" },
-              { id: "counterLocation", label: "Counter Location" },
-              { id: "pinCode", label: "PIN Code" },
-              { id: "city", label: "City" },
-              { id: "stateName", label: "State" },
-              { id: "commission", label: "Commission (%)", type: "number" },
-            ].map(({ id, label, type = "text" }) => (
+            {formFields.map(({ id, label, type = "text" }) => (
               <div key={id}>
                 <label
                   htmlFor={id}
@@ -139,7 +140,7 @@ export default function AddUser() {
                   required
                   value={formData[id]}
                   onChange={handleChange}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 px-1"
+                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                 />
               </div>
             ))}
@@ -148,7 +149,8 @@ export default function AddUser() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+            className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white 
+            bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
           >
             {loading ? "Creating..." : "Create Account"}
           </button>
