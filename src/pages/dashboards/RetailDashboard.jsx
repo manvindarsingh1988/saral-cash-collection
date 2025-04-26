@@ -98,7 +98,7 @@ export default function RetailDashboard({ retailUserId }) {
         ...data,
         Amount: parseFloat(data.Amount),
         TransactionType: parseInt(data.TransactionType),
-        WorkFlow: parseInt(data.WorkFlow),
+        WorkFlow: 0,
         Date: new Date(data.Date).toISOString(),
         GivenOn: new Date(data.GivenOn).toISOString(),
         CollectorId: data.TransactionType == "2" ? "" : data.CollectorId,
@@ -108,7 +108,7 @@ export default function RetailDashboard({ retailUserId }) {
       if (editData?.Id) {
         await apiBase.updateLedgerInfo(payload);
       } else {
-        await apiBase.addLedgeInfo(payload);
+        await apiBase.addLedgerInfo(payload);
       }
 
       await fetchData(selectedDate);
@@ -160,6 +160,7 @@ export default function RetailDashboard({ retailUserId }) {
 
   const computedStatus =
     liability && approvedAmount === liability.Amt ? "Approved" : "Pending";
+    const previousClosingAmount = 0; // Placeholder for previous closing amount logic
 
   return (
     <>
@@ -196,7 +197,7 @@ export default function RetailDashboard({ retailUserId }) {
 
           {liability && liability.Amt > 0 && (
             <>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-6">
+              <div className="grid grid-cols-1 sm:grid-cols-4 gap-6 mb-6">
                 <div className="bg-white shadow rounded-lg p-4">
                   <dt className="text-sm font-medium text-gray-500">
                     Liability
@@ -205,6 +206,7 @@ export default function RetailDashboard({ retailUserId }) {
                     ₹{formatIndianNumber(liability.Amt)}
                   </dd>
                 </div>
+
                 <div className="bg-white shadow rounded-lg p-4">
                   <dt className="text-sm font-medium text-gray-500">
                     Total clear amount
@@ -213,10 +215,20 @@ export default function RetailDashboard({ retailUserId }) {
                     ₹{formatIndianNumber(totalLedgerAmount)}
                   </dd>
                 </div>
+
                 <div className="bg-white shadow rounded-lg p-4">
                   <dt className="text-sm font-medium text-gray-500">Status</dt>
                   <dd className="mt-1 text-2xl font-semibold text-gray-900">
                     {computedStatus}
+                  </dd>
+                </div>
+
+                <div className="bg-white shadow rounded-lg p-4">
+                  <dt className="text-sm font-medium text-gray-500">
+                    Previous Closing Amount
+                  </dt>
+                  <dd className="mt-1 text-3xl font-semibold text-gray-900">
+                    ₹{formatIndianNumber(previousClosingAmount)}
                   </dd>
                 </div>
               </div>

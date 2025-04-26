@@ -1,12 +1,10 @@
 import React, { useState, useEffect } from "react";
 
 const allowedFields = [
+  "TransactionType",
   "CollectorId",
   "Amount",
-  "TransactionType",
-  "WorkFlow",
   "Date",
-  "GivenOn",
   "Comment",
 ];
 
@@ -24,7 +22,6 @@ export default function RetailerLedgerModal({
     TransactionType: "",
     WorkFlow: "",
     Date: "",
-    GivenOn: "",
     Comment: "",
   });
 
@@ -34,7 +31,7 @@ export default function RetailerLedgerModal({
 
       allowedFields.forEach((field) => {
         if (initialData[field]) {
-          if (["Date", "GivenOn"].includes(field)) {
+          if (["Date"].includes(field)) {
             formattedData[field] = new Date(initialData[field])
               .toISOString()
               .split("T")[0];
@@ -71,7 +68,9 @@ export default function RetailerLedgerModal({
           {!initialData ? "Add" : "Update"} Ledger Entry
         </h2>
         {allowedFields.map((key) => {
-          if (key === "CollectorId" && formData["TransactionType"] === "2") {
+          console.log("Key:", key, "Value:", formData[key]);
+
+          if (key === "CollectorId" && formData["TransactionTypes"] === "2") {
             return null;
           }
 
@@ -130,7 +129,7 @@ export default function RetailerLedgerModal({
           } else {
             const inputType = ["Amount", "WorkFlow"].includes(key)
               ? "number"
-              : ["Date", "GivenOn"].includes(key)
+              : ["Date"].includes(key)
               ? "date"
               : "text";
 

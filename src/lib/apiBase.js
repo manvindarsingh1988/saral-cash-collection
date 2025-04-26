@@ -143,8 +143,8 @@ export const apiBase = {
     return data;
   },
 
-  addLedgeInfo: async (data) => {
-    const response = await fetch(`${API_URL}/AddLedgeInfo`, {
+  addLedgerInfo: async (data) => {
+    const response = await fetch(`${API_URL}/AddLadgerInfo`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
