@@ -50,7 +50,7 @@ export default function RetailDashboard({ retailUserId }) {
         console.error("Failed to load master data:", err);
       }
     };
-
+    setSelectedDate(new Date().toISOString().split("T")[0]);
     loadMasterData();
   }, []);
 
@@ -100,7 +100,7 @@ export default function RetailDashboard({ retailUserId }) {
         TransactionType: parseInt(data.TransactionType),
         WorkFlow: 0,
         Date: new Date(data.Date).toISOString(),
-        GivenOn: new Date(new Date()).toISOString(),
+        GivenOn: new Date().toISOString(),
         CollectorId: data.TransactionType == "2" ? "" : data.CollectorId,
         CollectorName: data.TransactionType == "2" ? "" : data.CollectorName,
       };
@@ -188,7 +188,7 @@ export default function RetailDashboard({ retailUserId }) {
               {/* Search Button */}
               <button
                 onClick={() => fetchData(selectedDate)}
-                className="bg-indigo-600 text-white px-6 py-2 rounded-md hover:bg-indigo-700 transition duration-200 mt-2 sm:mt-0"
+                className="bg-indigo-600 text-white px-6 py-2 rounded-md hover:bg-indigo-700 transition duration-200"
               >
                 🔍 Search
               </button>
