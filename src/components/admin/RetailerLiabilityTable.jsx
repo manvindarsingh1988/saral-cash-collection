@@ -3,11 +3,12 @@ import { formatIndianNumber } from "../../lib/utils";
 import LadgerDetailsDialog from "./LedgerDetailsDialog";
 
 const columns = [
-  { heading: "Retailer Name", key: "RetailUserName", width: "w-48" },
-  { heading: "Amount", key: "Amt", width: "w-32" },
-  { heading: "Handover Amount", key: "HandoverAmt", width: "w-36" },
-  { heading: "Status", key: "Status", width: "w-28" },
-  { heading: "Action", key: "Action", width: "w-32", isAction: true },
+  { heading: "Retailer Name", key: "RetailUserName", width: "200px" },
+  { heading: "Amount", key: "Amt", width: "80px" },
+  { heading: "Handover Amount", key: "HandoverAmt", width: "80px" },
+  { heading: "Collected Amount", key: "CollectedAmt", width: "80px" },
+  { heading: "Status", key: "Status", width: "80px" },
+  { heading: "Action", key: "Action", width: "80px", isAction: true },
 ];
 
 export default function RetailerLiabilityTable({ data, selectedDate }) {
@@ -18,6 +19,7 @@ export default function RetailerLiabilityTable({ data, selectedDate }) {
     RetailUserName: "",
     Amt: "",
     HandoverAmt: "",
+    CollectedAmt: "",
     Status: "",
   });
 
@@ -41,14 +43,15 @@ export default function RetailerLiabilityTable({ data, selectedDate }) {
 
   return (
     <>
-      <div className="overflow-x-auto max-h-[400px] border border-gray-200 rounded">
-        <table className="min-w-full divide-y divide-gray-200">
+      <div className="overflow-y-auto overflow-x-hidden max-h-[400px] border border-gray-200 rounded">
+        <table className="min-w-full table-auto divide-y divide-gray-200">
           <thead className="bg-gray-50 sticky top-0 z-10">
             <tr>
               {columns.map((col) => (
                 <th
                   key={col.key}
-                  className={`px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider ${col.width}`}
+                  style={{ width: col.width }}
+                  className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                 >
                   {col.isAction ? (
                     col.heading
@@ -57,7 +60,8 @@ export default function RetailerLiabilityTable({ data, selectedDate }) {
                       <span>{col.heading}</span>
                       <input
                         type="text"
-                        placeholder={`Filter ${col.heading}...`}
+                        style={{ width: col.width }}
+                        placeholder={`Filter`}
                         value={filters[col.key] || ""}
                         onChange={(e) =>
                           onFilterChange(col.key, e.target.value)
@@ -70,14 +74,14 @@ export default function RetailerLiabilityTable({ data, selectedDate }) {
               ))}
             </tr>
           </thead>
-
           <tbody className="bg-white divide-y divide-gray-200">
             {filteredData.map((item) => (
               <tr key={item.RetailUserId}>
                 {columns.map((col) => (
                   <td
                     key={col.key}
-                    className={`px-4 py-4 whitespace-nowrap text-sm text-gray-900 ${col.width}`}
+                    style={{ width: col.width }}
+                    className="px-4 py-4 whitespace-nowrap text-sm text-gray-900"
                   >
                     {col.isAction ? (
                       <button
@@ -86,7 +90,9 @@ export default function RetailerLiabilityTable({ data, selectedDate }) {
                       >
                         More Details
                       </button>
-                    ) : col.key === "Amt" || col.key === "HandoverAmt" ? (
+                    ) : col.key === "Amt" ||
+                      col.key === "HandoverAmt" ||
+                      col.key === "CollectedAmt" ? (
                       `₹${formatIndianNumber(item[col.key])}`
                     ) : (
                       item[col.key]
@@ -98,6 +104,7 @@ export default function RetailerLiabilityTable({ data, selectedDate }) {
           </tbody>
         </table>
       </div>
+
       {openDialog && selectedRetailer && (
         <LadgerDetailsDialog
           retailerId={selectedRetailer}
