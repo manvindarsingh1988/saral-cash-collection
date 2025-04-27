@@ -6,7 +6,7 @@ const columns = [
   { heading: "Retailer Name", key: "RetailUserName", width: "200px" },
   { heading: "Amount", key: "Amt", width: "80px" },
   { heading: "Handover Amount", key: "HandoverAmt", width: "80px" },
-  { heading: "Collected Amount", key: "CollectedAmt", width: "80px" },
+  { heading: "Clear Amount", key: "ClearAmt", width: "80px" },
   { heading: "Status", key: "Status", width: "80px" },
   { heading: "Action", key: "Action", width: "80px", isAction: true },
 ];
@@ -92,7 +92,7 @@ export default function RetailerLiabilityTable({ data, selectedDate }) {
                       </button>
                     ) : col.key === "Amt" ||
                       col.key === "HandoverAmt" ||
-                      col.key === "CollectedAmt" ? (
+                      col.key === "ClearAmt" ? (
                       `₹${formatIndianNumber(item[col.key])}`
                     ) : (
                       item[col.key]
