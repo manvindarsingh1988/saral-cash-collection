@@ -1,3 +1,4 @@
+/* eslint-disable */
 import React, { useState, useEffect } from "react";
 
 const allowedFields = [
@@ -18,12 +19,13 @@ export default function CollectorLedgerModal({
   onClose,
   onSubmit,
   initialData,
+  cashiers,
 }) {
-
   const [formData, setFormData] = useState({
     CollectorId: collectorId,
-    Amount: "",
     TransactionType: "",
+    CashierId: "",
+    Amount: "",
     WorkFlow: "",
     Date: "",
     GivenOn: "",
@@ -32,25 +34,23 @@ export default function CollectorLedgerModal({
 
   useEffect(() => {
     if (initialData) {
-      const filteredData = { ...formData }; // start with default values
+      const fd = { ...formData };
       allowedFields.forEach((field) => {
         if (field === "CollectorId") {
-          filteredData[field] = collectorId;
+          fd[field] = collectorId;
         } else if (["Date", "GivenOn"].includes(field) && initialData[field]) {
-          filteredData[field] = new Date(initialData[field])
-            .toISOString()
-            .split("T")[0];
+          fd[field] = new Date(initialData[field]).toISOString().split("T")[0];
         } else if (initialData[field] !== undefined) {
-          filteredData[field] = initialData[field];
+          fd[field] = initialData[field];
         }
       });
-      setFormData(filteredData);
+      setFormData(fd);
     }
   }, [initialData, collectorId]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData((p) => ({ ...p, [name]: value }));
   };
 
   const handleSubmit = () => {
@@ -69,39 +69,65 @@ export default function CollectorLedgerModal({
 
         {allowedFields.map((key) => {
           if (key === "CollectorId") return null;
+          if (key === "CashierId" && formData.TransactionType !== "1") return null;
 
           const label = key.replace(/([A-Z])/g, " $1").trim();
           let inputElement;
 
           if (key === "TransactionType" || key === "WorkFlow") {
             inputElement = (
+              <>
+                <select
+                  name={key}
+                  value={formData[key]}
+                  onChange={handleChange}
+                  className="border px-2 py-1 rounded"
+                >
+                  <option value="" disabled>
+                    Select {label}
+                  </option>
+                  {masterData?.[key + "s"]?.map((opt) => (
+                    <option key={opt.Id} value={opt.Id}>
+                      {opt.Description}
+                    </option>
+                  ))}
+                </select>
+                {key === "TransactionType" && formData.TransactionType === "2" && (
+                  <p className="text-xs text-gray-500 mt-1">
+                    <strong>Note:</strong> Please mention transaction details in comments to avoid rejection.
+                  </p>
+                )}
+              </>
+            );
+          } else if (key === "CashierId") {
+            inputElement = (
               <select
-                name={key}
-                value={formData[key]}
+                name="CashierId"
+                value={formData.CashierId}
                 onChange={handleChange}
                 className="border px-2 py-1 rounded"
               >
-                <option value="" disabled hidden>
-                  Select {key} Type
+                <option value="" disabled>
+                  Select Cashier
                 </option>
-                {masterData?.[key + "s"]?.map((type) => (
-                  <option key={type.Id} value={type.Id}>
-                    {type.Description}
+                {cashiers?.map((c) => (
+                  <option key={c.Id} value={c.Id}>
+                    {c.Name}
                   </option>
                 ))}
               </select>
             );
           } else {
-            const inputType = key === "Amount"
-              ? "number"
-              : ["Date", "GivenOn"].includes(key)
-              ? "date"
-              : "text";
-
+            const type =
+              key === "Amount"
+                ? "number"
+                : ["Date", "GivenOn"].includes(key)
+                ? "date"
+                : "text";
             inputElement = (
               <input
                 name={key}
-                type={inputType}
+                type={type}
                 value={formData[key]}
                 onChange={handleChange}
                 className="border px-2 py-1 rounded"

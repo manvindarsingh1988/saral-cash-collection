@@ -11,12 +11,17 @@ export default function CollectorLedger({ collectorUserId }) {
   const [error, setError] = useState(null);
   const [isModalOpen, setModalOpen] = useState(false);
   const [masterData, setMasterData] = useState(null);
+  const [cashiers, setCashiers] = useState([]);
 
   useEffect(() => {
     const loadMasterData = async () => {
       try {
-        const master = await apiBase.getMasterData();
+        const [master, cashiers] = await Promise.all([
+          apiBase.getMasterData(),
+          apiBase.getCashiers(),
+        ]);
         setMasterData(master);
+        setCashiers(cashiers);
       } catch (err) {
         console.error("Failed to load master data:", err);
       }
@@ -155,6 +160,7 @@ export default function CollectorLedger({ collectorUserId }) {
 
       <CollectorLedgerModal
         masterData={masterData}
+        cashiers={cashiers}
         isOpen={isModalOpen}
         onClose={() => setModalOpen(false)}
         onSubmit={handleLedgerSubmit}

@@ -83,6 +83,16 @@ export const apiBase = {
     return data;
   },
 
+  getCashiers: async () => {
+    const response = await fetch(`${API_URL}/GetCashierUsers`);
+    if (!response.ok) {
+      console.error(`Failed to fetch: ${response.statusText}`);
+    }
+    const data = await response.json();
+    console.log(data);
+    return data;
+  },
+
   getMappedUsers: async () => {
     const response = await fetch(`${API_URL}/GetMappedUsers`);
     if (!response.ok) {
