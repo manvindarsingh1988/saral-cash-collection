@@ -10,6 +10,7 @@ import CollectorLayout from "./layouts/CollectorLayout";
 import AddUser from "../pages/admin/AddUser";
 import AssignRetail from "../pages/admin/AssignRetail";
 import CollectorLedgers from "../pages/admin/CollectorLedgers";
+import CollectorLedger from "../pages/collector/CollectorLedger";
 
 export default function UserSpecificDashboard() {
   const user = apiBase.getCurrentUser();
@@ -33,6 +34,7 @@ export default function UserSpecificDashboard() {
             path="/"
             element={<CollectorDashboard collectorUserId={user.Id} />}
           />
+          <Route path="/ledgers" element={<CollectorLedger />} />
         </Routes>
       </CollectorLayout>
     );

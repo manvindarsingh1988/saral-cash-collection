@@ -4,7 +4,7 @@ import { apiBase } from "../lib/apiBase";
 
 const routesForRoles = {
   Admin: ["/", "/collector-ledgers", "/add-user", "/assign-retail"],
-  Collector: ["/"],
+  Collector: ["/", "/ledgers"],
   Retailer: ["/"],
   Cashier: ["/", "/collector-ledgers", "/add-user", "/assign-retail"],
 };
