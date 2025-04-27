@@ -35,7 +35,7 @@ export default function CollectorLayout({ children }) {
                     to="/"
                     className={`${isActive('/')} text-white rounded-md px-3 py-2 text-sm font-medium`}
                   >
-                    Dashboard
+                    Retailer Liabilities
                   </Link>
                   <Link
                     to="/ledgers"

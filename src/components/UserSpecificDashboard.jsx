@@ -34,7 +34,7 @@ export default function UserSpecificDashboard() {
             path="/"
             element={<CollectorDashboard collectorUserId={user.Id} />}
           />
-          <Route path="/ledgers" element={<CollectorLedger />} />
+          <Route path="/ledgers" element={<CollectorLedger collectorUserId={user.Id} />} />
         </Routes>
       </CollectorLayout>
     );

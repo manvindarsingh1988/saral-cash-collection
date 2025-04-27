@@ -113,7 +113,7 @@ export default function CollectorDashboard({ collectorUserId }) {
       if (editData?.Id) {
         await apiBase.updateLedgerInfo(payload);
       } else {
-        await apiBase.addLedgeInfo(payload);
+        await apiBase.addLedgerInfo(payload);
       }
 
       await fetchData();
@@ -159,7 +159,7 @@ export default function CollectorDashboard({ collectorUserId }) {
     <>
       <div className="space-y-6">
         <div className="bg-white shadow rounded-lg p-6">
-          <div className="rounded-lg p-4 shadow-sm mb-6">
+          <div className="rounded-lg shadow-sm mb-6">
             <div className="flex flex-col sm:flex-row sm:items-end gap-4">
               {/* Date Picker */}
               <div className="flex-1">
@@ -229,7 +229,7 @@ export default function CollectorDashboard({ collectorUserId }) {
                   </dd>
                 </div>
               </div>
-              <div className="flex justify-end mb-2">
+              {/* <div className="flex justify-end mb-2">
                 <button
                   disabled={computedStatus === "Approved"}
                   onClick={openAddLedger}
@@ -237,7 +237,7 @@ export default function CollectorDashboard({ collectorUserId }) {
                 >
                   Add Ledger Entry
                 </button>
-              </div>
+              </div> */}
 
               <div className="overflow-y-auto border border-gray-200 rounded h-[400px]">
                 <table className="w-full table-auto divide-y divide-gray-200 text-sm">

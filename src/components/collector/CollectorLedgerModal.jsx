@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
 
 const allowedFields = [
+  "TransactionType",
+  "CashierId",
   "CollectorId",
   "Amount",
-  "TransactionType",
   "WorkFlow",
   "Date",
   "GivenOn",

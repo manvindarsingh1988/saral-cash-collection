@@ -1,19 +1,38 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { apiBase } from "../../lib/apiBase"; // adjust path if needed
 import useDocumentTitle from "../../hooks/useDocumentTitle"; // optional if you want page title
+import CollectorLedgerModal from "../../components/collector/CollectorLedgerModal";
 
-export default function CollectorLedger() {
+export default function CollectorLedger({ collectorUserId }) {
   useDocumentTitle("Collector Ledger"); // optional
   const [selectedDate, setSelectedDate] = useState("");
   const [collectorLedgers, setCollectorLedgers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [isModalOpen, setModalOpen] = useState(false);
+  const [masterData, setMasterData] = useState(null);
+
+  useEffect(() => {
+    const loadMasterData = async () => {
+      try {
+        const master = await apiBase.getMasterData();
+        setMasterData(master);
+      } catch (err) {
+        console.error("Failed to load master data:", err);
+      }
+    };
+
+    loadMasterData();
+  }, []);
 
   const fetchCollectorLedgers = async () => {
     try {
       setLoading(true);
       setError(null);
-      const data = await apiBase.getLadgerInfosCreatedByCollectors(selectedDate);
+      const data = await apiBase.getLedgerInfoByCollectorId(
+        selectedDate,
+        collectorUserId
+      );
       setCollectorLedgers(data);
     } catch (err) {
       console.error(err);
@@ -23,9 +42,38 @@ export default function CollectorLedger() {
     }
   };
 
-  return (
-    <div className="flex flex-col min-h-screen bg-gray-50 p-6">
+  const handleLedgerSubmit = async (data) => {
+    try {
+      data.RetailerId = selectedRetailerId;
+      const payload = {
+        ...data,
+        Amount: parseFloat(data.Amount),
+        TransactionType: parseInt(data.TransactionType),
+        WorkFlow: parseInt(data.WorkFlow),
+        Date: new Date(data.Date).toISOString(),
+        GivenOn: new Date(data.GivenOn).toISOString(),
+      };
 
+      if (editData?.Id) {
+        await apiBase.updateLedgerInfo(payload);
+      } else {
+        await apiBase.addLedgerInfo(payload);
+      }
+
+      await fetchData();
+      setModalOpen(false);
+    } catch (err) {
+      console.error("Submission failed:", err);
+    }
+  };
+
+  const openAddLedger = () => {
+    //setEditData(null);
+    setModalOpen(true);
+  };
+
+  return (
+    <div className="spacer-6">
       {/* Filter Section */}
       <div className="bg-white rounded-lg shadow p-6 mb-6">
         <div className="flex flex-col sm:flex-row items-end gap-4">
@@ -49,12 +97,23 @@ export default function CollectorLedger() {
         </div>
       </div>
 
+      <div className="flex justify-end mb-2">
+        <button
+          onClick={openAddLedger}
+          className="bg-green-600 text-white px-4 py-1.5 rounded hover:bg-green-700"
+        >
+          Add Ledger Entry
+        </button>
+      </div>
+
       {/* Grid Section */}
       <div className="bg-white rounded-lg shadow p-6">
         {loading && <div>Loading...</div>}
         {error && <div className="text-red-600">{error}</div>}
         {!loading && !error && collectorLedgers.length === 0 && (
-          <div className="text-gray-600 text-center">No collector ledgers found</div>
+          <div className="text-gray-600 text-center">
+            No collector ledgers found
+          </div>
         )}
         {!loading && collectorLedgers.length > 0 && (
           <div className="overflow-x-auto">
@@ -76,9 +135,15 @@ export default function CollectorLedger() {
               <tbody className="bg-white divide-y divide-gray-200">
                 {collectorLedgers.map((ledger, index) => (
                   <tr key={index}>
-                    <td className="px-4 py-2 whitespace-nowrap">{ledger.RetailerId}</td>
-                    <td className="px-4 py-2 whitespace-nowrap">₹{ledger.Amt}</td>
-                    <td className="px-4 py-2 whitespace-nowrap">{ledger.Date}</td>
+                    <td className="px-4 py-2 whitespace-nowrap">
+                      {ledger.RetailerId}
+                    </td>
+                    <td className="px-4 py-2 whitespace-nowrap">
+                      ₹{ledger.Amt}
+                    </td>
+                    <td className="px-4 py-2 whitespace-nowrap">
+                      {ledger.Date}
+                    </td>
                     {/* Add more columns if needed */}
                   </tr>
                 ))}
@@ -87,6 +152,13 @@ export default function CollectorLedger() {
           </div>
         )}
       </div>
+
+      <CollectorLedgerModal
+        masterData={masterData}
+        isOpen={isModalOpen}
+        onClose={() => setModalOpen(false)}
+        onSubmit={handleLedgerSubmit}
+      />
     </div>
   );
 }
