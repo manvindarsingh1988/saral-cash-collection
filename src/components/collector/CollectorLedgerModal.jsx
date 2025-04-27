@@ -46,6 +46,8 @@ export default function CollectorLedgerModal({
   useEffect(() => {
     if (initialData) {
       const fd = {
+        Id: initialData?.Id ?? "",
+        RetailerId: initialData?.RetailerId,
         CollectorId: collectorId,
         TransactionType: initialData.TransactionType ?? "",
         CashierId: initialData.CashierId ?? "",
@@ -69,7 +71,9 @@ export default function CollectorLedgerModal({
   const handleLedgerSubmit = async (data) => {
     try {
       const payload = {
-        CashierId: data.CashierId,
+        Id: data?.Id,
+        RetailerId: data?.RetailerId,
+        CashierId: data?.CashierId,
         CollectorId: collectorId,
         Amount: parseFloat(data.Amount),
         TransactionType: parseInt(data.TransactionType),
@@ -78,7 +82,7 @@ export default function CollectorLedgerModal({
         GivenOn: new Date(data.GivenOn).toISOString(),
       };
 
-      if (editData?.Id) {
+      if (initialData?.Id) {
         await apiBase.updateLedgerInfo(payload);
       } else {
         await apiBase.addLedgerInfo(payload);

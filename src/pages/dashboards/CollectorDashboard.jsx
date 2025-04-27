@@ -19,7 +19,7 @@ export default function CollectorDashboard({ collectorUserId }) {
   useDocumentTitle("Collector Dashboard");
   const [isModalOpen, setModalOpen] = useState(false);
   const [editData, setEditData] = useState(null);
-  const [selectedDate, setSelectedDate] = useState("");
+  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split("T")[0]);
   const [selectedRetailerId, setSelectedRetailerId] = useState("");
   const [liability, setLiability] = useState(null);
   const [ledger, setLedger] = useState(null);
@@ -350,6 +350,7 @@ export default function CollectorDashboard({ collectorUserId }) {
         onSubmit={handleLedgerSubmit}
         initialData={editData}
         modelFor="RetailerLedger"
+        collectorId={collectorUserId}
       />
     </>
   );
