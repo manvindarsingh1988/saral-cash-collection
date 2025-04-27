@@ -47,31 +47,6 @@ export default function CollectorLedger({ collectorUserId }) {
     }
   };
 
-  const handleLedgerSubmit = async (data) => {
-    try {
-      data.RetailerId = selectedRetailerId;
-      const payload = {
-        ...data,
-        Amount: parseFloat(data.Amount),
-        TransactionType: parseInt(data.TransactionType),
-        WorkFlow: parseInt(data.WorkFlow),
-        Date: new Date(data.Date).toISOString(),
-        GivenOn: new Date(data.GivenOn).toISOString(),
-      };
-
-      if (editData?.Id) {
-        await apiBase.updateLedgerInfo(payload);
-      } else {
-        await apiBase.addLedgerInfo(payload);
-      }
-
-      await fetchData();
-      setModalOpen(false);
-    } catch (err) {
-      console.error("Submission failed:", err);
-    }
-  };
-
   const openAddLedger = () => {
     //setEditData(null);
     setModalOpen(true);
@@ -159,11 +134,12 @@ export default function CollectorLedger({ collectorUserId }) {
       </div>
 
       <CollectorLedgerModal
+        collectorId={collectorUserId}
         masterData={masterData}
         cashiers={cashiers}
         isOpen={isModalOpen}
         onClose={() => setModalOpen(false)}
-        onSubmit={handleLedgerSubmit}
+        modelFor="CollectorLedger"
       />
     </div>
   );

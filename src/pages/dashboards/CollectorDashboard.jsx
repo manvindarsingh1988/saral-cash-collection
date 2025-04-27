@@ -349,6 +349,7 @@ export default function CollectorDashboard({ collectorUserId }) {
         onClose={() => setModalOpen(false)}
         onSubmit={handleLedgerSubmit}
         initialData={editData}
+        modelFor="RetailerLedger"
       />
     </>
   );

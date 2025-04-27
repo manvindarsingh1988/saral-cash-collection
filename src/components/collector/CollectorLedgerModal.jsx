@@ -1,5 +1,6 @@
 /* eslint-disable */
 import React, { useState, useEffect } from "react";
+import { apiBase } from "../../lib/apiBase"; // adjust path if needed
 
 const allowedFields = [
   "TransactionType",
@@ -8,7 +9,7 @@ const allowedFields = [
   "Amount",
   "WorkFlow",
   "Date",
-  "GivenOn",
+  // "GivenOn",  ← we’ll still track it, but won’t render it
   "Comment",
 ];
 
@@ -17,10 +18,20 @@ export default function CollectorLedgerModal({
   masterData,
   isOpen,
   onClose,
-  onSubmit,
   initialData,
   cashiers,
+  editData,
+  modelFor,
 }) {
+  // Filter workflows based on modelFor
+  const workflows =
+    modelFor === "CollectorLedger"
+      ? masterData?.WorkFlows?.filter(_ => _?.Id === 4) // Type 4 for CollectorLedger
+      : masterData?.WorkFlows; // All workflows for other cases
+
+  // Set today's date
+  const today = new Date().toISOString().split("T")[0];
+
   const [formData, setFormData] = useState({
     CollectorId: collectorId,
     TransactionType: "",
@@ -28,33 +39,59 @@ export default function CollectorLedgerModal({
     Amount: "",
     WorkFlow: "",
     Date: "",
-    GivenOn: "",
+    GivenOn: today,
     Comment: "",
   });
 
   useEffect(() => {
     if (initialData) {
-      const fd = { ...formData };
-      allowedFields.forEach((field) => {
-        if (field === "CollectorId") {
-          fd[field] = collectorId;
-        } else if (["Date", "GivenOn"].includes(field) && initialData[field]) {
-          fd[field] = new Date(initialData[field]).toISOString().split("T")[0];
-        } else if (initialData[field] !== undefined) {
-          fd[field] = initialData[field];
-        }
-      });
+      const fd = {
+        CollectorId: collectorId,
+        TransactionType: initialData.TransactionType ?? "",
+        CashierId: initialData.CashierId ?? "",
+        Amount: initialData.Amount ?? "",
+        WorkFlow: initialData.WorkFlow ?? "",
+        Date: initialData.Date
+          ? new Date(initialData.Date).toISOString().split("T")[0]
+          : "",
+        GivenOn: today, // always keep today
+        Comment: initialData.Comment ?? "",
+      };
       setFormData(fd);
     }
-  }, [initialData, collectorId]);
+  }, [initialData, collectorId, today]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((p) => ({ ...p, [name]: value }));
   };
 
+  const handleLedgerSubmit = async (data) => {
+    try {
+      const payload = {
+        CashierId: data.CashierId,
+        CollectorId: collectorId,
+        Amount: parseFloat(data.Amount),
+        TransactionType: parseInt(data.TransactionType),
+        WorkFlow: parseInt(data.WorkFlow),
+        Date: new Date(data.Date).toISOString(),
+        GivenOn: new Date(data.GivenOn).toISOString(),
+      };
+
+      if (editData?.Id) {
+        await apiBase.updateLedgerInfo(payload);
+      } else {
+        await apiBase.addLedgerInfo(payload);
+      }
+
+      onClose();
+    } catch (err) {
+      console.error("Submission failed:", err);
+    }
+  };
+
   const handleSubmit = () => {
-    onSubmit(formData);
+    handleLedgerSubmit(formData);
     onClose();
   };
 
@@ -68,8 +105,13 @@ export default function CollectorLedgerModal({
         </h2>
 
         {allowedFields.map((key) => {
-          if (key === "CollectorId") return null;
-          if (key === "CashierId" && formData.TransactionType !== "1") return null;
+          // hide GivenOn entirely
+          if (key === "GivenOn" || key === "CollectorId") return null;
+
+          // only show CashierId when TransactionType === "1"
+          if (key === "CashierId" && formData.TransactionType !== "1") {
+            return null;
+          }
 
           const label = key.replace(/([A-Z])/g, " $1").trim();
           let inputElement;
@@ -86,17 +128,26 @@ export default function CollectorLedgerModal({
                   <option value="" disabled>
                     Select {label}
                   </option>
-                  {masterData?.[key + "s"]?.map((opt) => (
-                    <option key={opt.Id} value={opt.Id}>
-                      {opt.Description}
-                    </option>
-                  ))}
+                  {key === "WorkFlow" &&
+                    workflows?.map((opt) => (
+                      <option key={opt.Id} value={opt.Id}>
+                        {opt.Description}
+                      </option>
+                    ))}
+                  {key === "TransactionType" &&
+                    masterData?.TransactionTypes?.map((opt) => (
+                      <option key={opt.Id} value={opt.Id}>
+                        {opt.Description}
+                      </option>
+                    ))}
                 </select>
-                {key === "TransactionType" && formData.TransactionType === "2" && (
-                  <p className="text-xs text-gray-500 mt-1">
-                    <strong>Note:</strong> Please mention transaction details in comments to avoid rejection.
-                  </p>
-                )}
+                {key === "TransactionType" &&
+                  formData.TransactionType === "2" && (
+                    <p className="text-xs text-gray-500 mt-1">
+                      <strong>Note:</strong> Please mention transaction details
+                      in comments to avoid rejection.
+                    </p>
+                  )}
               </>
             );
           } else if (key === "CashierId") {
@@ -112,18 +163,15 @@ export default function CollectorLedgerModal({
                 </option>
                 {cashiers?.map((c) => (
                   <option key={c.Id} value={c.Id}>
-                    {c.Name}
+                    {c.UserName}
                   </option>
                 ))}
               </select>
             );
           } else {
             const type =
-              key === "Amount"
-                ? "number"
-                : ["Date", "GivenOn"].includes(key)
-                ? "date"
-                : "text";
+              key === "Amount" ? "number" : key === "Date" ? "date" : "text";
+
             inputElement = (
               <input
                 name={key}
