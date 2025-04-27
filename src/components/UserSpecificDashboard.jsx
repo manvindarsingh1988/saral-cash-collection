@@ -11,6 +11,7 @@ import AddUser from "../pages/admin/AddUser";
 import AssignRetail from "../pages/admin/AssignRetail";
 import CollectorLedgers from "../pages/admin/CollectorLedgers";
 import CollectorLedger from "../pages/collector/CollectorLedger";
+import PendingApprovals from "../pages/admin/PendingApprovals";
 
 export default function UserSpecificDashboard() {
   const user = apiBase.getCurrentUser();
@@ -22,6 +23,7 @@ export default function UserSpecificDashboard() {
           <Route path="/collector-ledgers" element={<CollectorLedgers />} />
           <Route path="/add-user" element={<AddUser />} />
           <Route path="/assign-retail" element={<AssignRetail />} />
+          <Route path="/pending-approvals" element={<PendingApprovals />} />
           <Route path="/" element={<AdminDashboard />} />
         </Routes>
       </AdminLayout>

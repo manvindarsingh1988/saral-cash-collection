@@ -3,10 +3,22 @@ import { Navigate, useNavigate, useLocation } from "react-router-dom";
 import { apiBase } from "../lib/apiBase";
 
 const routesForRoles = {
-  Admin: ["/", "/collector-ledgers", "/add-user", "/assign-retail"],
+  Admin: [
+    "/",
+    "/collector-ledgers",
+    "/add-user",
+    "/assign-retail",
+    "/pending-approvals",
+  ],
+  Cashier: [
+    "/",
+    "/collector-ledgers",
+    "/add-user",
+    "/assign-retail",
+    "/pending-approvals",
+  ],
   Collector: ["/", "/ledgers"],
   Retailer: ["/"],
-  Cashier: ["/", "/collector-ledgers", "/add-user", "/assign-retail"],
 };
 
 export default function ProtectedRoute({ children }) {

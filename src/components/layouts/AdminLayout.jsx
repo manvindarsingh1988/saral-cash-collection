@@ -48,6 +48,14 @@ export default function AdminLayout({ children }) {
                     Collector Ledgers
                   </Link>
                   <Link
+                    to="/pending-approvals"
+                    className={`${isActive(
+                      "/pending-approvals"
+                    )} text-white rounded-md px-3 py-2 text-sm font-medium`}
+                  >
+                    Pending Approvals
+                  </Link>
+                  <Link
                     to="/add-user"
                     className={`${isActive(
                       "/add-user"
