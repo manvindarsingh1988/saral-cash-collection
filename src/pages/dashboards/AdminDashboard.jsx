@@ -1,17 +1,15 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { apiBase } from "../../lib/apiBase";
 import { formatIndianNumber } from "../../lib/utils";
 import RetailerLiabilityTable from "../../components/admin/RetailerLiabilityTable";
-import CollectorLedgerTable from "../../components/admin/CollectorLedgerTable";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
 
 export default function AdminDashboard() {
-  useDocumentTitle("Admin Dashboard");
+  useDocumentTitle("Retailer Liabilities");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [liabilities, setLiabilities] = useState([]);
   const [selectedDate, setSelectedDate] = useState("");
-  const [collectorLedgers, setCollectorLedgers] = useState([]);
 
   const [summary, setSummary] = useState({
     totalAmt: 0,
@@ -19,27 +17,15 @@ export default function AdminDashboard() {
     totalTransactions: 0,
   });
 
- 
-
   const fetchLiabilities = async (date) => {
     try {
       setLoading(true);
-      const [retailerData, collectorData] = await Promise.all([
-        apiBase.getLiabilityAmountOfAllRetailers(date),
-        apiBase.getLadgerInfosCreatedByCollectors(date),
-      ]);
+      const retailerData = await apiBase.getLiabilityAmountOfAllRetailers(date);
 
       setLiabilities(retailerData);
-      setCollectorLedgers(collectorData);
 
-      const totalAmt = retailerData.reduce(
-        (sum, item) => sum + (item.Amt || 0),
-        0
-      );
-      const totalHandover = retailerData.reduce(
-        (sum, item) => sum + (item.HandoverAmt || 0),
-        0
-      );
+      const totalAmt = retailerData.reduce((sum, item) => sum + (item.Amt || 0), 0);
+      const totalHandover = retailerData.reduce((sum, item) => sum + (item.HandoverAmt || 0), 0);
 
       setSummary({
         totalAmt,
@@ -48,7 +34,7 @@ export default function AdminDashboard() {
       });
       setLoading(false);
     } catch (err) {
-      console.error("Error fetching data:", err);
+      console.error("Error fetching liabilities:", err);
       setError(err.message || "Failed to fetch data");
       setLoading(false);
     }
@@ -58,7 +44,7 @@ export default function AdminDashboard() {
     <div className="space-y-6">
       <div className="bg-white shadow rounded-lg">
         <div className="px-4 py-5 sm:p-6">
-          {/* Search Card */}
+          {/* Search Filter */}
           <div className="rounded-lg shadow-sm mb-6">
             <div className="flex flex-col sm:flex-row sm:items-end gap-4">
               <div className="flex-1">
@@ -84,7 +70,7 @@ export default function AdminDashboard() {
           {loading && <div>Loading...</div>}
           {error && <div className="text-red-600">{error}</div>}
 
-          {liabilities?.length > 0 && (
+          {liabilities.length > 0 && (
             <>
               <h3 className="text-lg font-medium text-gray-900 mb-4">
                 Retailer Liabilities
@@ -122,8 +108,7 @@ export default function AdminDashboard() {
                 </div>
               </div>
 
-              <RetailerLiabilityTable data={liabilities}  selectedDate={selectedDate}/>
-              <CollectorLedgerTable data={collectorLedgers} />
+              <RetailerLiabilityTable data={liabilities} selectedDate={selectedDate} />
             </>
           )}
         </div>

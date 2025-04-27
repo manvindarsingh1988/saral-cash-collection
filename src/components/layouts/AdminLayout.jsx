@@ -37,7 +37,7 @@ export default function AdminLayout({ children }) {
                       "/"
                     )} text-white rounded-md px-3 py-2 text-sm font-medium`}
                   >
-                    Dashboard
+                    Retailer Liabilties
                   </Link>
                   <Link
                     to="/collector-ledgers"

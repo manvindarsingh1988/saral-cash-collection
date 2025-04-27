@@ -36,8 +36,6 @@ export const apiBase = {
         currentUser = JSON.parse(stored);
       }
     }
-    console.log("Current User:", currentUser);
-
     return currentUser;
   },
 

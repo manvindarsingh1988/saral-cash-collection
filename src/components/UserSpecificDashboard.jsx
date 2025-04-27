@@ -18,10 +18,10 @@ export default function UserSpecificDashboard() {
     return (
       <AdminLayout>
         <Routes>
-          <Route path="/" element={<AdminDashboard />} />
           <Route path="/collector-ledgers" element={<CollectorLedgers />} />
           <Route path="/add-user" element={<AddUser />} />
           <Route path="/assign-retail" element={<AssignRetail />} />
+          <Route path="/" element={<AdminDashboard />} />
         </Routes>
       </AdminLayout>
     );
