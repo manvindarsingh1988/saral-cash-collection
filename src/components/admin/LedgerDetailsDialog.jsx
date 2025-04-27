@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { apiBase } from "../lib/apiBase";
+import { apiBase } from "../../lib/apiBase";
 
 export default function LadgerDetailsDialog({ retailerId, date, onClose }) {
   const [ladgerData, setLadgerData] = useState([]);

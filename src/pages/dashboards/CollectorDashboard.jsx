@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { apiBase } from "../../lib/apiBase";
 import { formatIndianNumber } from "../../lib/utils";
-import CollectorLedgerModal from "../../components/CollectorLedgerModal";
+import CollectorLedgerModal from "../../components/collector/CollectorLedgerModal";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
 
 const columns = [
@@ -159,7 +159,7 @@ export default function CollectorDashboard({ collectorUserId }) {
     <>
       <div className="space-y-6">
         <div className="bg-white shadow rounded-lg p-6">
-          <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-4 shadow-sm mb-6">
+          <div className="rounded-lg shadow-sm mb-6">
             <div className="flex flex-col sm:flex-row sm:items-end gap-4">
               {/* Date Picker */}
               <div className="flex-1">

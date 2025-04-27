@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { formatIndianNumber } from "../lib/utils";
+import { formatIndianNumber } from "../../lib/utils";
 
 const columns = [
   { heading: "Collector Name", key: "CollectorName", width: "w-48" },

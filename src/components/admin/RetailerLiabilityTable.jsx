@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { formatIndianNumber } from "../lib/utils";
+import { formatIndianNumber } from "../../lib/utils";
 import LadgerDetailsDialog from "./LedgerDetailsDialog";
 
 const columns = [

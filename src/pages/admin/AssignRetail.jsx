@@ -122,7 +122,7 @@ export default function AssignRetail() {
         </label>
         <select
           id="collector"
-          className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm px-3 py-2 focus:border-indigo-500 focus:ring-indigo-500"
+          className="w-full px-3 py-2 border border-indigo-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
           value={selectedCollector?.Id || ""}
           onChange={(e) => handleCollectorSelect(e.target.value)}
         >

@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { apiBase } from "../../lib/apiBase";
 import { formatIndianNumber } from "../../lib/utils";
-import LadgerDetailsDialog from "../../components/LedgerDetailsDialog";
-import RetailerLiabilityTable from "../../components/RetailerLiabilityTable";
-import CollectorLedgerTable from "../../components/CollectorLedgerTable";
+import RetailerLiabilityTable from "../../components/admin/RetailerLiabilityTable";
+import CollectorLedgerTable from "../../components/admin/CollectorLedgerTable";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
 
 export default function AdminDashboard() {
