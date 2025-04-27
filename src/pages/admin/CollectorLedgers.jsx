@@ -8,7 +8,9 @@ export default function CollectorLedgers() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [collectorLedgers, setCollectorLedgers] = useState([]);
-  const [selectedDate, setSelectedDate] = useState("");
+  const [selectedDate, setSelectedDate] = useState(
+    new Date().toISOString().split("T")[0]
+  );
 
   const fetchCollectorLedgers = async (date) => {
     try {
@@ -56,12 +58,7 @@ export default function CollectorLedgers() {
           {error && <div className="text-red-600">{error}</div>}
 
           {collectorLedgers.length > 0 && (
-            <>
-              <h3 className="text-lg font-medium text-gray-900 mb-4">
-                Collector Ledger Entries
-              </h3>
-              <CollectorLedgerTable data={collectorLedgers} />
-            </>
+            <CollectorLedgerTable data={collectorLedgers} />
           )}
         </div>
       </div>

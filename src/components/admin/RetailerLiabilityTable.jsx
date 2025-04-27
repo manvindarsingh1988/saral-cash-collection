@@ -41,7 +41,7 @@ export default function RetailerLiabilityTable({ data, selectedDate }) {
 
   return (
     <>
-      <div className="overflow-x-auto max-h-[300px] border border-gray-200 rounded">
+      <div className="overflow-x-auto max-h-[400px] border border-gray-200 rounded">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50 sticky top-0 z-10">
             <tr>

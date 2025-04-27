@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { formatIndianNumber } from "../../lib/utils";
 
 const columns = [
+  { heading: "Id", key: "Id", width: "w-20" },
   { heading: "Collector Name", key: "CollectorName", width: "w-48" },
   { heading: "Amount", key: "Amt", width: "w-32" },
   { heading: "Handover Amount", key: "HandoverAmt", width: "w-36" },

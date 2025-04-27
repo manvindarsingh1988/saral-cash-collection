@@ -9,7 +9,7 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [liabilities, setLiabilities] = useState([]);
-  const [selectedDate, setSelectedDate] = useState("");
+  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split("T")[0]);
 
   const [summary, setSummary] = useState({
     totalAmt: 0,

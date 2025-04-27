@@ -23,7 +23,7 @@ export default function AddUser() {
     firstName: "",
     middleName: "",
     lastName: "",
-    dateOfBirth: "",
+    dateOfBirth: new Date().toISOString().split("T")[0],
     mobile: "",
     address: "",
     counterLocation: "",
