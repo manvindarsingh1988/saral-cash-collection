@@ -159,7 +159,7 @@ export default function CollectorDashboard({ collectorUserId }) {
     <>
       <div className="space-y-6">
         <div className="bg-white shadow rounded-lg p-6">
-          <div className="rounded-lg shadow-sm mb-6">
+          <div className="rounded-lg p-4 shadow-sm mb-6">
             <div className="flex flex-col sm:flex-row sm:items-end gap-4">
               {/* Date Picker */}
               <div className="flex-1">
