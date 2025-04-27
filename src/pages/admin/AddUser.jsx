@@ -86,7 +86,7 @@ export default function AddUser() {
 
   return (
     <div className="flex justify-center mt-4">
-      <div className="bg-white p-6 rounded shadow-lg space-y-6 w-full max-w-2xl">
+      <div className="bg-white p-6 rounded shadow-lg space-y-6 w-full max-w-5xl">
         {/* <h1 className="text-2xl font-semibold text-gray-900">Add New User</h1> */}
 
         <form onSubmit={handleSubmit} className="space-y-4">
