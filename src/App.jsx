@@ -1,16 +1,10 @@
-import React, {  } from "react";
-import {
-  Routes,
-  Route,
-} from "react-router-dom";
+import React from "react";
+import { Routes, Route } from "react-router-dom";
 import SignIn from "./pages/SignIn";
 import SignUp from "./pages/SignUp";
 import ForgotPassword from "./pages/ForgotPassword";
-import AssignRetail from "./pages/admin/AssignRetail";
-import AdminLayout from "./components/layouts/AdminLayout";
 import UserSpecificDashboard from "./components/UserSpecificDashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
-import AddUser from "./pages/admin/AddUser";
 
 function App() {
   return (
@@ -20,30 +14,10 @@ function App() {
         <Route path="/signup" element={<SignUp />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route
-          path="/"
+          path="/*"
           element={
             <ProtectedRoute>
               <UserSpecificDashboard />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/add-user"
-          element={
-            <ProtectedRoute>
-              <AdminLayout>
-                <AddUser />
-              </AdminLayout>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/assign-retail"
-          element={
-            <ProtectedRoute>
-              <AdminLayout>
-                <AssignRetail />
-              </AdminLayout>
             </ProtectedRoute>
           }
         />
