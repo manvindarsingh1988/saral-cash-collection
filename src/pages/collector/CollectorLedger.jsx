@@ -1,12 +1,26 @@
 import React, { useState, useEffect } from "react";
-import { apiBase } from "../../lib/apiBase"; // adjust path if needed
-import useDocumentTitle from "../../hooks/useDocumentTitle"; // optional if you want page title
+import { apiBase } from "../../lib/apiBase"; // Adjust if needed
+import useDocumentTitle from "../../hooks/useDocumentTitle"; // Optional
 import CollectorLedgerModal from "../../components/collector/CollectorLedgerModal";
 
+const columns = [
+    { key: "Id", label: "ID", width: "50px" },
+    { key: "Cashier", label: "Cashier", width: "150px" },
+    { key: "Amount", label: "Amount", width: "100px" },
+    { key: "TransactionType", label: "Transaction Type", width: "150px" },
+    { key: "WorkFlow", label: "Workflow", width: "120px" },
+    { key: "GivenOn", label: "Given On", width: "120px" },
+    { key: "Date", label: "Date", width: "120px" },
+    { key: "Comments", label: "Comments", width: "150px" },
+  ];
+
 export default function CollectorLedger({ collectorUserId }) {
-  useDocumentTitle("Collector Ledger"); // optional
-  const [selectedDate, setSelectedDate] = useState("");
+  useDocumentTitle("Collector Ledger");
+
+  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split("T")[0]);
   const [collectorLedgers, setCollectorLedgers] = useState([]);
+  const [filteredLedgers, setFilteredLedgers] = useState([]);
+  const [filters, setFilters] = useState({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [isModalOpen, setModalOpen] = useState(false);
@@ -39,6 +53,7 @@ export default function CollectorLedger({ collectorUserId }) {
         collectorUserId
       );
       setCollectorLedgers(data);
+      setFilteredLedgers(data);
     } catch (err) {
       console.error(err);
       setError("Failed to fetch collector ledgers");
@@ -48,8 +63,52 @@ export default function CollectorLedger({ collectorUserId }) {
   };
 
   const openAddLedger = () => {
-    //setEditData(null);
     setModalOpen(true);
+  };
+
+  const openEditLedger = (ledger) => {
+    // Optionally handle ledger editing
+    console.log("Edit ledger clicked:", ledger);
+  };
+
+  const formatIndianNumber = (num) => {
+    return num?.toLocaleString("en-IN");
+  };
+
+  const getMasterValue = (key, id) => {
+    const list = masterData?.[key] || [];
+    return list.find((item) => item.Id === id)?.Description || "";
+  };
+
+  const handleFilterChange = (key, value) => {
+    const updatedFilters = { ...filters, [key]: value };
+    setFilters(updatedFilters);
+
+    let filtered = collectorLedgers.filter((item) => {
+      return Object.keys(updatedFilters).every((filterKey) => {
+        const filterValue = updatedFilters[filterKey];
+        if (!filterValue) return true;
+
+        if (filterKey === "Cashier") {
+          const cashierName = cashiers.find(c => c.Id === item.CashierId)?.Name || "";
+          return cashierName.toLowerCase().includes(filterValue.toLowerCase());
+        }
+        if (filterKey === "TransactionType" || filterKey === "WorkFlow") {
+          return (
+            item[filterKey]?.toString() === filterValue
+          );
+        }
+        if (filterKey === "Comments") {
+          return (item.Comment || "").toLowerCase().includes(filterValue.toLowerCase());
+        }
+        return (item[filterKey] || "")
+          .toString()
+          .toLowerCase()
+          .includes(filterValue.toLowerCase());
+      });
+    });
+
+    setFilteredLedgers(filtered);
   };
 
   return (
@@ -90,41 +149,85 @@ export default function CollectorLedger({ collectorUserId }) {
       <div className="bg-white rounded-lg shadow p-6">
         {loading && <div>Loading...</div>}
         {error && <div className="text-red-600">{error}</div>}
-        {!loading && !error && collectorLedgers.length === 0 && (
+        {!loading && filteredLedgers.length === 0 && (
           <div className="text-gray-600 text-center">
             No collector ledgers found
           </div>
         )}
-        {!loading && collectorLedgers.length > 0 && (
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-100">
+        {!loading && filteredLedgers.length > 0 && (
+          <div className="overflow-y-auto border border-gray-200 rounded h-[400px]">
+            <table className="w-full table-auto divide-y divide-gray-200 text-sm">
+              <thead className="bg-gray-50 sticky top-0 z-10">
                 <tr>
-                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Retailer ID
-                  </th>
-                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Amount
-                  </th>
-                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Date
-                  </th>
-                  {/* Add more columns if needed */}
+                  {columns.map(({ key, label, width }) => (
+                    <th
+                      key={key}
+                      className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase"
+                      style={{ width, whiteSpace: "nowrap" }}
+                    >
+                      <div className="flex flex-col min-w-fit">
+                        <span>{label}</span>
+                        {["TransactionType", "WorkFlow"].includes(key) && masterData ? (
+                          <select
+                            value={filters[key] || ""}
+                            onChange={(e) =>
+                              handleFilterChange(key, e.target.value)
+                            }
+                            className="mt-1 px-1 py-0.5 border border-gray-300 rounded text-xs"
+                            style={{ width }}
+                          >
+                            <option value="">All</option>
+                            {masterData[key + "s"]?.map((opt) => (
+                              <option key={opt.Id} value={opt.Id}>
+                                {opt.Description}
+                              </option>
+                            ))}
+                          </select>
+                        ) : (
+                          <input
+                            type="text"
+                            style={{ width }}
+                            value={filters[key] || ""}
+                            onChange={(e) =>
+                              handleFilterChange(key, e.target.value)
+                            }
+                            className="mt-1 px-1 py-0.5 border border-gray-300 rounded text-xs"
+                            placeholder="Filter"
+                          />
+                        )}
+                      </div>
+                    </th>
+                  ))}
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {collectorLedgers.map((ledger, index) => (
-                  <tr key={index}>
-                    <td className="px-4 py-2 whitespace-nowrap">
-                      {ledger.RetailerId}
+              <tbody className="bg-white divide-y divide-gray-200 text-xs">
+                {filteredLedgers.map((item) => (
+                  <tr
+                    key={item.Id}
+                    onClick={() => openEditLedger(item)}
+                    className="cursor-pointer hover:bg-gray-100"
+                    title="Click to edit"
+                  >
+                    <td className="px-2 py-2">{item.Id}</td>
+                    <td className="px-2 py-2">
+                      {cashiers.find(c => c.Id === item.CashierId)?.Name || ""}
                     </td>
-                    <td className="px-4 py-2 whitespace-nowrap">
-                      ₹{ledger.Amt}
+                    <td className="px-2 py-2">₹{formatIndianNumber(item.Amount)}</td>
+                    <td className="px-2 py-2">
+                      {getMasterValue("TransactionTypes", item.TransactionType)}
                     </td>
-                    <td className="px-4 py-2 whitespace-nowrap">
-                      {ledger.Date}
+                    <td className="px-2 py-2">
+                      {getMasterValue("WorkFlows", item.WorkFlow)}
                     </td>
-                    {/* Add more columns if needed */}
+                    <td className="px-2 py-2">
+                      {item.GivenOn ? new Date(item.GivenOn).toLocaleDateString() : "-"}
+                    </td>
+                    <td className="px-2 py-2">
+                      {item.Date ? new Date(item.Date).toLocaleDateString() : "-"}
+                    </td>
+                    <td className="px-2 py-2 break-words max-w-[200px]">
+                      {item.Comment}
+                    </td>
                   </tr>
                 ))}
               </tbody>
