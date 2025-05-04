@@ -160,7 +160,6 @@ export default function RetailDashboard({ retailUserId }) {
 
   const computedStatus =
     liability && approvedAmount === liability.Amt ? "Approved" : "Pending";
-    const previousClosingAmount = 0; // Placeholder for previous closing amount logic
 
   return (
     <>
@@ -228,7 +227,7 @@ export default function RetailDashboard({ retailUserId }) {
                     Previous Closing Amount
                   </dt>
                   <dd className="mt-1 text-3xl font-semibold text-gray-900">
-                    ₹{formatIndianNumber(previousClosingAmount)}
+                    ₹{formatIndianNumber(liability.PreviousClosingAmt)}
                   </dd>
                 </div>
               </div>
