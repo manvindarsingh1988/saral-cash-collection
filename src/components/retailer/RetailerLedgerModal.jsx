@@ -1,5 +1,13 @@
 import React, { useState, useEffect } from "react";
 
+const fieldLabels = {
+  TransactionType: "Transaction Type",
+  CollectorId: "Collector",
+  Amount: "Amount (₹)",
+  Date: "Transaction Date",
+  Comment: "Comment",
+};
+
 const allowedFields = [
   "TransactionType",
   "CollectorId",
@@ -15,17 +23,21 @@ export default function RetailerLedgerModal({
   onClose,
   onSubmit,
   initialData,
+  selectedDate,
 }) {
   console.log("Initial Data:", initialData);
+  console.log("Selected Date:", selectedDate);
 
   const [formData, setFormData] = useState({
     CollectorId: "",
     Amount: "",
     TransactionType: "1",
     WorkFlow: "",
-    Date: new Date().toISOString().split("T")[0],
+    Date: selectedDate,
     Comment: "",
   });
+
+  console.log("Form Data:", formData);
 
   useEffect(() => {
     if (initialData) {
@@ -77,7 +89,7 @@ export default function RetailerLedgerModal({
             return null;
           }
 
-          const label = key.replace(/([A-Z])/g, " $1").trim();
+          const label = fieldLabels[key] || key;
           let inputElement;
 
           if (key === "CollectorId") {

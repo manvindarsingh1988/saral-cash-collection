@@ -6,10 +6,10 @@ import useDocumentTitle from "../../hooks/useDocumentTitle";
 
 const columns = [
   { key: "Id", label: "ID", width: "40px" },
-  { key: "CollectorName", label: "Collector", width: "150px" },
-  { key: "Amount", label: "Amount", width: "100px" },
   { key: "TransactionTypes", label: "Transaction Type", width: "120px" },
+  { key: "Amount", label: "Amount", width: "100px" },
   { key: "WorkFlows", label: "Workflow", width: "120px" },
+  { key: "CollectorName", label: "Collector", width: "150px" },
   { key: "Date", label: "Transaction Date", width: "100px" },
   { key: "GivenOn", label: "Given On", width: "100px" },
   { key: "Comment", label: "Remarks", width: "130px" },
@@ -144,22 +144,23 @@ export default function RetailDashboard({ retailUserId }) {
     });
   });
 
-  const totalLedgerAmount = (ledger || []).reduce(
-    (sum, item) => sum + (item.Amount || 0),
-    0
-  );
-
   const approvedAmount = (ledger || [])
     .filter((item) => {
-      const approvedId = masterData?.WorkFlows?.find(
-        (x) => x.Description.toLowerCase() === "approved"
-      )?.Id;
-      return item.WorkFlow === approvedId;
+      return item.WorkFlow === 5;
     })
     .reduce((sum, item) => sum + (item.Amount || 0), 0);
 
-  const computedStatus =
-    liability && approvedAmount === liability.Amt ? "Approved" : "Pending";
+  const pendingApprovalAmount = (ledger || [])
+    .filter((item) => {
+      return item.WorkFlow === 1;
+    })
+    .reduce((sum, item) => sum + (item.Amount || 0), 0);
+
+  const rejectedAmount = (ledger || [])
+    .filter((item) => {
+      return item.WorkFlow === 2;
+    })
+    .reduce((sum, item) => sum + (item.Amount || 0), 0);
 
   return (
     <>
@@ -196,7 +197,7 @@ export default function RetailDashboard({ retailUserId }) {
 
           {liability && liability.Amt > 0 && (
             <>
-              <div className="grid grid-cols-1 sm:grid-cols-4 gap-6 mb-6">
+              <div className="grid grid-cols-1 sm:grid-cols-5 gap-6 mb-6">
                 <div className="bg-white shadow rounded-lg p-4">
                   <dt className="text-sm font-medium text-gray-500">
                     Liability
@@ -208,17 +209,28 @@ export default function RetailDashboard({ retailUserId }) {
 
                 <div className="bg-white shadow rounded-lg p-4">
                   <dt className="text-sm font-medium text-gray-500">
-                    Total clear amount
+                    Total approved amount
                   </dt>
                   <dd className="mt-1 text-3xl font-semibold text-gray-900">
-                    ₹{formatIndianNumber(totalLedgerAmount)}
+                    ₹{formatIndianNumber(approvedAmount)}
                   </dd>
                 </div>
 
                 <div className="bg-white shadow rounded-lg p-4">
-                  <dt className="text-sm font-medium text-gray-500">Status</dt>
+                  <dt className="text-sm font-medium text-gray-500">
+                    Total pending approval
+                  </dt>
                   <dd className="mt-1 text-2xl font-semibold text-gray-900">
-                    {computedStatus}
+                    {formatIndianNumber(pendingApprovalAmount)}
+                  </dd>
+                </div>
+
+                <div className="bg-white shadow rounded-lg p-4">
+                  <dt className="text-sm font-medium text-gray-500">
+                    Total rejected amount
+                  </dt>
+                  <dd className="mt-1 text-2xl font-semibold text-gray-900">
+                    {formatIndianNumber(rejectedAmount)}
                   </dd>
                 </div>
 
@@ -234,7 +246,7 @@ export default function RetailDashboard({ retailUserId }) {
 
               <div className="flex justify-end mb-2">
                 <button
-                  disabled={computedStatus !== "Pending"}
+                  disabled={liability.Amt - approvedAmount == 0}
                   onClick={openAddLedger}
                   className="bg-green-600 text-white px-4 py-1.5 rounded hover:bg-green-700"
                 >
@@ -313,10 +325,6 @@ export default function RetailDashboard({ retailUserId }) {
                                 {item.Id}
                               </a>
                             </td>
-                            <td className="px-2 py-2">{item.CollectorName}</td>
-                            <td className="px-2 py-2">
-                              ₹{formatIndianNumber(item.Amount)}
-                            </td>
                             <td className="px-2 py-2">
                               {getMasterValue(
                                 "TransactionTypes",
@@ -324,8 +332,12 @@ export default function RetailDashboard({ retailUserId }) {
                               )}
                             </td>
                             <td className="px-2 py-2">
+                              ₹{formatIndianNumber(item.Amount)}
+                            </td>
+                            <td className="px-2 py-2">
                               {getMasterValue("WorkFlows", item.WorkFlow)}
                             </td>
+                            <td className="px-2 py-2">{item.CollectorName}</td>
                             <td className="px-2 py-2">
                               {item.Date.split("T")[0]}
                             </td>
@@ -367,14 +379,17 @@ export default function RetailDashboard({ retailUserId }) {
         </div>
       </div>
 
-      <RetailerLedgerModal
-        collectors={collectors}
-        masterData={masterData}
-        isOpen={isModalOpen}
-        onClose={() => setModalOpen(false)}
-        onSubmit={handleLedgerSubmit}
-        initialData={editData}
-      />
+      {isModalOpen && (
+        <RetailerLedgerModal
+          collectors={collectors}
+          masterData={masterData}
+          isOpen={isModalOpen}
+          onClose={() => setModalOpen(false)}
+          onSubmit={handleLedgerSubmit}
+          initialData={editData}
+          selectedDate={selectedDate}
+        />
+      )}
     </>
   );
 }
