@@ -98,7 +98,7 @@ export default function RetailDashboard({ retailUserId }) {
         ...data,
         Amount: parseFloat(data.Amount),
         TransactionType: parseInt(data.TransactionType),
-        WorkFlow: 0,
+        WorkFlow: 1,
         Date: new Date(data.Date).toISOString(),
         GivenOn: new Date().toISOString(),
         CollectorId: data.TransactionType == "2" ? "" : data.CollectorId,
