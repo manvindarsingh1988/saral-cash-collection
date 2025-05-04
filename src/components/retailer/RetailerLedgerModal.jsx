@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 
 const fieldLabels = {
+  Id: "Id",
   TransactionType: "Transaction Type",
   CollectorId: "Collector",
   Amount: "Amount (₹)",
@@ -9,6 +10,7 @@ const fieldLabels = {
 };
 
 const allowedFields = [
+  "Id",
   "TransactionType",
   "CollectorId",
   "Amount",
@@ -89,6 +91,10 @@ export default function RetailerLedgerModal({
             return null;
           }
 
+          if (key === "Id" && !formData["Id"]) {
+            return null;
+          }
+
           const label = fieldLabels[key] || key;
           let inputElement;
 
@@ -142,7 +148,7 @@ export default function RetailerLedgerModal({
               </>
             );
           } else {
-            const inputType = ["Amount", "WorkFlow"].includes(key)
+            const inputType = ["Amount", "WorkFlow", "Id"].includes(key)
               ? "number"
               : ["Date"].includes(key)
               ? "date"
@@ -150,6 +156,7 @@ export default function RetailerLedgerModal({
 
             inputElement = (
               <input
+                readonly={key === "Id"}
                 name={key}
                 type={inputType}
                 value={formData[key]}

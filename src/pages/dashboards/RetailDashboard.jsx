@@ -87,6 +87,8 @@ export default function RetailDashboard({ retailUserId }) {
   };
 
   const openEditLedger = (data) => {
+    if (!data || data.WorkFlow == "5") return;
+
     setEditData(data);
     setModalOpen(true);
   };
@@ -314,16 +316,22 @@ export default function RetailDashboard({ retailUserId }) {
                             )}`}
                           >
                             <td className="px-2 py-2">
-                              <a
-                                title="Click to edit"
-                                className="text-blue-600 underline hover:text-blue-800"
-                                onClick={(e) => {
-                                  e.preventDefault();
-                                  openEditLedger(item);
-                                }}
-                              >
-                                {item.Id}
-                              </a>
+                              {item.WorkFlow == "5" ? (
+                                <span className="text-green-600">
+                                  {item.Id}
+                                </span>
+                              ) : (
+                                <a
+                                  title="Click to edit"
+                                  className="text-blue-600 underline hover:text-blue-800"
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    openEditLedger(item);
+                                  }}
+                                >
+                                  {item.Id}
+                                </a>
+                              )}
                             </td>
                             <td className="px-2 py-2">
                               {getMasterValue(
