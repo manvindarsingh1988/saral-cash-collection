@@ -21,7 +21,7 @@ export default function RetailerLedgerModal({
   const [formData, setFormData] = useState({
     CollectorId: "",
     Amount: "",
-    TransactionType: "",
+    TransactionType: "1",
     WorkFlow: "",
     Date: "",
     Comment: "",
@@ -72,7 +72,8 @@ export default function RetailerLedgerModal({
         {allowedFields.map((key) => {
           console.log("Key:", key, "Value:", formData[key]);
 
-          if (formData["TransactionType"] === "2" && key === "CollectorId") {
+          if ((formData["TransactionType"] === "" && key === "CollectorId") ||
+            (formData["TransactionType"] === "2" && key === "CollectorId")) {
             return null;
           }
 
