@@ -87,7 +87,7 @@ export default function RetailDashboard({ retailUserId }) {
   };
 
   const openEditLedger = (data) => {
-    if (!data || data.WorkFlow == "5") return;
+    if (!data || data.WorkFlow == "5" || data.WorkFlow == "3") return;
 
     setEditData(data);
     setModalOpen(true);
@@ -148,7 +148,7 @@ export default function RetailDashboard({ retailUserId }) {
 
   const approvedAmount = (ledger || [])
     .filter((item) => {
-      return item.WorkFlow === 5;
+      return item.WorkFlow === 5 || item.WorkFlow === 3;
     })
     .reduce((sum, item) => sum + (item.Amount || 0), 0);
 
@@ -160,7 +160,7 @@ export default function RetailDashboard({ retailUserId }) {
 
   const rejectedAmount = (ledger || [])
     .filter((item) => {
-      return item.WorkFlow === 2;
+      return item.WorkFlow === 2 || item.WorkFlow === 4;
     })
     .reduce((sum, item) => sum + (item.Amount || 0), 0);
 
