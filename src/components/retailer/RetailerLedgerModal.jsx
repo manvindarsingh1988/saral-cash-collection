@@ -23,7 +23,7 @@ export default function RetailerLedgerModal({
     Amount: "",
     TransactionType: "1",
     WorkFlow: "",
-    Date: "",
+    Date: new Date().toISOString().split("T")[0],
     Comment: "",
   });
 
