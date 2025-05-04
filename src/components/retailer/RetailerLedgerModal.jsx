@@ -83,8 +83,8 @@ export default function RetailerLedgerModal({
           console.log("Key:", key, "Value:", formData[key]);
 
           if (
-            (formData["TransactionType"] === "" && key === "CollectorId") ||
-            (formData["TransactionType"] === "2" && key === "CollectorId")
+            (formData["TransactionType"] == "" && key === "CollectorId") ||
+            (formData["TransactionType"] == "2" && key === "CollectorId")
           ) {
             return null;
           }
