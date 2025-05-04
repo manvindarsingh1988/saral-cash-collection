@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { apiBase } from "../../lib/apiBase";
-import { formatIndianNumber } from "../../lib/utils";
+import { formatIndianNumber, getRowColor } from "../../lib/utils";
 import RetailerLedgerModal from "../../components/retailer/RetailerLedgerModal";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
 
@@ -291,63 +291,67 @@ export default function RetailDashboard({ retailUserId }) {
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200 text-xs">
-                      {filteredData.map((item) => (
-                        <tr
-                          title="Click to edit"
-                          key={item.Id}
-                          onClick={() => openEditLedger(item)}
-                          className="cursor-pointer hover:bg-gray-100"
-                        >
-                          <td className="px-2 py-2">
-                            <a
-                              title="Click to edit"
-                              className="text-blue-600 underline hover:text-blue-800"
-                              onClick={(e) => {
-                                e.preventDefault();
-                                openEditLedger(item);
-                              }}
-                            >
-                              {item.Id}
-                            </a>
-                          </td>
-                          <td className="px-2 py-2">{item.CollectorName}</td>
-                          <td className="px-2 py-2">
-                            ₹{formatIndianNumber(item.Amount)}
-                          </td>
-                          <td className="px-2 py-2">
-                            {getMasterValue(
-                              "TransactionTypes",
-                              item.TransactionType
-                            )}
-                          </td>
-                          <td className="px-2 py-2">
-                            {getMasterValue("WorkFlows", item.WorkFlow)}
-                          </td>
-                          <td className="px-2 py-2">
-                            {new Date(item.Date).toLocaleDateString()}
-                          </td>
-                          <td className="px-2 py-2">
-                            {new Date(item.GivenOn).toLocaleDateString()}
-                          </td>
-                          <td className="px-2 py-2 break-words max-w-[200px]">
-                            {item.Comment}
-                          </td>
-                          <td className="px-2 py-2">
-                            {getMasterValue("WorkFlows", item.WorkFlow) ===
-                              "Initiate" && (
-                              <button
+                      {filteredData.map((item) => {
+                        return (
+                          <tr
+                            title="Click to edit"
+                            key={item.Id}
+                            onClick={() => openEditLedger(item)}
+                            className={`cursor-pointer ${getRowColor(
+                              item.WorkFlow
+                            )}`}
+                          >
+                            <td className="px-2 py-2">
+                              <a
+                                title="Click to edit"
+                                className="text-blue-600 underline hover:text-blue-800"
                                 onClick={(e) => {
-                                  e.stopPropagation(); // Prevent triggering row edit
-                                  handleDeleteLedger(item.Id);
+                                  e.preventDefault();
+                                  openEditLedger(item);
                                 }}
-                                className="text-red-600 hover:text-red-800 text-xs"
                               >
-                                Delete
-                              </button>
-                            )}
-                          </td>
-                        </tr>
-                      ))}
+                                {item.Id}
+                              </a>
+                            </td>
+                            <td className="px-2 py-2">{item.CollectorName}</td>
+                            <td className="px-2 py-2">
+                              ₹{formatIndianNumber(item.Amount)}
+                            </td>
+                            <td className="px-2 py-2">
+                              {getMasterValue(
+                                "TransactionTypes",
+                                item.TransactionType
+                              )}
+                            </td>
+                            <td className="px-2 py-2">
+                              {getMasterValue("WorkFlows", item.WorkFlow)}
+                            </td>
+                            <td className="px-2 py-2">
+                              {item.Date.split("T")[0]}
+                            </td>
+                            <td className="px-2 py-2">
+                              {item.GivenOn.split("T")[0]}
+                            </td>
+                            <td className="px-2 py-2 break-words max-w-[200px]">
+                              {item.Comment}
+                            </td>
+                            <td className="px-2 py-2">
+                              {getMasterValue("WorkFlows", item.WorkFlow) ===
+                                "Initiate" && (
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation(); // Prevent triggering row edit
+                                    handleDeleteLedger(item.Id);
+                                  }}
+                                  className="text-red-600 hover:text-red-800 text-xs"
+                                >
+                                  Delete
+                                </button>
+                              )}
+                            </td>
+                          </tr>
+                        );
+                      })}
                     </tbody>
                   </table>
                 </div>

@@ -34,9 +34,7 @@ export default function RetailerLedgerModal({
       allowedFields.forEach((field) => {
         if (initialData[field]) {
           if (["Date"].includes(field)) {
-            formattedData[field] = new Date(initialData[field])
-              .toISOString()
-              .split("T")[0];
+            formattedData[field] = initialData[field].split("T")[0];
           } else {
             formattedData[field] = initialData[field];
           }
@@ -72,8 +70,10 @@ export default function RetailerLedgerModal({
         {allowedFields.map((key) => {
           console.log("Key:", key, "Value:", formData[key]);
 
-          if ((formData["TransactionType"] === "" && key === "CollectorId") ||
-            (formData["TransactionType"] === "2" && key === "CollectorId")) {
+          if (
+            (formData["TransactionType"] === "" && key === "CollectorId") ||
+            (formData["TransactionType"] === "2" && key === "CollectorId")
+          ) {
             return null;
           }
 
