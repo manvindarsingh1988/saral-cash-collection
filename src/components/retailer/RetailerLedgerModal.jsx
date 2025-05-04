@@ -72,10 +72,7 @@ export default function RetailerLedgerModal({
         {allowedFields.map((key) => {
           console.log("Key:", key, "Value:", formData[key]);
 
-          if (
-            key === "CollectorId" &&
-            (formData["TransactionTypes"] === "2" || !formData["CollectorId"])
-          ) {
+          if (formData["TransactionType"] === "2" && key === "CollectorId") {
             return null;
           }
 
