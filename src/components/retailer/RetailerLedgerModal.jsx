@@ -156,7 +156,7 @@ export default function RetailerLedgerModal({
 
             inputElement = (
               <input
-                readonly={key === "Id"}
+                readOnly={key === "Id"}
                 disabled={key === "Id"}
                 name={key}
                 type={inputType}

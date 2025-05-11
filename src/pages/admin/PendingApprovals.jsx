@@ -1,15 +1,16 @@
 import React, { useState, useEffect, use } from "react";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
 import { apiBase } from "../../lib/apiBase";
+import ApprovalLedgerModal from "../../components/admin/ApprovalLedgerModal";
 
 const columns = [
   { heading: "ID", accessor: "Id", width: "100px" },
   { heading: "Amount (₹)", accessor: "Amount", width: "130px" },
-  { heading: "Retailer Name", accessor: "RetailerName", width: "200px" },
+  { heading: "Retailer Name", accessor: "RetailerName", width: "150px" },
   { heading: "Cashier Name", accessor: "CashierName", width: "180px" },
-  { heading: "Collector Name", accessor: "CollectorName", width: "120px" },
-  { heading: "Transaction Type", accessor: "TransactionType", width: "120px" },
-  { heading: "Workflow", accessor: "WorkFlow", width: "120px" },
+  { heading: "Collector Name", accessor: "CollectorName", width: "100px" },
+  { heading: "Transaction Type", accessor: "TransactionType", width: "100px" },
+  { heading: "Workflow", accessor: "WorkFlow", width: "100px" },
   { heading: "Date", accessor: "Date", width: "130px" },
   { heading: "Given On", accessor: "GivenOn", width: "130px" },
   { heading: "Comment", accessor: "Comment", width: "100px" },
@@ -21,6 +22,7 @@ export default function PendingApprovals() {
   const [error, setError] = useState(null);
   new Date().toISOString().split("T")[0];
   const [isModalOpen, setModalOpen] = useState(false);
+  const [editData, setEditData] = useState(null);
 
   const [pendingApprovals, setPendingApprovals] = useState([]);
   const [filters, setFilters] = useState({});
@@ -84,6 +86,32 @@ export default function PendingApprovals() {
     setModalOpen(true);
   };
 
+  const handleLedgerSubmit = async (data) => {
+    try {
+      data.RetailerId = retailUserId;
+      const payload = {
+        ...data,
+        Amount: parseFloat(data.Amount),
+        TransactionType: parseInt(data.TransactionType),
+        WorkFlow: 1,
+        Date: new Date(data.Date).toISOString(),
+        GivenOn: new Date().toISOString(),
+        CollectorId: data.TransactionType == "2" ? "" : data.CollectorId,
+        CollectorName: data.TransactionType == "2" ? "" : data.CollectorName,
+      };
+
+      if (editData?.Id) {
+        await apiBase.updateLedgerInfo(payload);
+      } else {
+        await apiBase.addLedgerInfo(payload);
+      }
+
+      await fetchData(selectedDate);
+    } catch (err) {
+      console.error("Submission failed:", err);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="bg-white shadow rounded-lg">
@@ -134,6 +162,7 @@ export default function PendingApprovals() {
                           <input
                             type="text"
                             placeholder="Filter..."
+                            style={{ width: col.width }}
                             className="w-full px-2 py-1 border border-indigo-200 rounded-md"
                             value={filters[col.accessor] || ""}
                             onChange={(e) =>
@@ -234,6 +263,14 @@ export default function PendingApprovals() {
           )}
         </div>
       </div>
+      {isModalOpen && (
+        <ApprovalLedgerModal
+          masterData={masterData}
+          onClose={() => setModalOpen(false)}
+          onSubmit={handleLedgerSubmit}
+          initialData={editData}
+        />
+      )}
     </div>
   );
 }

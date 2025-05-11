@@ -19,23 +19,19 @@ const allowedFields = [
 ];
 
 export default function ApprovalLedgerModal({
-  collectors,
   masterData,
-  isOpen,
   onClose,
   onSubmit,
   initialData,
-  selectedDate,
 }) {
   console.log("Initial Data:", initialData);
-  console.log("Selected Date:", selectedDate);
 
   const [formData, setFormData] = useState({
     CollectorId: "",
     Amount: "",
     TransactionType: "1",
     WorkFlow: "",
-    Date: selectedDate,
+    Date: new Date().toISOString().split("T")[0],
     Comment: "",
   });
 
@@ -73,8 +69,6 @@ export default function ApprovalLedgerModal({
     onClose();
   };
 
-  if (!isOpen) return null;
-
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-30 z-50">
       <div className="bg-white p-6 rounded shadow-lg space-y-4 w-full max-w-md">
@@ -98,28 +92,7 @@ export default function ApprovalLedgerModal({
           const label = fieldLabels[key] || key;
           let inputElement;
 
-          if (key === "CollectorId") {
-            inputElement = (
-              <select
-                name={key}
-                value={formData[key]}
-                onChange={handleChange}
-                className="border px-2 py-1 rounded"
-              >
-                <option value="" disabled hidden>
-                  Select Collector
-                </option>
-                {collectors?.map((collector) => (
-                  <option
-                    key={collector.CollectorUserId}
-                    value={collector.CollectorUserId}
-                  >
-                    {collector.CollectorUserName}
-                  </option>
-                ))}
-              </select>
-            );
-          } else if (key === "TransactionType" || key === "WorkFlow") {
+          if (key === "TransactionType" || key === "WorkFlow") {
             inputElement = (
               <>
                 <select
@@ -156,7 +129,7 @@ export default function ApprovalLedgerModal({
 
             inputElement = (
               <input
-                readonly={key === "Id"}
+                readOnly={key === "Id"}
                 disabled={key === "Id"}
                 name={key}
                 type={inputType}
