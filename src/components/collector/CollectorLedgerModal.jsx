@@ -38,7 +38,7 @@ export default function CollectorLedgerModal({
     CashierId: "",
     Amount: "",
     WorkFlow: "1",
-    Date: "",
+    Date: selectedDate,
     GivenOn: today,
     Comment: "",
   });
@@ -78,6 +78,7 @@ export default function CollectorLedgerModal({
         WorkFlow: parseInt(data.WorkFlow),
         Date: new Date(data.Date).toISOString(),
         GivenOn: new Date(data.GivenOn).toISOString(),
+        Comment: data.Comment,
       };
 
       if (initialData?.Id) {
