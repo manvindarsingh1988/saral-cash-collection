@@ -191,6 +191,7 @@ export default function CollectorLiabilities() {
             setOpenDialog(false);
             selectedCollector(null);
           }}
+          modelFor="Collector"
         />
       )}
     </>
