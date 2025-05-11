@@ -107,7 +107,7 @@ export default function PendingApprovals() {
 
           {pendingApprovals.length > 0 && (
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y border border-gray-200 rounded-lg">
+              <table className="min-w-full divide-y border border-gray-200 rounded-lg text-xs">
                 <thead className="">
                   <tr>
                     {columns.map((col) => (
@@ -148,7 +148,7 @@ export default function PendingApprovals() {
                           <input
                             type="text"
                             placeholder="Filter..."
-                            className="w-full px-2 py-1 border border-indigo-200 rounded-md text-sm"
+                            className="w-full px-2 py-1 border border-indigo-200 rounded-md"
                             value={filters[col.accessor] || ""}
                             onChange={(e) =>
                               handleFilterChange(col.accessor, e.target.value)
@@ -181,7 +181,7 @@ export default function PendingApprovals() {
                             return (
                               <td
                                 key={col.accessor}
-                                className="px-4 py-2 text-sm text-gray-900"
+                                className="px-4 py-2 text-gray-900"
                                 style={{ width: col.width }}
                               >
                                 {getMasterValue("WorkFlows", item.WorkFlow)}
@@ -197,7 +197,7 @@ export default function PendingApprovals() {
                             return (
                               <td
                                 key={col.accessor}
-                                className="px-4 py-2 text-sm text-gray-900"
+                                className="px-4 py-2 text-gray-900"
                                 style={{ width: col.width }}
                               >
                                 {renderCell(item, col.accessor)}
