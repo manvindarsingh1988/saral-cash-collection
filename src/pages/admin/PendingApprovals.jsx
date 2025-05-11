@@ -20,6 +20,7 @@ export default function PendingApprovals() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   new Date().toISOString().split("T")[0];
+  const [isModalOpen, setModalOpen] = useState(false);
 
   const [pendingApprovals, setPendingApprovals] = useState([]);
   const [filters, setFilters] = useState({});
@@ -74,6 +75,13 @@ export default function PendingApprovals() {
       return value?.split("T")[0] || "—";
     }
     return value || "—";
+  };
+
+  const openLedger = (data) => {
+    if (!data || data.WorkFlow == "5" || data.WorkFlow == "3") return;
+
+    setEditData(data);
+    setModalOpen(true);
   };
 
   return (
@@ -140,9 +148,34 @@ export default function PendingApprovals() {
                 <tbody className="bg-white divide-y divide-gray-200">
                   {filteredData.length > 0 ? (
                     filteredData.map((item, idx) => (
-                      <tr key={idx}>
+                      <tr
+                        key={idx}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          openLedger(item);
+                        }}
+                        className="hover:bg-gray-50 cursor-pointer"
+                      >
                         {columns.map((col) => {
-                          if (col.accessor === "TransactionType") {
+                          if (col.accessor === "Id") {
+                            return (
+                              <td
+                                key={col.accessor}
+                                className="px-4 py-2 text-sm text-gray-900"
+                                style={{ width: col.width }}
+                              >
+                                <button
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    openLedger(item);
+                                  }}
+                                  className="underline hover:text-indigo-800"
+                                >
+                                  {item[col.accessor]}
+                                </button>
+                              </td>
+                            );
+                          } else if (col.accessor === "TransactionType") {
                             return (
                               <td
                                 key={col.accessor}
