@@ -16,17 +16,17 @@ const allowedFields = [
 export default function CollectorLedgerModal({
   collectorId,
   masterData,
-  isOpen,
   onClose,
   initialData,
   cashiers,
   editData,
   modelFor,
+  selectedDate,
 }) {
   // Filter workflows based on modelFor
   const workflows =
     modelFor === "CollectorLedger"
-      ? masterData?.WorkFlows?.filter(_ => _?.Id === 4) // Type 4 for CollectorLedger
+      ? masterData?.WorkFlows?.filter((_) => _?.Id === 4) // Type 4 for CollectorLedger
       : masterData?.WorkFlows; // All workflows for other cases
 
   // Set today's date
@@ -34,10 +34,10 @@ export default function CollectorLedgerModal({
 
   const [formData, setFormData] = useState({
     CollectorId: collectorId,
-    TransactionType: "",
+    TransactionType: "1",
     CashierId: "",
     Amount: "",
-    WorkFlow: "",
+    WorkFlow: "1",
     Date: "",
     GivenOn: today,
     Comment: "",
@@ -52,10 +52,8 @@ export default function CollectorLedgerModal({
         TransactionType: initialData.TransactionType ?? "",
         CashierId: initialData.CashierId ?? "",
         Amount: initialData.Amount ?? "",
-        WorkFlow: initialData.WorkFlow ?? "",
-        Date: initialData.Date
-          ? initialData.Date.split("T")[0]
-          : "",
+        WorkFlow: initialData.WorkFlow ?? "1",
+        Date: initialData.Date ? initialData.Date.split("T")[0] : "",
         GivenOn: today, // always keep today
         Comment: initialData.Comment ?? "",
       };
@@ -99,8 +97,6 @@ export default function CollectorLedgerModal({
     onClose();
   };
 
-  if (!isOpen) return null;
-
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-30 z-50">
       <div className="bg-white p-6 rounded shadow-lg space-y-4 w-full max-w-md">
@@ -113,7 +109,10 @@ export default function CollectorLedgerModal({
           if (key === "GivenOn" || key === "CollectorId") return null;
 
           // only show CashierId when TransactionType === "1"
-          if (key === "CashierId" && formData.TransactionType !== "1") {
+          if (
+            (key === "CashierId" && formData.TransactionType !== "1") ||
+            (key === "WorkFlow" && modelFor === "CollectorLedger")
+          ) {
             return null;
           }
 

@@ -359,15 +359,18 @@ export default function CollectorDashboard({ collectorUserId }) {
         </div>
       </div>
 
-      <CollectorLedgerModal
-        masterData={masterData}
-        isOpen={isModalOpen}
-        onClose={() => setModalOpen(false)}
-        onSubmit={handleLedgerSubmit}
-        initialData={editData}
-        modelFor="RetailerLedger"
-        collectorId={collectorUserId}
-      />
+      {isModalOpen && (
+        <CollectorLedgerModal
+          masterData={masterData}
+          isOpen={isModalOpen}
+          onClose={() => setModalOpen(false)}
+          onSubmit={handleLedgerSubmit}
+          initialData={editData}
+          modelFor="RetailerLedger"
+          collectorId={collectorUserId}
+          selectedDate={selectedDate}
+        />
+      )}
     </>
   );
 }
