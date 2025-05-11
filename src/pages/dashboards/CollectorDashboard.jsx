@@ -140,22 +140,23 @@ export default function CollectorDashboard({ collectorUserId }) {
     });
   });
 
-  const totalLedgerAmount = (ledger || []).reduce(
-    (sum, item) => sum + (item.Amount || 0),
-    0
-  );
-
   const approvedAmount = (ledger || [])
     .filter((item) => {
-      const approvedId = masterData?.WorkFlows?.find(
-        (x) => x.Description.toLowerCase() === "approved"
-      )?.Id;
-      return item.WorkFlow === approvedId;
+      return item.WorkFlow === 5 || item.WorkFlow === 3;
     })
     .reduce((sum, item) => sum + (item.Amount || 0), 0);
 
-  const computedStatus =
-    liability && approvedAmount === liability.Amt ? "Approved" : "Pending";
+  const pendingApprovalAmount = (ledger || [])
+    .filter((item) => {
+      return item.WorkFlow === 1;
+    })
+    .reduce((sum, item) => sum + (item.Amount || 0), 0);
+
+  const rejectedAmount = (ledger || [])
+    .filter((item) => {
+      return item.WorkFlow === 2 || item.WorkFlow === 4;
+    })
+    .reduce((sum, item) => sum + (item.Amount || 0), 0);
 
   return (
     <>
@@ -219,7 +220,7 @@ export default function CollectorDashboard({ collectorUserId }) {
                 Approved Amount
               </dt>
               <dd className="mt-1 text-3xl font-semibold text-gray-900">
-                ₹{formatIndianNumber(totalLedgerAmount)}
+                ₹{formatIndianNumber(approvedAmount)}
               </dd>
             </div>
 
@@ -228,7 +229,7 @@ export default function CollectorDashboard({ collectorUserId }) {
                 Pending Amount
               </dt>
               <dd className="mt-1 text-3xl font-semibold text-gray-900">
-                ₹{formatIndianNumber(totalLedgerAmount)}
+                ₹{formatIndianNumber(pendingApprovalAmount)}
               </dd>
             </div>
 
@@ -237,7 +238,7 @@ export default function CollectorDashboard({ collectorUserId }) {
                 Rejected Amount
               </dt>
               <dd className="mt-1 text-3xl font-semibold text-gray-900">
-                {computedStatus}
+                {rejectedAmount}
               </dd>
             </div>
           </div>
