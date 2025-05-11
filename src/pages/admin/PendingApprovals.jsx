@@ -46,6 +46,11 @@ export default function PendingApprovals() {
     }
   };
 
+  const getMasterValue = (type, id) => {
+    const list = masterData?.[type] || [];
+    return list.find((x) => x.Id == id)?.Description || id;
+  };
+
   const handleFilterChange = (accessor, value) => {
     setFilters((prev) => ({ ...prev, [accessor]: value }));
   };
@@ -122,15 +127,34 @@ export default function PendingApprovals() {
                         style={{ width: col.width }}
                         className="px-4 py-1"
                       >
-                        <input
-                          type="text"
-                          placeholder="Filter..."
-                          className="w-full px-2 py-1 border border-indigo-200 rounded-md text-sm"
-                          value={filters[col.accessor] || ""}
-                          onChange={(e) =>
-                            handleFilterChange(col.accessor, e.target.value)
-                          }
-                        />
+                        {["TransactionType", "WorkFlow"].includes(
+                          col.accessor
+                        ) && masterData ? (
+                          <select
+                            value={filters[col.accessor]}
+                            onChange={(e) =>
+                              handleFilterChange(col.accessor, e.target.value)
+                            }
+                            className="mt-1 px-1 py-0.5 border border-gray-300 rounded text-xs"
+                          >
+                            <option value="">All</option>
+                            {masterData[col.accessor + "s"]?.map((opt) => (
+                              <option key={opt.Id} value={opt.Id}>
+                                {opt.Description}
+                              </option>
+                            ))}
+                          </select>
+                        ) : (
+                          <input
+                            type="text"
+                            placeholder="Filter..."
+                            className="w-full px-2 py-1 border border-indigo-200 rounded-md text-sm"
+                            value={filters[col.accessor] || ""}
+                            onChange={(e) =>
+                              handleFilterChange(col.accessor, e.target.value)
+                            }
+                          />
+                        )}
                       </th>
                     ))}
                   </tr>
@@ -139,15 +163,48 @@ export default function PendingApprovals() {
                   {filteredData.length > 0 ? (
                     filteredData.map((item, idx) => (
                       <tr key={idx}>
-                        {columns.map((col) => (
-                          <td
-                            key={col.accessor}
-                            className="px-4 py-2 text-sm text-gray-900"
-                            style={{ width: col.width }}
-                          >
-                            {renderCell(item, col.accessor)}
-                          </td>
-                        ))}
+                        {columns.map((col) => {
+                          if (col.accessor === "TransactionType") {
+                            return (
+                              <td
+                                key={col.accessor}
+                                className="px-4 py-2 text-sm text-gray-900"
+                                style={{ width: col.width }}
+                              >
+                                {getMasterValue(
+                                  "TransactionTypes",
+                                  item.TransactionType
+                                )}
+                              </td>
+                            );
+                          } else if (col.accessor === "WorkFlow") {
+                            return (
+                              <td
+                                key={col.accessor}
+                                className="px-4 py-2 text-sm text-gray-900"
+                                style={{ width: col.width }}
+                              >
+                                {getMasterValue("WorkFlows", item.WorkFlow)}
+                              </td>
+                            );
+                          } else {
+                            {
+                              getMasterValue(
+                                "TransactionTypes",
+                                item.TransactionType
+                              );
+                            }
+                            return (
+                              <td
+                                key={col.accessor}
+                                className="px-4 py-2 text-sm text-gray-900"
+                                style={{ width: col.width }}
+                              >
+                                {renderCell(item, col.accessor)}
+                              </td>
+                            );
+                          }
+                        })}
                       </tr>
                     ))
                   ) : (
