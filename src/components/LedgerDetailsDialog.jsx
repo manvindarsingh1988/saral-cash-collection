@@ -6,6 +6,7 @@ const columns = [
   { heading: "Collector", key: "CollectorName", width: "150px" },
   { heading: "Amount", key: "Amount", width: "100px" },
   { heading: "Transaction Type", key: "TransactionType", width: "150px" },
+  { heading: "WorkFlow", key: "WorkFlow", width: "150px" },
   { heading: "Date", key: "Date", width: "120px" },
   { heading: "Given On", key: "GivenOn", width: "120px" },
   { heading: "Comment", key: "Comment", width: "200px" },
@@ -59,6 +60,9 @@ export default function LadgerDetailsDialog({
   const getCellValue = (entry, key) => {
     if (key === "TransactionType") {
       return getMasterValue("TransactionTypes", entry[key]);
+    }
+    if (key === "WorkFlow") {
+      return getMasterValue("WorkFlows", entry[key]);
     }
     if (key === "Date" || key === "GivenOn") {
       return entry[key]?.split("T")[0] || "";
