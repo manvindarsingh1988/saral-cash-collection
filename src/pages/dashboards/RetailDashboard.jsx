@@ -60,7 +60,7 @@ export default function RetailDashboard({ retailUserId }) {
     try {
       const [ledgerData, liabilityData] = await Promise.all([
         apiBase.getLadgerInfoByRetailerid(date, retailUserId),
-        apiBase.GetLiabilityAmountByRetailerId(retailUserId, date),
+        apiBase.getLiabilityAmountByRetailerId(retailUserId, date),
       ]);
 
       setLiability(liabilityData);

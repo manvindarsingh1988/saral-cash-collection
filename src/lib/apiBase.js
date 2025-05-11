@@ -139,9 +139,21 @@ export const apiBase = {
     return data;
   },
 
-  GetLiabilityAmountByRetailerId: async (retailerId, date) => {
+  getLiabilityAmountByRetailerId: async (retailerId, date) => {
     const response = await fetch(
       `${API_URL}/GetLiabilityAmountByRetailerId?userId=${retailerId}&date=${date}`
+    );
+    if (!response.ok) {
+      console.error(`Failed to fetch: ${response.statusText}`);
+    }
+    const data = await response.json();
+    console.log(data);
+    return data;
+  },
+
+  getLiabilityAmountByCollectorId: async (collectorId, date) => {
+    const response = await fetch(
+      `${API_URL}/GetLiabilityAmountByCollectorId?userId=${collectorId}&date=${date}`
     );
     if (!response.ok) {
       console.error(`Failed to fetch: ${response.statusText}`);

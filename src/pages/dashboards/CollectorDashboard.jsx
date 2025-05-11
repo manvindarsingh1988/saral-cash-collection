@@ -67,7 +67,7 @@ export default function CollectorDashboard({ collectorUserId }) {
           selectedRetailerId,
           collectorUserId
         ),
-        apiBase.GetLiabilityAmountByRetailerId(
+        apiBase.getLiabilityAmountByRetailerId(
           selectedRetailerId,
           selectedDate
         ),
@@ -256,7 +256,7 @@ export default function CollectorDashboard({ collectorUserId }) {
               </div> */}
 
               <div className="overflow-y-auto border border-gray-200 rounded h-[400px]">
-                <table className="w-full table-auto divide-y divide-gray-200 text-sm">
+                <table className="w-full table-auto divide-y divide-gray-200 text-xs">
                   <thead className="bg-gray-50 sticky top-0 z-10">
                     <tr>
                       {columns.map(({ key, label, width }) => (

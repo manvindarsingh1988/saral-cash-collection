@@ -29,6 +29,7 @@ export default function CollectorLedger({ collectorUserId }) {
   const [masterData, setMasterData] = useState(null);
   const [cashiers, setCashiers] = useState([]);
   const [selectedLedger, setSelectedLedger] = useState(null);
+  const [liability, setLiability] = useState({});
 
   useEffect(() => {
     const loadMasterData = async () => {
@@ -51,12 +52,15 @@ export default function CollectorLedger({ collectorUserId }) {
     try {
       setLoading(true);
       setError(null);
-      const data = await apiBase.getLedgerInfoByCollectorId(
-        selectedDate,
-        collectorUserId
-      );
+
+      const [data, liabilityData] = await Promise.all([
+        apiBase.getLedgerInfoByCollectorId(selectedDate, collectorUserId),
+        apiBase.getLiabilityAmountByCollectorId(collectorUserId, selectedDate),
+      ]);
+
       setCollectorLedgers(data);
       setFilteredLedgers(data);
+      setLiability(liabilityData);
     } catch (err) {
       console.error(err);
       setError("Failed to fetch collector ledgers");
@@ -116,6 +120,24 @@ export default function CollectorLedger({ collectorUserId }) {
     setFilteredLedgers(filtered);
   };
 
+  const approvedAmount = (collectorLedgers || [])
+    .filter((item) => {
+      return item.WorkFlow === 5 || item.WorkFlow === 3;
+    })
+    .reduce((sum, item) => sum + (item.Amount || 0), 0);
+
+  const pendingApprovalAmount = (collectorLedgers || [])
+    .filter((item) => {
+      return item.WorkFlow === 1;
+    })
+    .reduce((sum, item) => sum + (item.Amount || 0), 0);
+
+  const rejectedAmount = (collectorLedgers || [])
+    .filter((item) => {
+      return item.WorkFlow === 2 || item.WorkFlow === 4;
+    })
+    .reduce((sum, item) => sum + (item.Amount || 0), 0);
+
   return (
     <div className="spacer-6">
       {/* Filter Section */}
@@ -140,6 +162,43 @@ export default function CollectorLedger({ collectorUserId }) {
           </button>
         </div>
       </div>
+      {liability && liability.Amt > 0 && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+          <div className="bg-white shadow rounded-lg p-4">
+            <dt className="text-sm font-medium text-gray-500">Liability</dt>
+            <dd className="mt-1 text-3xl font-semibold text-gray-900">
+              ₹{formatIndianNumber(liability.Amt)}
+            </dd>
+          </div>
+
+          <div className="bg-white shadow rounded-lg p-4">
+            <dt className="text-sm font-medium text-gray-500">
+              Approved Amount
+            </dt>
+            <dd className="mt-1 text-3xl font-semibold text-gray-900">
+              ₹{formatIndianNumber(approvedAmount)}
+            </dd>
+          </div>
+
+          <div className="bg-white shadow rounded-lg p-4">
+            <dt className="text-sm font-medium text-gray-500">
+              Pending Amount
+            </dt>
+            <dd className="mt-1 text-3xl font-semibold text-gray-900">
+              ₹{formatIndianNumber(pendingApprovalAmount)}
+            </dd>
+          </div>
+
+          <div className="bg-white shadow rounded-lg p-4">
+            <dt className="text-sm font-medium text-gray-500">
+              Rejected Amount
+            </dt>
+            <dd className="mt-1 text-3xl font-semibold text-gray-900">
+              {formatIndianNumber(rejectedAmount)}
+            </dd>
+          </div>
+        </div>
+      )}
 
       <div className="flex justify-end mb-2">
         <button
