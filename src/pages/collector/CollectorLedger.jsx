@@ -69,6 +69,11 @@ export default function CollectorLedger({ collectorUserId }) {
     }
   };
 
+  const updateData = async () => {
+    setModalOpen(false);
+    await fetchCollectorLedgers();
+  }
+
   const openAddLedger = () => {
     setSelectedLedger(null); // reset selected ledger
     setModalOpen(true);
@@ -337,7 +342,7 @@ export default function CollectorLedger({ collectorUserId }) {
           collectorId={collectorUserId}
           masterData={masterData}
           cashiers={cashiers}
-          onClose={() => setModalOpen(false)}
+          onClose={updateData}
           modelFor="CollectorLedger"
           initialData={selectedLedger}
           selectedDate={selectedDate}

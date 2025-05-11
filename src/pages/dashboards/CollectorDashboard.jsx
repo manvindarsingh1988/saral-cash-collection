@@ -81,6 +81,11 @@ export default function CollectorDashboard({ collectorUserId }) {
     }
   };
 
+  const updateData = async () => {
+    setModalOpen(false);
+    await fetchData();
+  }
+
   const getMasterValue = (type, id) => {
     const list = masterData?.[type] || [];
     return list.find((x) => x.Id == id)?.Description || id;
@@ -346,7 +351,7 @@ export default function CollectorDashboard({ collectorUserId }) {
         <CollectorLedgerModal
           masterData={masterData}
           isOpen={isModalOpen}
-          onClose={() => setModalOpen(false)}
+          onClose={updateData}
           onSubmit={handleLedgerSubmit}
           initialData={editData}
           modelFor="RetailerLedger"

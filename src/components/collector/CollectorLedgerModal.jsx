@@ -133,7 +133,10 @@ export default function CollectorLedgerModal({
                     Select {label}
                   </option>
                   {key === "WorkFlow" &&
-                    workflows?.map((opt) => (
+                    workflows?.filter(_ => { 
+                      if (_.Id === 1 || _.Id === 2 || _.Id === 3) return true;
+                      else return false;
+                    }).map((opt) => (
                       <option key={opt.Id} value={opt.Id}>
                         {opt.Description}
                       </option>
