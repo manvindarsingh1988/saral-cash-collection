@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { formatIndianNumber } from "../../lib/utils";
-import LadgerDetailsDialog from "./LedgerDetailsDialog";
+import LadgerDetailsDialog from "../LedgerDetailsDialog";
 
 const columns = [
   { heading: "Retailer Name", key: "RetailUserName", width: "200px" },
