@@ -134,6 +134,20 @@ export default function CollectorLiabilities() {
                     </div>
                   </th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <div className="flex flex-col">
+                      <span>Handover Amount (₹)</span>
+                      <input
+                        type="text"
+                        value={filters.HandoverAmt}
+                        onChange={(e) =>
+                          onFilterChange("Amount", e.target.value)
+                        }
+                        placeholder="Filter"
+                        className="mt-1 px-2 py-1 border border-gray-300 rounded text-xs"
+                      />
+                    </div>
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Action
                   </th>
                 </tr>
@@ -149,6 +163,9 @@ export default function CollectorLiabilities() {
                     </td>
                     <td className="px-4 py-4 whitespace-nowrap text-gray-900 font-semibold">
                       ₹ {formatIndianNumber(item.Amount)}
+                    </td>
+                    <td className="px-4 py-4 whitespace-nowrap text-gray-900 font-semibold">
+                      ₹ {formatIndianNumber(item.HandoverAmt)}
                     </td>
                     <td className="px-4 py-4 whitespace-nowrap text-indigo-600">
                       <button
