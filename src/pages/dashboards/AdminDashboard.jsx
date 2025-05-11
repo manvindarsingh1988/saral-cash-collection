@@ -116,7 +116,7 @@ export default function AdminDashboard() {
                     Total Clear Amount
                   </dt>
                   <dd className="mt-1 text-3xl font-semibold text-gray-900">
-                    {formatIndianNumber(summary.totalTransactions)}
+                  ₹{formatIndianNumber(summary.totalClearedAmt)}
                   </dd>
                 </div>
               </div>
