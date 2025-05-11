@@ -9,12 +9,14 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [liabilities, setLiabilities] = useState([]);
-  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split("T")[0]);
+  const [selectedDate, setSelectedDate] = useState(
+    new Date().toISOString().split("T")[0]
+  );
 
   const [summary, setSummary] = useState({
     totalAmt: 0,
     totalHandover: 0,
-    totalTransactions: 0,
+    totalClearedAmt: 0,
   });
 
   const fetchLiabilities = async (date) => {
@@ -24,13 +26,23 @@ export default function AdminDashboard() {
 
       setLiabilities(retailerData);
 
-      const totalAmt = retailerData.reduce((sum, item) => sum + (item.Amt || 0), 0);
-      const totalHandover = retailerData.reduce((sum, item) => sum + (item.HandoverAmt || 0), 0);
+      const totalAmt = retailerData.reduce(
+        (sum, item) => sum + (item.Amt || 0),
+        0
+      );
+      const totalHandover = retailerData.reduce(
+        (sum, item) => sum + (item.HandoverAmt || 0),
+        0
+      );
+      const totalClearedAmt = retailerData.reduce(
+        (sum, item) => sum + (item.ClearedAmt || 0),
+        0
+      );
 
       setSummary({
         totalAmt,
         totalHandover,
-        totalTransactions: retailerData.length,
+        totalClearedAmt: totalClearedAmt,
       });
       setLoading(false);
     } catch (err) {
@@ -99,16 +111,19 @@ export default function AdminDashboard() {
                 <div className="bg-white overflow-hidden shadow rounded-lg">
                   <div className="px-4 py-5 sm:p-3">
                     <dt className="text-sm font-medium text-gray-500 truncate">
-                      Total Transactions
+                      Total Clear Amount
                     </dt>
                     <dd className="mt-1 text-3xl font-semibold text-gray-900">
-                      {summary.totalTransactions}
+                      {formatIndianNumber(summary.totalTransactions)}
                     </dd>
                   </div>
                 </div>
               </div>
 
-              <RetailerLiabilityTable data={liabilities} selectedDate={selectedDate} />
+              <RetailerLiabilityTable
+                data={liabilities}
+                selectedDate={selectedDate}
+              />
             </>
           )}
         </div>
