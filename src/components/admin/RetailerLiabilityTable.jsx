@@ -106,7 +106,7 @@ export default function RetailerLiabilityTable({ data, selectedDate }) {
 
       {openDialog && selectedRetailer && (
         <LadgerDetailsDialog
-          retailerId={selectedRetailer}
+          userId={selectedRetailer}
           date={selectedDate}
           onClose={() => {
             setOpenDialog(false);

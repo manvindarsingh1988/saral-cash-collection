@@ -11,7 +11,12 @@ const columns = [
   { heading: "Comment", key: "Comment", width: "200px" },
 ];
 
-export default function LadgerDetailsDialog({ retailerId, date, onClose }) {
+export default function LadgerDetailsDialog({
+  userId,
+  date,
+  onClose,
+  modelFor = "Retailer",
+}) {
   const [ladgerData, setLadgerData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [masterData, setMasterData] = useState({});
@@ -19,12 +24,23 @@ export default function LadgerDetailsDialog({ retailerId, date, onClose }) {
   useEffect(() => {
     const fetchLadger = async () => {
       try {
-        const [retailerData, masterData] = await Promise.all([
-          apiBase.getLadgerInfoByRetailerid(date, retailerId),
-          apiBase.getMasterData(),
-        ]);
-        setLadgerData(retailerData || []);
-        setMasterData(masterData || {});
+        if (modelFor === "Collector") {
+          const [retailerData, masterData] = await Promise.all([
+            apiBase.getCollectorLiabilityDetails(date, userId),
+            apiBase.getMasterData(),
+          ]);
+
+          setLadgerData(retailerData || []);
+          setMasterData(masterData || {});
+        } else if (modelFor === "Retailer") {
+          const [retailerData, masterData] = await Promise.all([
+            apiBase.getLadgerInfoByRetailerid(date, userId),
+            apiBase.getMasterData(),
+          ]);
+
+          setLadgerData(retailerData || []);
+          setMasterData(masterData || {});
+        }
       } catch (err) {
         console.error("Failed to fetch ladger info", err);
       } finally {
@@ -33,7 +49,7 @@ export default function LadgerDetailsDialog({ retailerId, date, onClose }) {
     };
 
     fetchLadger();
-  }, [retailerId, date]);
+  }, [userId, date]);
 
   const getMasterValue = (type, id) => {
     const list = masterData?.[type] || [];
