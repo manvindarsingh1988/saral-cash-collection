@@ -204,48 +204,45 @@ export default function CollectorDashboard({ collectorUserId }) {
               </button>
             </div>
           </div>
+        </div>
+        {liability && liability.Amt > 0 && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+            <div className="bg-white shadow rounded-lg p-4">
+              <dt className="text-sm font-medium text-gray-500">Liability</dt>
+              <dd className="mt-1 text-3xl font-semibold text-gray-900">
+                ₹{formatIndianNumber(liability.Amt)}
+              </dd>
+            </div>
 
-          {liability && liability.Amt > 0 && (
-            <>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-                <div className="bg-white shadow rounded-lg p-4">
-                  <dt className="text-sm font-medium text-gray-500">
-                    Liability
-                  </dt>
-                  <dd className="mt-1 text-3xl font-semibold text-gray-900">
-                    ₹{formatIndianNumber(liability.Amt)}
-                  </dd>
-                </div>
+            <div className="bg-white shadow rounded-lg p-4">
+              <dt className="text-sm font-medium text-gray-500">
+                Approved Amount
+              </dt>
+              <dd className="mt-1 text-3xl font-semibold text-gray-900">
+                ₹{formatIndianNumber(totalLedgerAmount)}
+              </dd>
+            </div>
 
-                <div className="bg-white shadow rounded-lg p-4">
-                  <dt className="text-sm font-medium text-gray-500">
-                    Approved Amount
-                  </dt>
-                  <dd className="mt-1 text-3xl font-semibold text-gray-900">
-                    ₹{formatIndianNumber(totalLedgerAmount)}
-                  </dd>
-                </div>
+            <div className="bg-white shadow rounded-lg p-4">
+              <dt className="text-sm font-medium text-gray-500">
+                Pending Amount
+              </dt>
+              <dd className="mt-1 text-3xl font-semibold text-gray-900">
+                ₹{formatIndianNumber(totalLedgerAmount)}
+              </dd>
+            </div>
 
-                <div className="bg-white shadow rounded-lg p-4">
-                  <dt className="text-sm font-medium text-gray-500">
-                    Pending Amount
-                  </dt>
-                  <dd className="mt-1 text-3xl font-semibold text-gray-900">
-                    ₹{formatIndianNumber(totalLedgerAmount)}
-                  </dd>
-                </div>
-
-                <div className="bg-white shadow rounded-lg p-4">
-                  <dt className="text-sm font-medium text-gray-500">
-                    Rejected Amount
-                  </dt>
-                  <dd className="mt-1 text-3xl font-semibold text-gray-900">
-                    {computedStatus}
-                  </dd>
-                </div>
-              </div>
-
-              {/* <div className="flex justify-end mb-2">
+            <div className="bg-white shadow rounded-lg p-4">
+              <dt className="text-sm font-medium text-gray-500">
+                Rejected Amount
+              </dt>
+              <dd className="mt-1 text-3xl font-semibold text-gray-900">
+                {computedStatus}
+              </dd>
+            </div>
+          </div>
+        )}
+        {/* <div className="flex justify-end mb-2">
                 <button
                   disabled={computedStatus === "Approved"}
                   onClick={openAddLedger}
@@ -254,104 +251,98 @@ export default function CollectorDashboard({ collectorUserId }) {
                   Add Ledger Entry
                 </button>
               </div> */}
-
-              <div className="overflow-y-auto border border-gray-200 rounded h-[400px]">
-                <table className="w-full table-auto divide-y divide-gray-200 text-xs">
-                  <thead className="bg-gray-50 sticky top-0 z-10">
-                    <tr>
-                      {columns.map(({ key, label, width }) => (
-                        <th
-                          key={key}
-                          className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase"
-                          style={{ width, whiteSpace: "nowrap" }}
-                        >
-                          <div className="flex flex-col min-w-fit">
-                            <span>{label}</span>
-                            {["TransactionTypes", "WorkFlows"].includes(key) &&
-                            masterData ? (
-                              <select
-                                value={filters[key]}
-                                onChange={(e) =>
-                                  handleFilterChange(key, e.target.value)
-                                }
-                                className="mt-1 px-1 py-0.5 border border-gray-300 rounded text-xs"
-                                style={{ width }}
-                              >
-                                <option value="">All</option>
-                                {masterData[key]?.map((opt) => (
-                                  <option key={opt.Id} value={opt.Id}>
-                                    {opt.Description}
-                                  </option>
-                                ))}
-                              </select>
-                            ) : (
-                              <input
-                                type="text"
-                                style={{ width }}
-                                value={filters[key] || ""}
-                                onChange={(e) =>
-                                  handleFilterChange(key, e.target.value)
-                                }
-                                className="mt-1 px-1 py-0.5 border border-gray-300 rounded text-xs"
-                                placeholder="Filter"
-                              />
-                            )}
-                          </div>
-                        </th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {filteredData.map((item) => (
-                      <tr
-                        title="Click to edit"
-                        key={item.Id}
-                        onClick={() => openEditLedger(item)}
-                        className="cursor-pointer hover:bg-gray-100"
-                      >
-                        <td className="px-2 py-2">
-                          <a
-                            title="Click to edit"
-                            className="text-blue-600 underline hover:text-blue-800"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              openEditLedger(item);
-                            }}
+        <div className="bg-white rounded-lg shadow p-6">
+          <div className="overflow-y-auto border border-gray-200 rounded h-[400px]">
+            <table className="w-full table-auto divide-y divide-gray-200 text-xs">
+              <thead className="bg-gray-50 sticky top-0 z-10">
+                <tr>
+                  {columns.map(({ key, label, width }) => (
+                    <th
+                      key={key}
+                      className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase"
+                      style={{ width, whiteSpace: "nowrap" }}
+                    >
+                      <div className="flex flex-col min-w-fit">
+                        <span>{label}</span>
+                        {["TransactionTypes", "WorkFlows"].includes(key) &&
+                        masterData ? (
+                          <select
+                            value={filters[key]}
+                            onChange={(e) =>
+                              handleFilterChange(key, e.target.value)
+                            }
+                            className="mt-1 px-1 py-0.5 border border-gray-300 rounded text-xs"
+                            style={{ width }}
                           >
-                            {item.Id}
-                          </a>
-                        </td>
-                        <td className="px-2 py-2">{item.CollectorName}</td>
-                        <td className="px-2 py-2">
-                          ₹{formatIndianNumber(item.Amount)}
-                        </td>
-                        <td className="px-2 py-2">
-                          {getMasterValue(
-                            "TransactionTypes",
-                            item.TransactionType
-                          )}
-                        </td>
-                        <td className="px-2 py-2">
-                          {getMasterValue("WorkFlows", item.WorkFlow)}
-                        </td>
-                        <td className="px-2 py-2">
-                          {new Date(item.Date).toLocaleDateString()}
-                        </td>
-                        <td className="px-2 py-2">
-                          {new Date(item.GivenOn).toLocaleDateString()}
-                        </td>
-                        <td className="px-2 py-2 break-words max-w-[200px]">
-                          {item.Comment}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </>
-          )}
-
-          {((!ledger && selectedDate) || (liability && liability.Amt <= 0)) && (
+                            <option value="">All</option>
+                            {masterData[key]?.map((opt) => (
+                              <option key={opt.Id} value={opt.Id}>
+                                {opt.Description}
+                              </option>
+                            ))}
+                          </select>
+                        ) : (
+                          <input
+                            type="text"
+                            style={{ width }}
+                            value={filters[key] || ""}
+                            onChange={(e) =>
+                              handleFilterChange(key, e.target.value)
+                            }
+                            className="mt-1 px-1 py-0.5 border border-gray-300 rounded text-xs"
+                            placeholder="Filter"
+                          />
+                        )}
+                      </div>
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {filteredData.map((item) => (
+                  <tr
+                    title="Click to edit"
+                    key={item.Id}
+                    onClick={() => openEditLedger(item)}
+                    className="cursor-pointer hover:bg-gray-100"
+                  >
+                    <td className="px-2 py-2">
+                      <a
+                        title="Click to edit"
+                        className="text-blue-600 underline hover:text-blue-800"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          openEditLedger(item);
+                        }}
+                      >
+                        {item.Id}
+                      </a>
+                    </td>
+                    <td className="px-2 py-2">{item.CollectorName}</td>
+                    <td className="px-2 py-2">
+                      ₹{formatIndianNumber(item.Amount)}
+                    </td>
+                    <td className="px-2 py-2">
+                      {getMasterValue("TransactionTypes", item.TransactionType)}
+                    </td>
+                    <td className="px-2 py-2">
+                      {getMasterValue("WorkFlows", item.WorkFlow)}
+                    </td>
+                    <td className="px-2 py-2">
+                      {new Date(item.Date).toLocaleDateString()}
+                    </td>
+                    <td className="px-2 py-2">
+                      {new Date(item.GivenOn).toLocaleDateString()}
+                    </td>
+                    <td className="px-2 py-2 break-words max-w-[200px]">
+                      {item.Comment}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          {ledger?.length == 0 && selectedDate && (
             <div className="text-gray-500 mt-4">
               No data available for selected date.
             </div>
