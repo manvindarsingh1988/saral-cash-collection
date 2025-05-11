@@ -250,7 +250,7 @@ export const apiBase = {
     return data;
   },
 
-  saveCollectorUser: async (user) => {
+  saveUser: async (user) => {
     const response = await fetch(`${API_URL}/SaveUser`, {
       method: "POST",
       headers: {

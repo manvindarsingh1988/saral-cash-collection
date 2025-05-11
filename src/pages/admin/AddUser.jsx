@@ -37,6 +37,7 @@ export default function AddUser() {
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState(null);
+  const [password, setPassword] = useState("");
 
   useEffect(() => {
     try {
@@ -60,8 +61,10 @@ export default function AddUser() {
       setError(null);
       setSuccess(false);
 
-      await apiBase.saveCollectorUser(formData);
+      const response = await apiBase.saveUser(formData); // assuming it returns user data with password
+      const generatedPassword = response?.password || "Temp@1234"; // fallback if not returned
 
+      setPassword(generatedPassword);
       setSuccess(true);
       setFormData({
         userType: 12,
@@ -156,6 +159,25 @@ export default function AddUser() {
           </button>
         </form>
       </div>
+      {success && (
+        <div className="rounded-md bg-green-50 p-4 text-sm text-green-700 space-y-2">
+          <div>Account created successfully!</div>
+          {password && (
+            <div className="flex items-center space-x-2">
+              <span className="font-mono bg-white px-2 py-1 border rounded text-gray-900">
+                {password}
+              </span>
+              <button
+                type="button"
+                onClick={() => navigator.clipboard.writeText(password)}
+                className="text-sm px-2 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded"
+              >
+                Copy
+              </button>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
