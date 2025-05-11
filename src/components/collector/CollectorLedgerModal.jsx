@@ -54,7 +54,7 @@ export default function CollectorLedgerModal({
         Amount: initialData.Amount ?? "",
         WorkFlow: initialData.WorkFlow ?? "",
         Date: initialData.Date
-          ? new Date(initialData.Date).toISOString().split("T")[0]
+          ? initialData.Date.split("T")[0]
           : "",
         GivenOn: today, // always keep today
         Comment: initialData.Comment ?? "",

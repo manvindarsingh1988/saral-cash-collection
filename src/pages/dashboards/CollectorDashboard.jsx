@@ -19,7 +19,9 @@ export default function CollectorDashboard({ collectorUserId }) {
   useDocumentTitle("Collector Dashboard");
   const [isModalOpen, setModalOpen] = useState(false);
   const [editData, setEditData] = useState(null);
-  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split("T")[0]);
+  const [selectedDate, setSelectedDate] = useState(
+    new Date().toISOString().split("T")[0]
+  );
   const [selectedRetailerId, setSelectedRetailerId] = useState("");
   const [liability, setLiability] = useState(null);
   const [ledger, setLedger] = useState(null);
@@ -205,7 +207,7 @@ export default function CollectorDashboard({ collectorUserId }) {
 
           {liability && liability.Amt > 0 && (
             <>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
                 <div className="bg-white shadow rounded-lg p-4">
                   <dt className="text-sm font-medium text-gray-500">
                     Liability
@@ -214,21 +216,35 @@ export default function CollectorDashboard({ collectorUserId }) {
                     ₹{formatIndianNumber(liability.Amt)}
                   </dd>
                 </div>
+
                 <div className="bg-white shadow rounded-lg p-4">
                   <dt className="text-sm font-medium text-gray-500">
-                    Handover
+                    Approved Amount
                   </dt>
                   <dd className="mt-1 text-3xl font-semibold text-gray-900">
                     ₹{formatIndianNumber(totalLedgerAmount)}
                   </dd>
                 </div>
+
                 <div className="bg-white shadow rounded-lg p-4">
-                  <dt className="text-sm font-medium text-gray-500">Status</dt>
-                  <dd className="mt-1 text-2xl font-semibold text-gray-900">
+                  <dt className="text-sm font-medium text-gray-500">
+                    Pending Amount
+                  </dt>
+                  <dd className="mt-1 text-3xl font-semibold text-gray-900">
+                    ₹{formatIndianNumber(totalLedgerAmount)}
+                  </dd>
+                </div>
+
+                <div className="bg-white shadow rounded-lg p-4">
+                  <dt className="text-sm font-medium text-gray-500">
+                    Rejected Amount
+                  </dt>
+                  <dd className="mt-1 text-3xl font-semibold text-gray-900">
                     {computedStatus}
                   </dd>
                 </div>
               </div>
+
               {/* <div className="flex justify-end mb-2">
                 <button
                   disabled={computedStatus === "Approved"}
