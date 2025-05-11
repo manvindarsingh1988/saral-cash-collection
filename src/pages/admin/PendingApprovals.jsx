@@ -7,11 +7,12 @@ const columns = [
   { heading: "Amount (₹)", accessor: "Amount", width: "130px" },
   { heading: "Retailer Name", accessor: "RetailerName", width: "200px" },
   { heading: "Cashier Name", accessor: "CashierName", width: "180px" },
-  { heading: "Collector Name", accessor: "CollectorName", width: "180px" },
-  { heading: "Transaction Type", accessor: "TransactionType", width: "180px" },
-  { heading: "Workflow", accessor: "WorkFlow", width: "150px" },
+  { heading: "Collector Name", accessor: "CollectorName", width: "120px" },
+  { heading: "Transaction Type", accessor: "TransactionType", width: "120px" },
+  { heading: "Workflow", accessor: "WorkFlow", width: "120px" },
   { heading: "Date", accessor: "Date", width: "130px" },
   { heading: "Given On", accessor: "GivenOn", width: "130px" },
+  { heading: "Comment", accessor: "Comment", width: "100px" },
 ];
 
 export default function PendingApprovals() {
