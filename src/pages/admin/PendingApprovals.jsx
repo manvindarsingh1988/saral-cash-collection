@@ -80,29 +80,6 @@ export default function PendingApprovals() {
     <div className="space-y-6">
       <div className="bg-white shadow rounded-lg">
         <div className="px-4 py-5 sm:p-6">
-          {/* Date Filter */}
-          {/* <div className="rounded-lg shadow-sm mb-6">
-            <div className="flex flex-col sm:flex-row sm:items-end gap-4">
-              <div className="flex-1">
-                <label className="block text-sm font-medium text-indigo-700 mb-1">
-                  Select Date
-                </label>
-                <input
-                  type="date"
-                  value={selectedDate}
-                  onChange={(e) => setSelectedDate(e.target.value)}
-                  className="w-full px-3 py-2 border border-indigo-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                />
-              </div>
-              <button
-                onClick={() => fetchPendingApprovals(selectedDate)}
-                className="bg-indigo-600 text-white px-6 py-2 rounded-md hover:bg-indigo-700 transition duration-200 mt-2 sm:mt-0"
-              >
-                🔍 Search
-              </button>
-            </div>
-          </div> */}
-
           {loading && <div>Loading...</div>}
           {error && <div className="text-red-600">{error}</div>}
 
