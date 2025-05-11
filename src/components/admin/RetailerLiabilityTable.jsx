@@ -6,8 +6,7 @@ const columns = [
   { heading: "Retailer Name", key: "RetailUserName", width: "200px" },
   { heading: "Amount", key: "Amt", width: "80px" },
   { heading: "Handover Amount", key: "HandoverAmt", width: "80px" },
-  { heading: "Clear Amount", key: "ClearAmt", width: "80px" },
-  { heading: "Status", key: "Status", width: "80px" },
+  { heading: "Clear Amount", key: "ClearedAmt", width: "80px" },
   { heading: "Action", key: "Action", width: "80px", isAction: true },
 ];
 
@@ -42,8 +41,8 @@ export default function RetailerLiabilityTable({ data, selectedDate }) {
   };
 
   return (
-    <>
-      <div className="overflow-y-auto overflow-x-hidden max-h-[400px] border border-gray-200 rounded">
+    <div className="bg-white rounded-lg shadow p-6">
+      <div className="overflow-y-auto overflow-x-hidden max-h-[400px] border border-gray-200 rounded text-xs">
         <table className="min-w-full table-auto divide-y divide-gray-200">
           <thead className="bg-gray-50 sticky top-0 z-10">
             <tr>
@@ -60,7 +59,7 @@ export default function RetailerLiabilityTable({ data, selectedDate }) {
                       <span>{col.heading}</span>
                       <input
                         type="text"
-                        style={{ width: col.width }}
+                        // style={{ width: col.width }}
                         placeholder={`Filter`}
                         value={filters[col.key] || ""}
                         onChange={(e) =>
@@ -92,7 +91,7 @@ export default function RetailerLiabilityTable({ data, selectedDate }) {
                       </button>
                     ) : col.key === "Amt" ||
                       col.key === "HandoverAmt" ||
-                      col.key === "ClearAmt" ? (
+                      col.key === "ClearedAmt" ? (
                       `₹${formatIndianNumber(item[col.key])}`
                     ) : (
                       item[col.key]
@@ -115,6 +114,6 @@ export default function RetailerLiabilityTable({ data, selectedDate }) {
           }}
         />
       )}
-    </>
+    </div>
   );
 }

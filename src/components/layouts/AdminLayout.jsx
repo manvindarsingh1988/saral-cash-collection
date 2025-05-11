@@ -45,7 +45,7 @@ export default function AdminLayout({ children }) {
                       "/collector-ledgers"
                     )} text-white rounded-md px-3 py-2 text-sm font-medium`}
                   >
-                    Collector Ledgers
+                    Collector Liabilties
                   </Link>
                   <Link
                     to="/pending-approvals"

@@ -9,7 +9,7 @@ import RetailUserLayout from "./layouts/RetailUserLayout";
 import CollectorLayout from "./layouts/CollectorLayout";
 import AddUser from "../pages/admin/AddUser";
 import AssignRetail from "../pages/admin/AssignRetail";
-import CollectorLedgers from "../pages/admin/CollectorLedgers";
+import CollectorLiabilities from "../pages/admin/CollectorLiabilities";
 import CollectorLedger from "../pages/collector/CollectorLedger";
 import PendingApprovals from "../pages/admin/PendingApprovals";
 
@@ -20,7 +20,7 @@ export default function UserSpecificDashboard() {
     return (
       <AdminLayout>
         <Routes>
-          <Route path="/collector-ledgers" element={<CollectorLedgers />} />
+          <Route path="/collector-ledgers" element={<CollectorLiabilities />} />
           <Route path="/add-user" element={<AddUser />} />
           <Route path="/assign-retail" element={<AssignRetail />} />
           <Route path="/pending-approvals" element={<PendingApprovals />} />
