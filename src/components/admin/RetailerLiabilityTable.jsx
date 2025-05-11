@@ -41,7 +41,7 @@ export default function RetailerLiabilityTable({ data, selectedDate }) {
   };
 
   return (
-    <>
+    <div className="bg-white rounded-lg shadow p-6">
       <div className="overflow-y-auto overflow-x-hidden max-h-[400px] border border-gray-200 rounded text-xs">
         <table className="min-w-full table-auto divide-y divide-gray-200">
           <thead className="bg-gray-50 sticky top-0 z-10">
@@ -114,6 +114,6 @@ export default function RetailerLiabilityTable({ data, selectedDate }) {
           }}
         />
       )}
-    </>
+    </div>
   );
 }

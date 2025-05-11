@@ -55,7 +55,7 @@ export default function AdminDashboard() {
   return (
     <div className="space-y-6">
       <div className="bg-white shadow rounded-lg">
-        <div className="px-4 py-5 sm:p-6">
+        <div className="px-4 sm:p-6">
           {/* Search Filter */}
           <div className="rounded-lg shadow-sm mb-6">
             <div className="flex flex-col sm:flex-row sm:items-end gap-4">
@@ -78,56 +78,57 @@ export default function AdminDashboard() {
               </button>
             </div>
           </div>
-
-          {loading && <div>Loading...</div>}
-          {error && <div className="text-red-600">{error}</div>}
-
-          {liabilities.length > 0 && (
-            <>
-              <h3 className="text-lg font-medium text-gray-900 mb-4">
-                Retailer Liabilities
-              </h3>
-              <div className="grid grid-cols-1 gap-6 sm:grid-cols-3 mt-4 mb-4">
-                <div className="bg-white overflow-hidden shadow rounded-lg">
-                  <div className="px-4 py-5 sm:p-3">
-                    <dt className="text-sm font-medium text-gray-500 truncate">
-                      Total Liability Amount
-                    </dt>
-                    <dd className="mt-1 text-3xl font-semibold text-gray-900">
-                      ₹{formatIndianNumber(summary.totalAmt)}
-                    </dd>
-                  </div>
-                </div>
-                <div className="bg-white overflow-hidden shadow rounded-lg">
-                  <div className="px-4 py-5 sm:p-3">
-                    <dt className="text-sm font-medium text-gray-500 truncate">
-                      Total Handover Amount
-                    </dt>
-                    <dd className="mt-1 text-3xl font-semibold text-gray-900">
-                      ₹{formatIndianNumber(summary.totalHandover)}
-                    </dd>
-                  </div>
-                </div>
-                <div className="bg-white overflow-hidden shadow rounded-lg">
-                  <div className="px-4 py-5 sm:p-3">
-                    <dt className="text-sm font-medium text-gray-500 truncate">
-                      Total Clear Amount
-                    </dt>
-                    <dd className="mt-1 text-3xl font-semibold text-gray-900">
-                      {formatIndianNumber(summary.totalTransactions)}
-                    </dd>
-                  </div>
-                </div>
-              </div>
-
-              <RetailerLiabilityTable
-                data={liabilities}
-                selectedDate={selectedDate}
-              />
-            </>
-          )}
         </div>
       </div>
+
+      {loading && (
+        <div className="bg-white rounded-lg shadow p-6">Loading...</div>
+      )}
+      {error && <div className="text-red-600">{error}</div>}
+
+      {liabilities.length > 0 && (
+        <>
+          <div className="rounded-lg">
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-3 mt-4 mb-4">
+              <div className="bg-white overflow-hidden shadow rounded-lg">
+                <div className="px-4 py-5 sm:p-3">
+                  <dt className="text-sm font-medium text-gray-500 truncate">
+                    Total Liability Amount
+                  </dt>
+                  <dd className="mt-1 text-3xl font-semibold text-gray-900">
+                    ₹{formatIndianNumber(summary.totalAmt)}
+                  </dd>
+                </div>
+              </div>
+              <div className="bg-white overflow-hidden shadow rounded-lg">
+                <div className="px-4 py-5 sm:p-3">
+                  <dt className="text-sm font-medium text-gray-500 truncate">
+                    Total Handover Amount
+                  </dt>
+                  <dd className="mt-1 text-3xl font-semibold text-gray-900">
+                    ₹{formatIndianNumber(summary.totalHandover)}
+                  </dd>
+                </div>
+              </div>
+              <div className="bg-white overflow-hidden shadow rounded-lg">
+                <div className="px-4 py-5 sm:p-3">
+                  <dt className="text-sm font-medium text-gray-500 truncate">
+                    Total Clear Amount
+                  </dt>
+                  <dd className="mt-1 text-3xl font-semibold text-gray-900">
+                    {formatIndianNumber(summary.totalTransactions)}
+                  </dd>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <RetailerLiabilityTable
+            data={liabilities}
+            selectedDate={selectedDate}
+          />
+        </>
+      )}
     </div>
   );
 }
