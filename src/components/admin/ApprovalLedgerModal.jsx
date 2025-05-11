@@ -13,6 +13,7 @@ const allowedFields = [
   "Id",
   "TransactionType",
   "CollectorId",
+  "WorkFlow",
   "Amount",
   "Date",
   "Comment",
@@ -95,7 +96,7 @@ export default function ApprovalLedgerModal({
             inputElement = (
               <>
                 <select
-                  disabled={key === "WorkFlow"}
+                  disabled={key === "TransactionType"}
                   name={key}
                   value={formData[key]}
                   onChange={handleChange}
@@ -104,11 +105,21 @@ export default function ApprovalLedgerModal({
                   <option value="" disabled hidden>
                     Select {key} Type
                   </option>
-                  {masterData?.[key + "s"]?.map((type) => (
-                    <option key={type.Id} value={type.Id}>
-                      {type.Description}
-                    </option>
-                  ))}
+                  {masterData?.[key + "s"]?.map((type) => {
+                    if (
+                      key === "WorkFlow" &&
+                      type.Id !== 1 &&
+                      type.Id !== 4 &&
+                      type.Id !== 5
+                    )
+                      return null;
+
+                    return (
+                      <option key={type.Id} value={type.Id}>
+                        {type.Description}
+                      </option>
+                    );
+                  })}
                 </select>
                 {key === "TransactionType" &&
                   formData["TransactionType"] === "2" && (
