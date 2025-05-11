@@ -3,22 +3,22 @@ import { apiBase } from "../../lib/apiBase";
 import CollectorLedgerTable from "../../components/admin/CollectorLedgerTable";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
 
-export default function CollectorLedgers() {
-  useDocumentTitle("Collector Ledgers");
+export default function CollectorLiabilities() {
+  useDocumentTitle("Collector Liabilities");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [collectorLedgers, setCollectorLedgers] = useState([]);
+  const [collectorLiabilities, setCollectorLiabilities] = useState([]);
   const [selectedDate, setSelectedDate] = useState(
     new Date().toISOString().split("T")[0]
   );
 
-  const fetchCollectorLedgers = async (date) => {
+  const fetchCollectorLiabilities = async (date) => {
     try {
       setLoading(true);
       const collectorData = await apiBase.getLadgerInfosCreatedByCollectors(
         date
       );
-      setCollectorLedgers(collectorData);
+      setCollectorLiabilities(collectorData);
       setLoading(false);
     } catch (err) {
       console.error("Error fetching collector ledgers:", err);
@@ -46,7 +46,7 @@ export default function CollectorLedgers() {
                 />
               </div>
               <button
-                onClick={() => fetchCollectorLedgers(selectedDate)}
+                onClick={() => fetchCollectorLiabilities(selectedDate)}
                 className="bg-indigo-600 text-white px-6 py-2 rounded-md hover:bg-indigo-700 transition duration-200 mt-2 sm:mt-0"
               >
                 🔍 Search
@@ -57,8 +57,8 @@ export default function CollectorLedgers() {
           {loading && <div>Loading...</div>}
           {error && <div className="text-red-600">{error}</div>}
 
-          {collectorLedgers.length > 0 && (
-            <CollectorLedgerTable data={collectorLedgers} />
+          {collectorLiabilities.length > 0 && (
+            <CollectorLedgerTable data={collectorLiabilities} />
           )}
         </div>
       </div>
