@@ -88,24 +88,20 @@ export default function PendingApprovals() {
 
   const handleLedgerSubmit = async (data) => {
     try {
-      data.RetailerId = retailUserId;
       const payload = {
         ...data,
         Amount: parseFloat(data.Amount),
         TransactionType: parseInt(data.TransactionType),
-        WorkFlow: 1,
+        WorkFlow: data.Workflow,
         Date: new Date(data.Date).toISOString(),
         GivenOn: new Date().toISOString(),
         CollectorId: data.TransactionType == "2" ? "" : data.CollectorId,
         CollectorName: data.TransactionType == "2" ? "" : data.CollectorName,
+        CashierId: apiBase.getCurrentUser()?.Id,
+        CashierName: apiBase.getCurrentUser()?.UserName,
       };
 
-      if (editData?.Id) {
-        await apiBase.updateLedgerInfo(payload);
-      } else {
-        await apiBase.addLedgerInfo(payload);
-      }
-
+      await apiBase.updateLedgerInfo(payload);
       await fetchData(selectedDate);
     } catch (err) {
       console.error("Submission failed:", err);
