@@ -18,11 +18,11 @@ export default function PendingApprovals() {
   useDocumentTitle("Pending Approvals");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [selectedDate, setSelectedDate] = useState(
-    new Date().toISOString().split("T")[0]
-  );
+  new Date().toISOString().split("T")[0];
+
   const [pendingApprovals, setPendingApprovals] = useState([]);
   const [filters, setFilters] = useState({});
+  const [masterData, setMasterData] = useState({});
 
   useEffect(() => {
     fetchPendingApprovals();
@@ -31,14 +31,24 @@ export default function PendingApprovals() {
   const fetchPendingApprovals = async (date) => {
     try {
       setLoading(true);
-      const approvals = await apiBase.getPendingApprovals(date);
+      const [masterData, approvals] = await Promise.all([
+        apiBase.getMasterData(),
+        apiBase.getPendingApprovals(date),
+      ]);
+
       setPendingApprovals(approvals);
+      setMasterData(masterData || {});
       setLoading(false);
     } catch (err) {
       console.error("Error fetching pending approvals:", err);
       setError(err.message || "Failed to fetch data");
       setLoading(false);
     }
+  };
+
+  const getMasterValue = (type, id) => {
+    const list = masterData?.[type] || [];
+    return list.find((x) => x.Id == id)?.Description || id;
   };
 
   const handleFilterChange = (accessor, value) => {
@@ -97,7 +107,7 @@ export default function PendingApprovals() {
 
           {pendingApprovals.length > 0 && (
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y border border-gray-200 rounded-lg">
+              <table className="min-w-full divide-y border border-gray-200 rounded-lg text-xs">
                 <thead className="">
                   <tr>
                     {columns.map((col) => (
@@ -117,15 +127,34 @@ export default function PendingApprovals() {
                         style={{ width: col.width }}
                         className="px-4 py-1"
                       >
-                        <input
-                          type="text"
-                          placeholder="Filter..."
-                          className="w-full px-2 py-1 border border-indigo-200 rounded-md text-sm"
-                          value={filters[col.accessor] || ""}
-                          onChange={(e) =>
-                            handleFilterChange(col.accessor, e.target.value)
-                          }
-                        />
+                        {["TransactionType", "WorkFlow"].includes(
+                          col.accessor
+                        ) && masterData ? (
+                          <select
+                            value={filters[col.accessor]}
+                            onChange={(e) =>
+                              handleFilterChange(col.accessor, e.target.value)
+                            }
+                            className="mt-1 px-1 py-0.5 border border-gray-300 rounded text-xs"
+                          >
+                            <option value="">All</option>
+                            {masterData[col.accessor + "s"]?.map((opt) => (
+                              <option key={opt.Id} value={opt.Id}>
+                                {opt.Description}
+                              </option>
+                            ))}
+                          </select>
+                        ) : (
+                          <input
+                            type="text"
+                            placeholder="Filter..."
+                            className="w-full px-2 py-1 border border-indigo-200 rounded-md"
+                            value={filters[col.accessor] || ""}
+                            onChange={(e) =>
+                              handleFilterChange(col.accessor, e.target.value)
+                            }
+                          />
+                        )}
                       </th>
                     ))}
                   </tr>
@@ -134,15 +163,48 @@ export default function PendingApprovals() {
                   {filteredData.length > 0 ? (
                     filteredData.map((item, idx) => (
                       <tr key={idx}>
-                        {columns.map((col) => (
-                          <td
-                            key={col.accessor}
-                            className="px-4 py-2 text-sm text-gray-900"
-                            style={{ width: col.width }}
-                          >
-                            {renderCell(item, col.accessor)}
-                          </td>
-                        ))}
+                        {columns.map((col) => {
+                          if (col.accessor === "TransactionType") {
+                            return (
+                              <td
+                                key={col.accessor}
+                                className="px-4 py-2 text-sm text-gray-900"
+                                style={{ width: col.width }}
+                              >
+                                {getMasterValue(
+                                  "TransactionTypes",
+                                  item.TransactionType
+                                )}
+                              </td>
+                            );
+                          } else if (col.accessor === "WorkFlow") {
+                            return (
+                              <td
+                                key={col.accessor}
+                                className="px-4 py-2 text-gray-900"
+                                style={{ width: col.width }}
+                              >
+                                {getMasterValue("WorkFlows", item.WorkFlow)}
+                              </td>
+                            );
+                          } else {
+                            {
+                              getMasterValue(
+                                "TransactionTypes",
+                                item.TransactionType
+                              );
+                            }
+                            return (
+                              <td
+                                key={col.accessor}
+                                className="px-4 py-2 text-gray-900"
+                                style={{ width: col.width }}
+                              >
+                                {renderCell(item, col.accessor)}
+                              </td>
+                            );
+                          }
+                        })}
                       </tr>
                     ))
                   ) : (
