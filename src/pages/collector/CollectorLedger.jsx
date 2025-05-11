@@ -162,7 +162,7 @@ export default function CollectorLedger({ collectorUserId }) {
           </button>
         </div>
       </div>
-      {liability && liability.Amt > 0 && (
+      {liability && collectorLedgers.length > 0 && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
           <div className="bg-white shadow rounded-lg p-4">
             <dt className="text-sm font-medium text-gray-500">Liability</dt>
