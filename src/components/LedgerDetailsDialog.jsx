@@ -22,6 +22,8 @@ export default function LadgerDetailsDialog({
   const [loading, setLoading] = useState(true);
   const [masterData, setMasterData] = useState({});
 
+  console.log("LadgerDetailsDialog", userId, date, modelFor);
+
   useEffect(() => {
     const fetchLadger = async () => {
       try {
@@ -36,6 +38,22 @@ export default function LadgerDetailsDialog({
         } else if (modelFor === "Retailer") {
           const [retailerData, masterData] = await Promise.all([
             apiBase.getLadgerInfoByRetailerid(date, userId),
+            apiBase.getMasterData(),
+          ]);
+
+          setLadgerData(retailerData || []);
+          setMasterData(masterData || {});
+        } else if (modelFor === "Handover") {
+          const [retailerData, masterData] = await Promise.all([
+            apiBase.getCollectorLedgerDetails(date, userId),
+            apiBase.getMasterData(),
+          ]);
+
+          setLadgerData(retailerData || []);
+          setMasterData(masterData || {});
+        } else if (modelFor === "Cleared") {
+          const [retailerData, masterData] = await Promise.all([
+            apiBase.getCollectorLiabilityDetails(date, userId),
             apiBase.getMasterData(),
           ]);
 

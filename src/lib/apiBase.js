@@ -308,6 +308,18 @@ export const apiBase = {
     return data;
   },
 
+  getCollectorLedgerDetails: async (date, collectorId) => {
+    const response = await fetch(
+      `${API_URL}/GetCollectorLedgerDetails?date=${date}&collectorId=${collectorId}`
+    );
+    if (!response.ok) {
+      console.error(`Failed to fetch: ${response.statusText}`);
+    }
+    const data = await response.json();
+    console.log(data);
+    return data;
+  },
+
   getPendingApprovals: async () => {
     const response = await fetch(`${API_URL}/GetPendingApprovalLedgers`);
     if (!response.ok) {

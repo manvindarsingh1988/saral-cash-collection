@@ -13,6 +13,7 @@ export default function CollectorLiabilities() {
   const [selectedDate, setSelectedDate] = useState(
     new Date().toISOString().split("T")[0]
   );
+  const [modelFor, setModelFor] = useState("Handover");
 
   const [filters, setFilters] = useState({
     CollectorId: "",
@@ -49,9 +50,10 @@ export default function CollectorLiabilities() {
     })
   );
 
-  const handleMoreDetails = (collectorId) => {
+  const handleMoreDetails = (collectorId, modelFor) => {
     setSelectedCollector(collectorId);
     setOpenDialog(true);
+    setModelFor(modelFor);
   };
 
   useEffect(() => {
@@ -161,9 +163,9 @@ export default function CollectorLiabilities() {
                       />
                     </div>
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  {/* <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Action
-                  </th>
+                  </th> */}
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
@@ -179,17 +181,19 @@ export default function CollectorLiabilities() {
                       ₹ {formatIndianNumber(item.Amount)}
                     </td>
                     <td className="px-4 py-4 whitespace-nowrap text-gray-900 font-semibold">
-                      ₹ {formatIndianNumber(item.HandoverAmt)}
-                    </td>
-                    <td className="px-4 py-4 whitespace-nowrap text-gray-900 font-semibold">
-                      ₹ {formatIndianNumber(item.ClearedAmt)}
-                    </td>
-                    <td className="px-4 py-4 whitespace-nowrap text-indigo-600">
                       <button
-                        onClick={() => handleMoreDetails(item.CollectorId)}
+                        onClick={() => handleMoreDetails(item.CollectorId, "Handover")}
                         className="underline hover:text-indigo-800"
                       >
-                        More Details
+                        ₹ {formatIndianNumber(item.HandoverAmt)}
+                      </button>
+                    </td>
+                    <td className="px-4 py-4 whitespace-nowrap text-gray-900 font-semibold">
+                      <button
+                        onClick={() => handleMoreDetails(item.CollectorId, "Cleared")}
+                        className="underline hover:text-indigo-800"
+                      >
+                        ₹ {formatIndianNumber(item.ClearedAmt)}
                       </button>
                     </td>
                   </tr>
@@ -206,9 +210,9 @@ export default function CollectorLiabilities() {
           date={selectedDate}
           onClose={() => {
             setOpenDialog(false);
-            selectedCollector(null);
+            setSelectedCollector(null);
           }}
-          modelFor="Collector"
+          modelFor={modelFor}
         />
       )}
     </>
