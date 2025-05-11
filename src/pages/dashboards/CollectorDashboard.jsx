@@ -242,15 +242,6 @@ export default function CollectorDashboard({ collectorUserId }) {
             </div>
           </div>
         )}
-        {/* <div className="flex justify-end mb-2">
-                <button
-                  disabled={computedStatus === "Approved"}
-                  onClick={openAddLedger}
-                  className="bg-green-600 text-white px-4 py-1.5 rounded hover:bg-green-700"
-                >
-                  Add Ledger Entry
-                </button>
-              </div> */}
         <div className="bg-white rounded-lg shadow p-6">
           <div className="overflow-y-auto border border-gray-200 rounded h-[400px]">
             <table className="w-full table-auto divide-y divide-gray-200 text-xs">
@@ -342,11 +333,11 @@ export default function CollectorDashboard({ collectorUserId }) {
               </tbody>
             </table>
           </div>
-          {ledger?.length == 0 && selectedDate && (
+          {/* {ledger?.length == 0 && selectedDate && (
             <div className="text-gray-500 mt-4">
               No data available for selected date.
             </div>
-          )}
+          )} */}
         </div>
       </div>
 
