@@ -101,6 +101,7 @@ export default function CollectorDashboard({ collectorUserId }) {
   };
 
   const openEditLedger = (data) => {
+    if (!data || data.WorkFlow == "5" || data.WorkFlow == "3" || data.WorkFlow == "2") return;
     setEditData(data);
     setModalOpen(true);
   };
