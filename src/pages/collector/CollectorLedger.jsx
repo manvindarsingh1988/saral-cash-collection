@@ -223,8 +223,7 @@ export default function CollectorLedger({ collectorUserId }) {
                       className="px-2 py-2"
                       onClick={() => openEditLedger(item)}
                     >
-                      {cashiers.find((c) => c.Id === item.CashierId)?.Name ||
-                        ""}
+                      {item.CashierName}
                     </td>
                     <td
                       className="px-2 py-2"
