@@ -283,4 +283,38 @@ export const apiBase = {
     console.log(result);
     return result;
   },
+
+  getCollectorLiabilities: async (date) => {
+    const response = await fetch(
+      `${API_URL}/GetCollectorLiabilities?date=${date}`
+    );
+    if (!response.ok) {
+      console.error(`Failed to fetch: ${response.statusText}`);
+    }
+    const data = await response.json();
+    console.log(data);
+    return data;
+  },
+
+  getCollectorLiabilityDetails: async (date, collectorId) => {
+    const response = await fetch(
+      `${API_URL}/GetCollectorLiabilityDetails?date=${date}&collectorId=${collectorId}`
+    );
+    if (!response.ok) {
+      console.error(`Failed to fetch: ${response.statusText}`);
+    }
+    const data = await response.json();
+    console.log(data);
+    return data;
+  },
+
+  getPendingApprovals: async () => {
+    const response = await fetch(`${API_URL}/GetPendingApprovalLedgers`);
+    if (!response.ok) {
+      console.error(`Failed to fetch: ${response.statusText}`);
+    }
+    const data = await response.json();
+    console.log(data);
+    return data;
+  },
 };

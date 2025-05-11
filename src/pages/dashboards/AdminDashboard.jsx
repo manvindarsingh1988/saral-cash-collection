@@ -57,7 +57,7 @@ export default function AdminDashboard() {
       <div className="bg-white shadow rounded-lg">
         <div className="px-4 sm:p-6">
           {/* Search Filter */}
-          <div className="rounded-lg shadow-sm mb-6">
+          <div className="rounded-lg shadow-sm">
             <div className="flex flex-col sm:flex-row sm:items-end gap-4">
               <div className="flex-1">
                 <label className="block text-sm font-medium text-indigo-700 mb-1">
