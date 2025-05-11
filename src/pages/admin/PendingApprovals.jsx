@@ -18,11 +18,11 @@ export default function PendingApprovals() {
   useDocumentTitle("Pending Approvals");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [selectedDate, setSelectedDate] = useState(
-    new Date().toISOString().split("T")[0]
-  );
+  new Date().toISOString().split("T")[0];
+
   const [pendingApprovals, setPendingApprovals] = useState([]);
   const [filters, setFilters] = useState({});
+  const [masterData, setMasterData] = useState({});
 
   useEffect(() => {
     fetchPendingApprovals();
@@ -31,8 +31,13 @@ export default function PendingApprovals() {
   const fetchPendingApprovals = async (date) => {
     try {
       setLoading(true);
-      const approvals = await apiBase.getPendingApprovals(date);
+      const [masterData, approvals] = await Promise.all([
+        apiBase.getMasterData(),
+        apiBase.getPendingApprovals(date),
+      ]);
+
       setPendingApprovals(approvals);
+      setMasterData(masterData || {});
       setLoading(false);
     } catch (err) {
       console.error("Error fetching pending approvals:", err);
