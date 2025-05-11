@@ -4,16 +4,16 @@ import { apiBase } from "../../lib/apiBase";
 import ApprovalLedgerModal from "../../components/admin/ApprovalLedgerModal";
 
 const columns = [
-  { heading: "ID", accessor: "Id", width: "100px" },
-  { heading: "Amount (₹)", accessor: "Amount", width: "130px" },
-  { heading: "Retailer Name", accessor: "RetailerName", width: "150px" },
-  { heading: "Cashier Name", accessor: "CashierName", width: "180px" },
+  { heading: "ID", accessor: "Id", width: "30px" },
+  { heading: "Amount (₹)", accessor: "Amount", width: "80px" },
+  // { heading: "Retailer Name", accessor: "RetailerName", width: "150px" },
+  { heading: "Cashier Name", accessor: "CashierName", width: "150px" },
   { heading: "Collector Name", accessor: "CollectorName", width: "100px" },
-  { heading: "Transaction Type", accessor: "TransactionType", width: "100px" },
-  { heading: "Workflow", accessor: "WorkFlow", width: "100px" },
-  { heading: "Date", accessor: "Date", width: "130px" },
-  { heading: "Given On", accessor: "GivenOn", width: "130px" },
-  { heading: "Comment", accessor: "Comment", width: "100px" },
+  { heading: "Transaction Type", accessor: "TransactionType", width: "50px" },
+  { heading: "Workflow", accessor: "WorkFlow", width: "70px" },
+  { heading: "Date", accessor: "Date", width: "100px" },
+  { heading: "Given On", accessor: "GivenOn", width: "100px" },
+  { heading: "Comment", accessor: "Comment", width: "80px" },
 ];
 
 export default function PendingApprovals() {
