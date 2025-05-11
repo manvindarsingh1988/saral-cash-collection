@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { apiBase } from "../../lib/apiBase";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
-import CollectorLiabilityDialog from "../../components/admin/CollectorLiabilityDialog";
 import { formatIndianNumber } from "../../lib/utils";
+import LadgerDetailsDialog from "../../components/LedgerDetailsDialog";
 
 export default function CollectorLiabilities() {
   useDocumentTitle("Collector Liabilities");
@@ -184,12 +184,12 @@ export default function CollectorLiabilities() {
       )}
 
       {openDialog && selectedCollector && (
-        <CollectorLedgerDialog
-          collectorId={selectedCollector}
+        <LadgerDetailsDialog
+          userId={selectedCollector}
           date={selectedDate}
           onClose={() => {
             setOpenDialog(false);
-            setSelectedCollector(null);
+            selectedCollector(null);
           }}
         />
       )}
