@@ -32,12 +32,12 @@ export default function PendingApprovals() {
     fetchPendingApprovals();
   }, [isModalOpen]);
 
-  const fetchPendingApprovals = async (date) => {
+  const fetchPendingApprovals = async () => {
     try {
       setLoading(true);
       const [masterData, approvals] = await Promise.all([
         apiBase.getMasterData(),
-        apiBase.getPendingApprovals(date),
+        apiBase.getPendingApprovals(),
       ]);
 
       setPendingApprovals(approvals);
@@ -263,6 +263,7 @@ export default function PendingApprovals() {
           masterData={masterData}
           onClose={() => {
             setModalOpen(false);
+            fetchPendingApprovals();
           }}
           onSubmit={handleLedgerSubmit}
           initialData={editData}
