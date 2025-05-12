@@ -175,7 +175,13 @@ export default function CollectorLiabilities() {
                       {item.CollectorUserName || "—"}
                     </td>
                     <td className="px-4 py-4 whitespace-nowrap text-gray-900 font-semibold">
-                      ₹ {formatIndianNumber(item.Amount)}
+                    <button
+                        onClick={() => handleMoreDetails(item.CollectorId, "Cleared")}
+                        className="underline hover:text-indigo-800"
+                      >
+                        ₹ {formatIndianNumber(item.Amount)}
+                      </button>
+                      
                     </td>
                     <td className="px-4 py-4 whitespace-nowrap text-gray-900 font-semibold">
                       <button
@@ -186,12 +192,8 @@ export default function CollectorLiabilities() {
                       </button>
                     </td>
                     <td className="px-4 py-4 whitespace-nowrap text-gray-900 font-semibold">
-                      <button
-                        onClick={() => handleMoreDetails(item.CollectorId, "Cleared")}
-                        className="underline hover:text-indigo-800"
-                      >
+                      
                         ₹ {formatIndianNumber(item.ClearedAmt)}
-                      </button>
                     </td>
                   </tr>
                 ))}
