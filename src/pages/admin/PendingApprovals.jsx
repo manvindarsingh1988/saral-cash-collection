@@ -30,7 +30,7 @@ export default function PendingApprovals() {
 
   useEffect(() => {
     fetchPendingApprovals();
-  }, [isModalOpen]);
+  }, []);
 
   const fetchPendingApprovals = async () => {
     try {
@@ -101,7 +101,7 @@ export default function PendingApprovals() {
       };
 
       await apiBase.updateLedgerInfo(payload);
-      await fetchData(selectedDate);
+      await fetchPendingApprovals();
     } catch (err) {
       console.error("Submission failed:", err);
     }
@@ -261,9 +261,8 @@ export default function PendingApprovals() {
       {isModalOpen && (
         <ApprovalLedgerModal
           masterData={masterData}
-          onClose={() => {
+          onClose={async () => {
             setModalOpen(false);
-            fetchPendingApprovals();
           }}
           onSubmit={handleLedgerSubmit}
           initialData={editData}
