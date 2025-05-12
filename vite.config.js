@@ -2,5 +2,5 @@
 import { defineConfig } from 'vite'
 
 export default defineConfig({
-  base: '/https://jangirsumit.github.io/', // replace with actual repo name
+  base: './', // replace with actual repo name
 })
