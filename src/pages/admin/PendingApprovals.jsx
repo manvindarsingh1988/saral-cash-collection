@@ -30,7 +30,7 @@ export default function PendingApprovals() {
 
   useEffect(() => {
     fetchPendingApprovals();
-  }, []);
+  }, [isModalOpen]);
 
   const fetchPendingApprovals = async (date) => {
     try {
@@ -92,7 +92,6 @@ export default function PendingApprovals() {
         ...data,
         Amount: parseFloat(data.Amount),
         TransactionType: parseInt(data.TransactionType),
-        WorkFlow: data.Workflow,
         Date: new Date(data.Date).toISOString(),
         GivenOn: new Date().toISOString(),
         CollectorId: data.TransactionType == "2" ? "" : data.CollectorId,
@@ -262,7 +261,9 @@ export default function PendingApprovals() {
       {isModalOpen && (
         <ApprovalLedgerModal
           masterData={masterData}
-          onClose={() => setModalOpen(false)}
+          onClose={() => {
+            setModalOpen(false);
+          }}
           onSubmit={handleLedgerSubmit}
           initialData={editData}
         />
