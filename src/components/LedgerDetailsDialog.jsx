@@ -10,6 +10,8 @@ const columns = [
   { heading: "Date", key: "Date", width: "120px" },
   { heading: "Given On", key: "GivenOn", width: "120px" },
   { heading: "Comment", key: "Comment", width: "200px" },
+  { heading: "Retailer", key: "RetailerName", width: "200px" },
+  { heading: "Cashier", key: "CashierName", width: "200px" },
 ];
 
 export default function LadgerDetailsDialog({
