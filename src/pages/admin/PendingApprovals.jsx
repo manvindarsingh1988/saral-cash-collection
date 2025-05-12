@@ -114,7 +114,7 @@ export default function PendingApprovals() {
           {loading && <div>Loading...</div>}
           {error && <div className="text-red-600">{error}</div>}
 
-          {pendingApprovals.length > 0 && (
+          {pendingApprovals.length >= 0 && (
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y border border-gray-200 rounded-lg text-xs">
                 <thead className="">
@@ -170,7 +170,7 @@ export default function PendingApprovals() {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {filteredData.length > 0 ? (
+                  {filteredData.length >= 0 ? (
                     filteredData.map((item, idx) => (
                       <tr
                         key={idx}
