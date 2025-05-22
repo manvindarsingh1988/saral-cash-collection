@@ -331,14 +331,48 @@ export const apiBase = {
   },
 
   getUserExtendedInfo: async () => {
-    const response = await fetch(
-      `${API_URL}/GetUserExtendedInfo`
-    );
+    const response = await fetch(`${API_URL}/GetUserExtendedInfo`);
     if (!response.ok) {
       console.error(`Failed to fetch: ${response.statusText}`);
     }
     const data = await response.json();
     console.log(data);
     return data;
-  }
+  },
+
+  updateIsSelfSubmitterFlag: async (userId, isSelfSubmitter) => {
+    const response = await fetch(`${API_URL}/UpdateIsSelfSubmitterFlag`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ userId, isSelfSubmitter }),
+    });
+
+    if (!response.ok) {
+      console.error(`Failed to fetch: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    console.log(data);
+    return data;
+  },
+
+  updateIsThirdPartyFlag: async (userId, isThirdParty) => {
+    const response = await fetch(`${API_URL}/UpdateIsThirdPartyFlag`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ userId, isThirdParty }),
+    });
+
+    if (!response.ok) {
+      console.error(`Failed to fetch: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    console.log(data);
+    return data;
+  },
 };

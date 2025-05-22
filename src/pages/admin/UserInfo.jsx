@@ -66,7 +66,7 @@ export default function UserInfo() {
   const formatDate = (dateStr) => {
     if (!dateStr || dateStr === "0001-01-01T00:00:00") return "-";
     const date = new Date(dateStr);
-    return date.toLocaleDateString("en-GB");
+    return date.toLocaleDateString();
   };
 
   const formatCurrency = (value) => {
@@ -87,32 +87,50 @@ export default function UserInfo() {
 
   const handleIsThirdPartyChange = async (e, userId) => {
     const isChecked = e.target.checked;
-    const user = userInfos.find((user) => user.Id === userId);
-    if (user) {
-      user.IsThirdParty = isChecked;
+    try {
+      const result = await apiBase.updateIsThirdPartyFlag(userId, isChecked);
+      if (!result.Response) {
+        alert(
+          `Failed to update 'Is Third Party' for user ${userId}: ${result.Message}`
+        );
+        return;
+      }
+
       setUserInfos((prev) =>
         prev.map((u) =>
           u.Id === userId ? { ...u, IsThirdParty: isChecked } : u
         )
       );
+    } catch (error) {
+      alert(
+        `Failed to update 'Is Third Party' for user ${userId}: ${error.message}`
+      );
+      console.error(error);
     }
-
-    console.log(isChecked, userId);
   };
 
   const handleIsSelfSubmitterChange = async (e, userId) => {
     const isChecked = e.target.checked;
-    const user = userInfos.find((user) => user.Id === userId);
-    if (user) {
-      user.IsSelfSubmitter = isChecked;
+    try {
+      const result = await apiBase.updateIsSelfSubmitterFlag(userId, isChecked);
+      if (!result.Response) {
+        alert(
+          `Failed to update 'Is Self Submitter' for user ${userId}: ${result.Message}`
+        );
+        return;
+      }
+      
       setUserInfos((prev) =>
         prev.map((u) =>
           u.Id === userId ? { ...u, IsSelfSubmitter: isChecked } : u
         )
       );
+    } catch (error) {
+      alert(
+        `Failed to update 'Is Self Submitter' for user ${userId}: ${error.message}`
+      );
+      console.error(error);
     }
-    
-    console.log(isChecked, userId);
   };
 
   const userTypeOptions = [
