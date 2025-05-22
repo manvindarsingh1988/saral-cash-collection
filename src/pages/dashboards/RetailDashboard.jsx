@@ -319,7 +319,7 @@ export default function RetailDashboard({ retailUserId }) {
                           <tr
                             title="Click to edit"
                             key={item.Id}
-                            onClick={() => openEditLedger(item)}
+                            // onClick={() => openEditLedger(item)}
                             className={`cursor-pointer ${getRowColor(
                               item.WorkFlow
                             )}`}
