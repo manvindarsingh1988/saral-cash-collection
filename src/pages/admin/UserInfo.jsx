@@ -1,5 +1,7 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
 import { apiBase } from "../../lib/apiBase";
+import UpdateOpeningBalanceModal from "../../components/admin/UpdateOpeningBalanceModal";
+import ConnectedCollectorsModal from "../../components/admin/ConnectedCollectorsModal";
 
 export default function UserInfo() {
   const [userInfos, setUserInfos] = useState([]);
@@ -8,8 +10,9 @@ export default function UserInfo() {
   const [masterData, setMasterData] = useState({});
 
   const [showModal, setShowModal] = useState(false);
-  const [selectedUserId, setSelectedUserId] = useState(null);
-  const [connectedCollectors, setConnectedCollectors] = useState([]);
+  const [selectedUserId, setSelectedUserId] = useState("");
+
+  const [showOpeningBalanceModal, setShowOpeningBalanceModal] = useState(false);
 
   const [filters, setFilters] = useState({
     id: "",
@@ -41,16 +44,16 @@ export default function UserInfo() {
     fetchUserInfos();
   }, []);
 
-  const handleIdClick = async (userId) => {
+  const handleIdClick = (userId) => {
     setSelectedUserId(userId);
+    setShowOpeningBalanceModal(false);
     setShowModal(true);
-    try {
-      const result = await apiBase.getLinkedCollectors(userId);
-      setConnectedCollectors(result || []);
-    } catch (err) {
-      console.error("Failed to fetch connected collectors", err);
-      setConnectedCollectors([]);
-    }
+  };
+
+  const handleOpeningBalance = (userId, currentOpeningBalance) => {
+    setSelectedUserId(userId);
+    setShowModal(false);
+    setShowOpeningBalanceModal(true);
   };
 
   const applyFilters = useCallback(() => {
@@ -76,7 +79,10 @@ export default function UserInfo() {
   }, [filters, userInfos]);
 
   useEffect(() => {
-    applyFilters();
+    const timeout = setTimeout(() => {
+      applyFilters();
+    }, 300);
+    return () => clearTimeout(timeout);
   }, [applyFilters]);
 
   const formatDate = (dateStr) => {
@@ -149,10 +155,13 @@ export default function UserInfo() {
     }
   };
 
-  const userTypeOptions = [
-    { Id: 5, Name: "Retailer" },
-    { Id: 12, Name: "Collector" },
-  ];
+  const userTypeOptions = useMemo(
+    () => [
+      { Id: 5, Name: "Retailer" },
+      { Id: 12, Name: "Collector" },
+    ],
+    []
+  );
 
   return (
     <div
@@ -292,6 +301,7 @@ export default function UserInfo() {
                 <th style={{ padding: "8px 12px", fontWeight: 600 }}>
                   Is Self Submitter
                 </th>
+                <th></th>
               </tr>
             </thead>
             <tbody>
@@ -377,6 +387,27 @@ export default function UserInfo() {
                         ""
                       )}
                     </td>
+                    <td>
+                      {user.UserType == 5 && user.Active ? (
+                        <button
+                          onClick={() =>
+                            handleOpeningBalance(user.Id, user.OpeningBalance)
+                          }
+                          style={{
+                            padding: "4px 8px",
+                            borderRadius: "4px",
+                            backgroundColor: "#007bff",
+                            color: "white",
+                            border: "none",
+                            cursor: "pointer",
+                          }}
+                        >
+                          Update opening balance
+                        </button>
+                      ) : (
+                        ""
+                      )}
+                    </td>
                   </tr>
                 ))
               )}
@@ -384,91 +415,19 @@ export default function UserInfo() {
           </table>
         </div>
       )}
-      {showModal &&
-        ConnectedCollectors(setShowModal, selectedUserId, connectedCollectors)}
-    </div>
-  );
-}
+      {showModal && selectedUserId && (
+        <ConnectedCollectorsModal
+          setShowModal={setShowModal}
+          selectedUserId={selectedUserId}
+        />
+      )}
 
-function ConnectedCollectors(
-  setShowModal,
-  selectedUserId,
-  connectedCollectors
-) {
-  return (
-    <div
-      style={{
-        position: "fixed",
-        top: 0,
-        left: 0,
-        width: "100vw",
-        height: "100vh",
-        backgroundColor: "rgba(0,0,0,0.5)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        zIndex: 1000,
-      }}
-      onClick={() => setShowModal(false)}
-    >
-      <div
-        onClick={(e) => e.stopPropagation()}
-        style={{
-          backgroundColor: "white",
-          padding: "2rem",
-          borderRadius: "8px",
-          width: "400px",
-          maxHeight: "80vh",
-          overflowY: "auto",
-        }}
-      >
-        <h3 style={{ marginBottom: "1rem" }}>
-          Connected Collectors for ID: {selectedUserId}
-        </h3>
-        {connectedCollectors.length === 0 ? (
-          <p>No collectors found.</p>
-        ) : (
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))",
-              gap: "12px",
-              padding: "0",
-              listStyleType: "none",
-            }}
-          >
-            {connectedCollectors.map((collector) => (
-              <div
-                key={collector.CollectorUserId}
-                style={{
-                  border: "1px solid #ccc",
-                  borderRadius: "6px",
-                  padding: "10px",
-                  backgroundColor: "#f9f9f9",
-                }}
-              >
-                <strong>{collector.CollectorUser}</strong>
-                <br />
-                ID: {collector.CollectorUserId}
-              </div>
-            ))}
-          </div>
-        )}
-        <button
-          onClick={() => setShowModal(false)}
-          style={{
-            marginTop: "1rem",
-            padding: "0.5rem 1rem",
-            borderRadius: "4px",
-            backgroundColor: "#007bff",
-            color: "white",
-            border: "none",
-            cursor: "pointer",
-          }}
-        >
-          Close
-        </button>
-      </div>
+      {showOpeningBalanceModal && selectedUserId && (
+        <UpdateOpeningBalanceModal
+          setShowOpeningBalanceModal={setShowOpeningBalanceModal}
+          selectedUserId={selectedUserId}
+        />
+      )}
     </div>
   );
 }
