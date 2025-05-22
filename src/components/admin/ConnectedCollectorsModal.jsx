@@ -5,8 +5,7 @@ export default function ConnectedCollectorsModal({
   setShowModal,
   selectedUserId,
 }) {
-  console.log("Selected User ID:", selectedUserId);
-  console.log("Show Modal:", setShowModal);
+
   const [connectedCollectors, setConnectedCollectors] = useState([]);
 
   useEffect(() => {
