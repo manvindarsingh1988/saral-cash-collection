@@ -56,6 +56,21 @@ export default function UserInfo() {
     setShowOpeningBalanceModal(true);
   };
 
+  const handleOpeningBalanceModalClose = (openingBalance, date) => {
+    const user = userInfos.find((user) => user.Id === selectedUserId);
+    if (user) {
+      setUserInfos((prev) =>
+        prev.map((u) =>
+          u.Id === selectedUserId
+            ? { ...u, OpeningBalance: openingBalance, OpeningBalanceDate: date }
+            : u
+        )
+      );
+    }
+    setShowOpeningBalanceModal(false);
+    setSelectedUserId("");
+  };
+
   const applyFilters = useCallback(() => {
     const filtered = userInfos.filter((user) => {
       return (
@@ -424,7 +439,7 @@ export default function UserInfo() {
 
       {showOpeningBalanceModal && selectedUserId && (
         <UpdateOpeningBalanceModal
-          setShowOpeningBalanceModal={setShowOpeningBalanceModal}
+          handleOpeningBalanceModalClose={handleOpeningBalanceModalClose}
           selectedUserId={selectedUserId}
         />
       )}

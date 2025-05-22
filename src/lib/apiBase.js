@@ -386,5 +386,23 @@ export const apiBase = {
     const data = await response.json();
     console.log(data);
     return data;
-  }
+  },
+
+  updateOpeningBalanceData: async (userId, openingBalance, date) => {
+    const response = await fetch(`${API_URL}/UpdateOpeningBalanceData`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ userId, openingBalance, date }),
+    });
+
+    if (!response.ok) {
+      console.error(`Failed to fetch: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    console.log(data);
+    return data;
+  },
 };

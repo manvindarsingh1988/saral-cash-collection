@@ -1,24 +1,29 @@
 import React, { useState } from "react";
+import { apiBase } from "../../lib/apiBase";
 
 export default function UpdateOpeningBalanceModal({
-  setShowOpeningBalanceModal,
+  handleOpeningBalanceModalClose,
   selectedUserId,
 }) {
-  console.log("Selected User ID:", selectedUserId);
-  console.log("Show Opening Balance Modal:", setShowOpeningBalanceModal);
-
   const [openingBalance, setOpeningBalance] = useState("");
-  const [date, setDate] = useState("");
+  const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
 
-  const handleSave = () => {
+  const handleSave = async () => {
     console.log("Saving for user:", selectedUserId, {
       openingBalance,
       date,
     });
 
-    // TODO: Add your API call here to persist the data
-
-    setShowOpeningBalanceModal(false);
+    const result = await apiBase.updateOpeningBalanceData(
+      selectedUserId,
+      openingBalance,
+      date
+    );
+    if (!result) {
+      alert("Failed to update opening balance");
+      return;
+    }
+    handleOpeningBalanceModalClose(openingBalance, date);
   };
 
   if (!selectedUserId) {
