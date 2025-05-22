@@ -99,7 +99,7 @@ export default function AdminDashboard() {
                     Total Liability Amount
                   </dt>
                   <dd className="mt-1 text-3xl font-semibold text-gray-900">
-                    ₹{formatIndianNumber(summary.totalAmt)}
+                    ₹ {formatIndianNumber(summary.totalAmt)}
                   </dd>
                 </div>
               </div>
@@ -109,7 +109,7 @@ export default function AdminDashboard() {
                     Total Handover Amount
                   </dt>
                   <dd className="mt-1 text-3xl font-semibold text-gray-900">
-                    ₹{formatIndianNumber(summary.totalHandover)}
+                    ₹ {formatIndianNumber(summary.totalHandover)}
                   </dd>
                 </div>
               </div>
@@ -119,7 +119,7 @@ export default function AdminDashboard() {
                     Total Clear Amount
                   </dt>
                   <dd className="mt-1 text-3xl font-semibold text-gray-900">
-                    ₹{formatIndianNumber(summary.totalClearedAmt)}
+                    ₹ {formatIndianNumber(summary.totalClearedAmt)}
                   </dd>
                 </div>
               </div>
