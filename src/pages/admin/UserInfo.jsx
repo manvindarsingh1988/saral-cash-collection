@@ -57,16 +57,23 @@ export default function UserInfo() {
   };
 
   const handleOpeningBalanceModalClose = (openingBalance, date) => {
-    const user = userInfos.find((user) => user.Id === selectedUserId);
-    if (user) {
-      setUserInfos((prev) =>
-        prev.map((u) =>
-          u.Id === selectedUserId
-            ? { ...u, OpeningBalance: openingBalance, OpeningBalanceDate: date }
-            : u
-        )
-      );
+    if (openingBalance && date) {
+      const user = userInfos.find((user) => user.Id === selectedUserId);
+      if (user) {
+        setUserInfos((prev) =>
+          prev.map((u) =>
+            u.Id === selectedUserId
+              ? {
+                  ...u,
+                  OpeningBalance: openingBalance,
+                  OpeningBalanceDate: date,
+                }
+              : u
+          )
+        );
+      }
     }
+
     setShowOpeningBalanceModal(false);
     setSelectedUserId("");
   };

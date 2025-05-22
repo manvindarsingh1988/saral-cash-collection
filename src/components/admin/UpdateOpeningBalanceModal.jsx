@@ -59,6 +59,18 @@ export default function UpdateOpeningBalanceModal({
         <h3 style={{ marginBottom: "1rem" }}>Update Opening Balance</h3>
 
         <div style={{ marginBottom: "1rem" }}>
+          <label htmlFor="opening-balance">Id</label>
+          <input
+            disabled
+            type="text"
+            id="id"
+            value={`${selectedUserId}`}
+            style={{ width: "100%", padding: "8px", marginTop: "4px" }}
+            className="date-picker border-2 border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+          />
+        </div>
+
+        <div style={{ marginBottom: "1rem" }}>
           <label htmlFor="opening-balance">Opening Balance</label>
           <input
             type="number"
@@ -86,7 +98,7 @@ export default function UpdateOpeningBalanceModal({
           style={{ display: "flex", justifyContent: "flex-end", gap: "1rem" }}
         >
           <button
-            onClick={() => setShowOpeningBalanceModal(false)}
+            onClick={() => handleOpeningBalanceModalClose(null, null)}
             style={{
               padding: "0.5rem 1rem",
               backgroundColor: "#ccc",
