@@ -7,6 +7,10 @@ export default function UserInfo() {
   const [loading, setLoading] = useState(true);
   const [masterData, setMasterData] = useState({});
 
+  const [showModal, setShowModal] = useState(false);
+  const [selectedUserId, setSelectedUserId] = useState(null);
+  const [connectedCollectors, setConnectedCollectors] = useState([]);
+
   const [filters, setFilters] = useState({
     id: "",
     username: "",
@@ -36,6 +40,18 @@ export default function UserInfo() {
   useEffect(() => {
     fetchUserInfos();
   }, []);
+
+  const handleIdClick = async (userId) => {
+    setSelectedUserId(userId);
+    setShowModal(true);
+    try {
+      const result = await apiBase.getLinkedCollectors(userId);
+      setConnectedCollectors(result || []);
+    } catch (err) {
+      console.error("Failed to fetch connected collectors", err);
+      setConnectedCollectors([]);
+    }
+  };
 
   const applyFilters = useCallback(() => {
     const filtered = userInfos.filter((user) => {
@@ -119,7 +135,7 @@ export default function UserInfo() {
         );
         return;
       }
-      
+
       setUserInfos((prev) =>
         prev.map((u) =>
           u.Id === userId ? { ...u, IsSelfSubmitter: isChecked } : u
@@ -302,7 +318,26 @@ export default function UserInfo() {
                       color: user.Active ? "inherit" : "#888",
                     }}
                   >
-                    <td style={{ padding: "8px 12px" }}>{user.Id}</td>
+                    <td
+                      style={{
+                        padding: "8px 12px",
+                        cursor: user.UserType === 5 ? "pointer" : "default",
+                        color: user.UserType === 5 ? "#007bff" : "inherit",
+                      }}
+                      onClick={
+                        user.UserType === 5
+                          ? () => handleIdClick(user.Id)
+                          : undefined
+                      }
+                      title={
+                        user.UserType === 5
+                          ? "Click to view connected collectors"
+                          : ""
+                      }
+                    >
+                      {user.Id}
+                    </td>
+
                     <td style={{ padding: "8px 12px" }}>{user.UserName}</td>
                     <td style={{ padding: "8px 12px" }}>
                       {user.Active ? "Yes" : "No"}
@@ -349,6 +384,91 @@ export default function UserInfo() {
           </table>
         </div>
       )}
+      {showModal &&
+        ConnectedCollectors(setShowModal, selectedUserId, connectedCollectors)}
+    </div>
+  );
+}
+
+function ConnectedCollectors(
+  setShowModal,
+  selectedUserId,
+  connectedCollectors
+) {
+  return (
+    <div
+      style={{
+        position: "fixed",
+        top: 0,
+        left: 0,
+        width: "100vw",
+        height: "100vh",
+        backgroundColor: "rgba(0,0,0,0.5)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        zIndex: 1000,
+      }}
+      onClick={() => setShowModal(false)}
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          backgroundColor: "white",
+          padding: "2rem",
+          borderRadius: "8px",
+          width: "400px",
+          maxHeight: "80vh",
+          overflowY: "auto",
+        }}
+      >
+        <h3 style={{ marginBottom: "1rem" }}>
+          Connected Collectors for ID: {selectedUserId}
+        </h3>
+        {connectedCollectors.length === 0 ? (
+          <p>No collectors found.</p>
+        ) : (
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))",
+              gap: "12px",
+              padding: "0",
+              listStyleType: "none",
+            }}
+          >
+            {connectedCollectors.map((collector) => (
+              <div
+                key={collector.CollectorUserId}
+                style={{
+                  border: "1px solid #ccc",
+                  borderRadius: "6px",
+                  padding: "10px",
+                  backgroundColor: "#f9f9f9",
+                }}
+              >
+                <strong>{collector.CollectorUser}</strong>
+                <br />
+                ID: {collector.CollectorUserId}
+              </div>
+            ))}
+          </div>
+        )}
+        <button
+          onClick={() => setShowModal(false)}
+          style={{
+            marginTop: "1rem",
+            padding: "0.5rem 1rem",
+            borderRadius: "4px",
+            backgroundColor: "#007bff",
+            color: "white",
+            border: "none",
+            cursor: "pointer",
+          }}
+        >
+          Close
+        </button>
+      </div>
     </div>
   );
 }
