@@ -10,10 +10,10 @@ export default function UserProfileMenu({ user, onSignOut }) {
         className="text-white flex items-center space-x-2 px-3 py-2 text-sm font-medium hover:bg-indigo-700 rounded"
       >
         <div className="text-left">
-          <div className="font-semibold truncate max-w-[100px] sm:max-w-[150px]">
+          <div className="font-semibold truncate max-w sm:max-w">
             {user?.UserName || "User"}
           </div>
-          <div className="text-xs opacity-80 truncate max-w-[100px] sm:max-w-[150px]">
+          <div className="text-xs opacity-80 truncate max-w sm:max-w">
             {user?.UserType || "Role"}
           </div>
         </div>
