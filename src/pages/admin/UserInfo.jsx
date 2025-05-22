@@ -85,6 +85,36 @@ export default function UserInfo() {
     }));
   };
 
+  const handleIsThirdPartyChange = async (e, userId) => {
+    const isChecked = e.target.checked;
+    const user = userInfos.find((user) => user.Id === userId);
+    if (user) {
+      user.IsThirdParty = isChecked;
+      setUserInfos((prev) =>
+        prev.map((u) =>
+          u.Id === userId ? { ...u, IsThirdParty: isChecked } : u
+        )
+      );
+    }
+
+    console.log(isChecked, userId);
+  };
+
+  const handleIsSelfSubmitterChange = async (e, userId) => {
+    const isChecked = e.target.checked;
+    const user = userInfos.find((user) => user.Id === userId);
+    if (user) {
+      user.IsSelfSubmitter = isChecked;
+      setUserInfos((prev) =>
+        prev.map((u) =>
+          u.Id === userId ? { ...u, IsSelfSubmitter: isChecked } : u
+        )
+      );
+    }
+    
+    console.log(isChecked, userId);
+  };
+
   const userTypeOptions = [
     { Id: 5, Name: "Retailer" },
     { Id: 12, Name: "Collector" },
@@ -273,7 +303,8 @@ export default function UserInfo() {
                         <input
                           type="checkbox"
                           checked={user.IsThirdParty}
-                          readOnly={!user.Active}
+                          disabled={!user.Active}
+                          onChange={(e) => handleIsThirdPartyChange(e, user.Id)}
                         />
                       ) : (
                         ""
@@ -285,6 +316,9 @@ export default function UserInfo() {
                           type="checkbox"
                           checked={user.IsSelfSubmitter}
                           disabled={!user.Active}
+                          onChange={(e) =>
+                            handleIsSelfSubmitterChange(e, user.Id)
+                          }
                         />
                       ) : (
                         ""
