@@ -62,7 +62,7 @@ export default function AddUser() {
       setSuccess(false);
 
       const response = await apiBase.saveUser(formData); // assuming it returns user data with password
-      const generatedPassword = response?.password || "Temp@1234"; // fallback if not returned
+      const generatedPassword = response?.Password || "Temp@1234"; // fallback if not returned
 
       setPassword(generatedPassword);
       setSuccess(true);
