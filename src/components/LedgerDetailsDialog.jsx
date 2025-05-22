@@ -16,7 +16,6 @@ const columns = [
 
 export default function LadgerDetailsDialog({
   userId,
-  date,
   onClose,
   modelFor = "Retailer",
 }) {
@@ -24,14 +23,14 @@ export default function LadgerDetailsDialog({
   const [loading, setLoading] = useState(true);
   const [masterData, setMasterData] = useState({});
 
-  console.log("LadgerDetailsDialog", userId, date, modelFor);
+  console.log("LadgerDetailsDialog", userId, modelFor);
 
   useEffect(() => {
     const fetchLadger = async () => {
       try {
         if (modelFor === "Collector") {
           const [retailerData, masterData] = await Promise.all([
-            apiBase.getCollectorLiabilityDetails(date, userId),
+            apiBase.getCollectorLiabilityDetails(userId),
             apiBase.getMasterData(),
           ]);
 
@@ -39,7 +38,7 @@ export default function LadgerDetailsDialog({
           setMasterData(masterData || {});
         } else if (modelFor === "Retailer") {
           const [retailerData, masterData] = await Promise.all([
-            apiBase.getLadgerInfoByRetailerid(date, userId),
+            apiBase.getLadgerInfoByRetailerid(false, userId),
             apiBase.getMasterData(),
           ]);
 
@@ -47,7 +46,7 @@ export default function LadgerDetailsDialog({
           setMasterData(masterData || {});
         } else if (modelFor === "Handover") {
           const [retailerData, masterData] = await Promise.all([
-            apiBase.getCollectorLedgerDetails(date, userId),
+            apiBase.getCollectorLedgerDetails(userId),
             apiBase.getMasterData(),
           ]);
 
@@ -55,7 +54,7 @@ export default function LadgerDetailsDialog({
           setMasterData(masterData || {});
         } else if (modelFor === "Cleared") {
           const [retailerData, masterData] = await Promise.all([
-            apiBase.getCollectorLiabilityDetails(date, userId),
+            apiBase.getCollectorLiabilityDetails(userId),
             apiBase.getMasterData(),
           ]);
 
@@ -70,7 +69,7 @@ export default function LadgerDetailsDialog({
     };
 
     fetchLadger();
-  }, [userId, date]);
+  }, [userId]);
 
   const getMasterValue = (type, id) => {
     const list = masterData?.[type] || [];

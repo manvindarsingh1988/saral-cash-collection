@@ -115,9 +115,9 @@ export const apiBase = {
     return data;
   },
 
-  getLiabilityAmountOfAllRetailers: async (date) => {
+  getLiabilityAmountOfAllRetailers: async (all) => {
     const response = await fetch(
-      `${API_URL}/GetLiabilityAmountOfAllRetailers?date=${date}`
+      `${API_URL}/GetLiabilityAmountOfAllRetailers?all=${all}`
     );
     if (!response.ok) {
       console.error(`Failed to fetch: ${response.statusText}`);
@@ -284,9 +284,19 @@ export const apiBase = {
     return result;
   },
 
-  getCollectorLiabilities: async (date) => {
+  getCollectorLiabilities: async () => {
+    const response = await fetch(`${API_URL}/GetCollectorLiabilities`);
+    if (!response.ok) {
+      console.error(`Failed to fetch: ${response.statusText}`);
+    }
+    const data = await response.json();
+    console.log(data);
+    return data;
+  },
+
+  getCollectorLiabilityDetails: async (collectorId) => {
     const response = await fetch(
-      `${API_URL}/GetCollectorLiabilities?date=${date}`
+      `${API_URL}/GetCollectorLiabilityDetails?collectorId=${collectorId}`
     );
     if (!response.ok) {
       console.error(`Failed to fetch: ${response.statusText}`);
@@ -296,21 +306,9 @@ export const apiBase = {
     return data;
   },
 
-  getCollectorLiabilityDetails: async (date, collectorId) => {
+  getCollectorLedgerDetails: async (collectorId) => {
     const response = await fetch(
-      `${API_URL}/GetCollectorLiabilityDetails?date=${date}&collectorId=${collectorId}`
-    );
-    if (!response.ok) {
-      console.error(`Failed to fetch: ${response.statusText}`);
-    }
-    const data = await response.json();
-    console.log(data);
-    return data;
-  },
-
-  getCollectorLedgerDetails: async (date, collectorId) => {
-    const response = await fetch(
-      `${API_URL}/GetCollectorLedgerDetails?date=${date}&collectorId=${collectorId}`
+      `${API_URL}/GetCollectorLedgerDetails?collectorId=${collectorId}`
     );
     if (!response.ok) {
       console.error(`Failed to fetch: ${response.statusText}`);

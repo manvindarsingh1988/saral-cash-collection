@@ -3,19 +3,19 @@ import { formatIndianNumber } from "../../lib/utils";
 import LadgerDetailsDialog from "../LedgerDetailsDialog";
 
 const columns = [
-  { heading: "Retailer Name", key: "RetailUserName", width: "200px" },
+  { heading: "Retailer Name", key: "UserName", width: "200px" },
   { heading: "Amount", key: "Amt", width: "80px" },
   { heading: "Handover Amount", key: "HandoverAmt", width: "80px" },
   { heading: "Clear Amount", key: "ClearedAmt", width: "80px" },
   { heading: "Action", key: "Action", width: "80px", isAction: true },
 ];
 
-export default function RetailerLiabilityTable({ data, selectedDate }) {
+export default function RetailerLiabilityTable({ data }) {
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedRetailer, setSelectedRetailer] = useState(null);
 
   const [filters, setFilters] = useState({
-    RetailUserName: "",
+    UserName: "",
     Amt: "",
     HandoverAmt: "",
     CollectedAmt: "",
@@ -45,7 +45,7 @@ export default function RetailerLiabilityTable({ data, selectedDate }) {
       <div className="overflow-y-auto overflow-x-hidden max-h-[400px] border border-gray-200 rounded text-xs">
         <table className="min-w-full table-auto divide-y divide-gray-200">
           <thead className="bg-gray-50 sticky top-0 z-10">
-            <tr>
+            <tr key={"header"}>
               {columns.map((col) => (
                 <th
                   key={col.key}
@@ -75,16 +75,16 @@ export default function RetailerLiabilityTable({ data, selectedDate }) {
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {filteredData.map((item) => (
-              <tr key={item.RetailUserId}>
+              <tr key={item.UserId}>
                 {columns.map((col) => (
                   <td
                     key={col.key}
                     style={{ width: col.width }}
-                    className="px-4 py-4 whitespace-nowrap text-sm text-gray-900"
+                    className="px-4 py-2 whitespace-nowrap text-sm text-gray-900"
                   >
                     {col.isAction ? (
                       <button
-                        onClick={() => onMoreDetails(item.RetailUserId)}
+                        onClick={() => onMoreDetails(item.UserId)}
                         className="text-blue-600 underline"
                       >
                         More Details
@@ -107,7 +107,6 @@ export default function RetailerLiabilityTable({ data, selectedDate }) {
       {openDialog && selectedRetailer && (
         <LadgerDetailsDialog
           userId={selectedRetailer}
-          date={selectedDate}
           onClose={() => {
             setOpenDialog(false);
             setSelectedRetailer(null);

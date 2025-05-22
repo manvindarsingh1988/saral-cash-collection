@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { apiBase } from "../../lib/apiBase";
 import { formatIndianNumber } from "../../lib/utils";
 import RetailerLiabilityTable from "../../components/admin/RetailerLiabilityTable";
@@ -9,9 +9,7 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [liabilities, setLiabilities] = useState([]);
-  const [selectedDate, setSelectedDate] = useState(
-    new Date().toISOString().split("T")[0]
-  );
+  const [showAll, setShowAll] = useState(false);
 
   const [summary, setSummary] = useState({
     totalAmt: 0,
@@ -19,10 +17,16 @@ export default function AdminDashboard() {
     totalClearedAmt: 0,
   });
 
-  const fetchLiabilities = async (date) => {
+  useEffect(() => {
+    fetchLiabilities();
+  }, [showAll]);
+
+  const fetchLiabilities = async () => {
     try {
       setLoading(true);
-      const retailerData = await apiBase.getLiabilityAmountOfAllRetailers(date);
+      const retailerData = await apiBase.getLiabilityAmountOfAllRetailers(
+        showAll
+      );
 
       setLiabilities(retailerData);
 
@@ -54,9 +58,8 @@ export default function AdminDashboard() {
 
   return (
     <div className="space-y-6">
-      <div className="bg-white shadow rounded-lg">
+      {/* <div className="bg-white shadow rounded-lg">
         <div className="px-4 sm:p-6">
-          {/* Search Filter */}
           <div className="rounded-lg shadow-sm">
             <div className="flex flex-col sm:flex-row sm:items-end gap-4">
               <div className="flex-1">
@@ -79,7 +82,7 @@ export default function AdminDashboard() {
             </div>
           </div>
         </div>
-      </div>
+      </div> */}
 
       {loading && (
         <div className="bg-white rounded-lg shadow p-6">Loading...</div>
@@ -116,17 +119,26 @@ export default function AdminDashboard() {
                     Total Clear Amount
                   </dt>
                   <dd className="mt-1 text-3xl font-semibold text-gray-900">
-                  ₹{formatIndianNumber(summary.totalClearedAmt)}
+                    ₹{formatIndianNumber(summary.totalClearedAmt)}
                   </dd>
                 </div>
               </div>
             </div>
           </div>
-
-          <RetailerLiabilityTable
-            data={liabilities}
-            selectedDate={selectedDate}
-          />
+          <div className="flex justify-start mb-2">
+            <input
+              type="checkbox"
+              id="show-all"
+              checked={showAll}
+              onChange={() => {
+                setShowAll(!showAll);
+              }}
+            />
+            <label htmlFor="show-all" className="ml-2 text-md text-black-500">
+              Show All
+            </label>
+          </div>
+          <RetailerLiabilityTable data={liabilities} />
         </>
       )}
     </div>
