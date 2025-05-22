@@ -20,11 +20,11 @@ export default function RetailDashboard({ retailUserId }) {
   useDocumentTitle("Retail Dashboard");
   const [isModalOpen, setModalOpen] = useState(false);
   const [editData, setEditData] = useState(null);
-  const [selectedDate, setSelectedDate] = useState("");
   const [liability, setLiability] = useState(null);
   const [ledger, setLedger] = useState(null);
   const [masterData, setMasterData] = useState(null);
   const [collectors, setCollectors] = useState([]);
+  const [showAll, setShowAll] = useState(false);
   const [filters, setFilters] = useState({
     CollectorId: "",
     Amount: "",
@@ -50,17 +50,20 @@ export default function RetailDashboard({ retailUserId }) {
         console.error("Failed to load master data:", err);
       }
     };
-    setSelectedDate(new Date().toISOString().split("T")[0]);
     loadMasterData();
   }, []);
 
-  const fetchData = async (date) => {
-    if (!retailUserId || !date) return;
+  useEffect(() => {
+    fetchData();
+  }, [showAll]);
+
+  const fetchData = async () => {
+    if (!retailUserId) return;
 
     try {
       const [ledgerData, liabilityData] = await Promise.all([
-        apiBase.getLadgerInfoByRetailerid(date, retailUserId),
-        apiBase.getLiabilityAmountByRetailerId(retailUserId, date),
+        apiBase.getLadgerInfoByRetailerid(showAll, retailUserId),
+        apiBase.getLiabilityAmountByRetailerId(retailUserId),
       ]);
 
       setLiability(liabilityData);
@@ -113,7 +116,7 @@ export default function RetailDashboard({ retailUserId }) {
         await apiBase.addLedgerInfo(payload);
       }
 
-      await fetchData(selectedDate);
+      await fetchData();
     } catch (err) {
       console.error("Submission failed:", err);
     }
@@ -125,7 +128,7 @@ export default function RetailDashboard({ retailUserId }) {
 
     try {
       await apiBase.deleteLedgerInfo(id); // Make sure this API exists
-      await fetchData(selectedDate);
+      await fetchData();
     } catch (err) {
       console.error("Delete failed:", err);
     }
@@ -168,9 +171,8 @@ export default function RetailDashboard({ retailUserId }) {
     <>
       <div className="space-y-6">
         <div className="bg-white shadow rounded-lg p-6">
-          <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-4 shadow-sm mb-6">
+          {/* <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-4 shadow-sm mb-6">
             <div className="flex flex-col sm:flex-row sm:items-end gap-4">
-              {/* Date Picker */}
               <div className="flex-1">
                 <label
                   htmlFor="transaction-date"
@@ -187,7 +189,6 @@ export default function RetailDashboard({ retailUserId }) {
                 />
               </div>
 
-              {/* Search Button */}
               <button
                 onClick={() => fetchData(selectedDate)}
                 className="bg-indigo-600 text-white px-6 py-2 rounded-md hover:bg-indigo-700 transition duration-200"
@@ -195,26 +196,17 @@ export default function RetailDashboard({ retailUserId }) {
                 🔍 Search
               </button>
             </div>
-          </div>
+          </div> */}
 
-          {liability && liability.Amt > 0 && (
+          {liability && (
             <>
-              <div className="grid grid-cols-1 sm:grid-cols-5 gap-6 mb-6">
+              <div className="grid grid-cols-1 sm:grid-cols-4 gap-6 mb-6">
                 <div className="bg-white shadow rounded-lg p-4">
                   <dt className="text-sm font-medium text-gray-500">
                     Liability
                   </dt>
                   <dd className="mt-1 text-3xl font-semibold text-gray-900">
-                    ₹{formatIndianNumber(liability.Amt)}
-                  </dd>
-                </div>
-
-                <div className="bg-white shadow rounded-lg p-4">
-                  <dt className="text-sm font-medium text-gray-500">
-                    Total approved amount
-                  </dt>
-                  <dd className="mt-1 text-3xl font-semibold text-gray-900">
-                    ₹{formatIndianNumber(approvedAmount)}
+                    ₹ {formatIndianNumber(liability.LaibilityAmount)}
                   </dd>
                 </div>
 
@@ -223,7 +215,7 @@ export default function RetailDashboard({ retailUserId }) {
                     Total pending approval
                   </dt>
                   <dd className="mt-1 text-2xl font-semibold text-gray-900">
-                    {formatIndianNumber(pendingApprovalAmount)}
+                    ₹ {formatIndianNumber(liability.PendingApprovalAmount)}
                   </dd>
                 </div>
 
@@ -232,16 +224,16 @@ export default function RetailDashboard({ retailUserId }) {
                     Total rejected amount
                   </dt>
                   <dd className="mt-1 text-2xl font-semibold text-gray-900">
-                    {formatIndianNumber(rejectedAmount)}
+                    ₹ {formatIndianNumber(liability.RejectedAmount)}
                   </dd>
                 </div>
 
                 <div className="bg-white shadow rounded-lg p-4">
                   <dt className="text-sm font-medium text-gray-500">
-                    Previous Closing Amount
+                    Projection Amount
                   </dt>
                   <dd className="mt-1 text-3xl font-semibold text-gray-900">
-                    ₹{formatIndianNumber(liability.PreviousClosingAmt)}
+                    ₹ {formatIndianNumber(liability.ProjectionAmount)}
                   </dd>
                 </div>
               </div>
@@ -254,6 +246,23 @@ export default function RetailDashboard({ retailUserId }) {
                 >
                   Add Ledger Entry
                 </button>
+              </div>
+
+              <div className="flex justify-start mb-2">
+                <input
+                  type="checkbox"
+                  id="show-all"
+                  checked={showAll}
+                  onChange={() => {
+                    setShowAll(!showAll);
+                  }}
+                />
+                <label
+                  htmlFor="show-all"
+                  className="ml-2 text-md text-black-500"
+                >
+                  Show All
+                </label>
               </div>
 
               {ledger?.length > 0 && (
@@ -379,7 +388,7 @@ export default function RetailDashboard({ retailUserId }) {
             </>
           )}
 
-          {((!ledger && selectedDate) || (liability && liability.Amt <= 0)) && (
+          {(!ledger || (liability && liability.Amt <= 0)) && (
             <div className="text-gray-500 mt-4">
               No data available for selected date.
             </div>
@@ -395,7 +404,6 @@ export default function RetailDashboard({ retailUserId }) {
           onClose={() => setModalOpen(false)}
           onSubmit={handleLedgerSubmit}
           initialData={editData}
-          selectedDate={selectedDate}
         />
       )}
     </>
