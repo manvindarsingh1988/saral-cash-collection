@@ -273,7 +273,7 @@ export default function UserInfo() {
                         <input
                           type="checkbox"
                           checked={user.IsThirdParty}
-                          readOnly
+                          readOnly={!user.Active}
                         />
                       ) : (
                         ""
@@ -284,7 +284,7 @@ export default function UserInfo() {
                         <input
                           type="checkbox"
                           checked={user.IsSelfSubmitter}
-                          readOnly
+                          disabled={!user.Active}
                         />
                       ) : (
                         ""
