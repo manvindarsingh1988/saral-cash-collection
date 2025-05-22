@@ -187,6 +187,7 @@ export default function UserInfo() {
 
   return (
     <div
+      className="rounded-lg shadow-lg border border-gray-200"
       style={{ padding: "1rem", borderRadius: "8px", background: "#f8f9fa" }}
     >
       {loading ? (
@@ -443,7 +444,6 @@ export default function UserInfo() {
           selectedUserId={selectedUserId}
         />
       )}
-
       {showOpeningBalanceModal && selectedUserId && (
         <UpdateOpeningBalanceModal
           handleOpeningBalanceModalClose={handleOpeningBalanceModalClose}
