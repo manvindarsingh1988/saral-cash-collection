@@ -122,7 +122,7 @@ export default function PendingApprovals() {
                     {columns.map((col) => (
                       <th
                         key={col.accessor}
-                        style={{ width: col.width }}
+                        //style={{ width: col.width }}
                         className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                       >
                         {col.heading}
@@ -133,8 +133,7 @@ export default function PendingApprovals() {
                     {columns.map((col) => (
                       <th
                         key={col.accessor}
-                        style={{ width: col.width }}
-                        className="px-4 py-1"
+                        className="px-4 py-1 text-left"
                       >
                         {["TransactionType", "WorkFlow"].includes(
                           col.accessor
@@ -157,8 +156,8 @@ export default function PendingApprovals() {
                           <input
                             type="text"
                             placeholder="Filter..."
-                            style={{ width: col.width }}
-                            className="w-full px-2 py-1 border border-indigo-200 rounded-md"
+                            // style={{ width: col.width }}
+                            className="w-full px-1 py-1 border border-indigo-200 rounded-md"
                             value={filters[col.accessor] || ""}
                             onChange={(e) =>
                               handleFilterChange(col.accessor, e.target.value)

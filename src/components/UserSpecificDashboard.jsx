@@ -12,6 +12,7 @@ import AssignRetail from "../pages/admin/AssignRetail";
 import CollectorLiabilities from "../pages/admin/CollectorLiabilities";
 import CollectorLedger from "../pages/collector/CollectorLedger";
 import PendingApprovals from "../pages/admin/PendingApprovals";
+import UserInfo from "../pages/admin/UserInfo";
 
 export default function UserSpecificDashboard() {
   const user = apiBase.getCurrentUser();
@@ -24,6 +25,7 @@ export default function UserSpecificDashboard() {
           <Route path="/add-user" element={<AddUser />} />
           <Route path="/assign-retail" element={<AssignRetail />} />
           <Route path="/pending-approvals" element={<PendingApprovals />} />
+          <Route path="/user-info" element={<UserInfo />} />
           <Route path="/" element={<AdminDashboard />} />
         </Routes>
       </AdminLayout>

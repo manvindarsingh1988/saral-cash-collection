@@ -71,6 +71,14 @@ export default function AdminLayout({ children }) {
                   >
                     Assign Retail Users
                   </Link>
+                  <Link
+                    to="/user-info"
+                    className={`${isActive(
+                      "/user-info"
+                    )} text-white rounded-md px-3 py-2 text-sm font-medium`}
+                  >
+                    User Info
+                  </Link>
                 </div>
               </div>
             </div>
