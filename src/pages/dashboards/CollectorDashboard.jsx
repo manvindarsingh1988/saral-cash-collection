@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { use, useEffect, useState } from "react";
 import { apiBase } from "../../lib/apiBase";
-import { formatIndianNumber } from "../../lib/utils";
+import { formatIndianNumber, getRowColor } from "../../lib/utils";
 import CollectorLedgerModal from "../../components/collector/CollectorLedgerModal";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
 
@@ -19,9 +19,7 @@ export default function CollectorDashboard({ collectorUserId }) {
   useDocumentTitle("Collector Dashboard");
   const [isModalOpen, setModalOpen] = useState(false);
   const [editData, setEditData] = useState(null);
-  const [selectedDate, setSelectedDate] = useState(
-    new Date().toISOString().split("T")[0]
-  );
+  const [showAll, setShowAll] = useState(false);
   const [selectedRetailerId, setSelectedRetailerId] = useState("");
   const [liability, setLiability] = useState(null);
   const [ledger, setLedger] = useState(null);
@@ -54,23 +52,26 @@ export default function CollectorDashboard({ collectorUserId }) {
     loadMasterData();
   }, []);
 
+  useEffect(() => {
+    if (selectedRetailerId) {
+      fetchData();
+    }
+  }, [showAll]);
+
   const fetchData = async () => {
-    if (!collectorUserId || !selectedDate || !selectedRetailerId) {
-      alert("Please select a date and retailer.");
+    if (!collectorUserId || !selectedRetailerId) {
+      alert("Please select retailer.");
       return;
     }
 
     try {
       const [ledgerData, liabilityData] = await Promise.all([
         apiBase.getLadgerInfoByRetaileridAndCollectorId(
-          selectedDate,
+          showAll,
           selectedRetailerId,
           collectorUserId
         ),
-        apiBase.getLiabilityAmountByRetailerId(
-          selectedRetailerId,
-          selectedDate
-        ),
+        apiBase.getLiabilityAmountByRetailerId(selectedRetailerId),
       ]);
 
       setLiability(liabilityData);
@@ -84,7 +85,7 @@ export default function CollectorDashboard({ collectorUserId }) {
   const updateData = async () => {
     setModalOpen(false);
     await fetchData();
-  }
+  };
 
   const getMasterValue = (type, id) => {
     const list = masterData?.[type] || [];
@@ -101,7 +102,13 @@ export default function CollectorDashboard({ collectorUserId }) {
   };
 
   const openEditLedger = (data) => {
-    if (!data || data.WorkFlow == "5" || data.WorkFlow == "3" || data.WorkFlow == "2") return;
+    if (
+      !data ||
+      data.WorkFlow == "5" ||
+      data.WorkFlow == "3" ||
+      data.WorkFlow == "2"
+    )
+      return;
     setEditData(data);
     setModalOpen(true);
   };
@@ -146,32 +153,14 @@ export default function CollectorDashboard({ collectorUserId }) {
     });
   });
 
-  const approvedAmount = (ledger || [])
-    .filter((item) => {
-      return item.WorkFlow === 5 || item.WorkFlow === 3;
-    })
-    .reduce((sum, item) => sum + (item.Amount || 0), 0);
-
-  const pendingApprovalAmount = (ledger || [])
-    .filter((item) => {
-      return item.WorkFlow === 1;
-    })
-    .reduce((sum, item) => sum + (item.Amount || 0), 0);
-
-  const rejectedAmount = (ledger || [])
-    .filter((item) => {
-      return item.WorkFlow === 2 || item.WorkFlow === 4;
-    })
-    .reduce((sum, item) => sum + (item.Amount || 0), 0);
-
   return (
     <>
       <div className="space-y-6">
         <div className="bg-white shadow rounded-lg p-6">
-          <div className="rounded-lg shadow-sm mb-6">
+          <div className="rounded-lg shadow-sm">
             <div className="flex flex-col sm:flex-row sm:items-end gap-4">
               {/* Date Picker */}
-              <div className="flex-1">
+              {/* <div className="flex-1">
                 <label className="block text-sm font-medium text-indigo-700 mb-1">
                   Select Date
                 </label>
@@ -181,7 +170,7 @@ export default function CollectorDashboard({ collectorUserId }) {
                   onChange={(e) => setSelectedDate(e.target.value)}
                   className="w-full px-3 py-2 border border-indigo-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                 />
-              </div>
+              </div> */}
 
               {/* Retailer Dropdown */}
               <div className="flex-1">
@@ -212,30 +201,31 @@ export default function CollectorDashboard({ collectorUserId }) {
             </div>
           </div>
         </div>
-        {liability && liability.Amt > 0 && (
+
+        {liability && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
             <div className="bg-white shadow rounded-lg p-4">
               <dt className="text-sm font-medium text-gray-500">Liability</dt>
               <dd className="mt-1 text-3xl font-semibold text-gray-900">
-                ₹{formatIndianNumber(liability.Amt)}
+                ₹ {formatIndianNumber(liability.LaibilityAmount)}
               </dd>
             </div>
 
             <div className="bg-white shadow rounded-lg p-4">
               <dt className="text-sm font-medium text-gray-500">
-                Approved Amount
+                Projection Amount
               </dt>
               <dd className="mt-1 text-3xl font-semibold text-gray-900">
-                ₹{formatIndianNumber(approvedAmount)}
+                ₹ {formatIndianNumber(liability.ProjectionAmount)}
               </dd>
             </div>
 
             <div className="bg-white shadow rounded-lg p-4">
               <dt className="text-sm font-medium text-gray-500">
-                Pending Amount
+                Pending Approval Amount
               </dt>
               <dd className="mt-1 text-3xl font-semibold text-gray-900">
-                ₹{formatIndianNumber(pendingApprovalAmount)}
+                ₹ {formatIndianNumber(liability.PendingApprovalAmount)}
               </dd>
             </div>
 
@@ -244,108 +234,134 @@ export default function CollectorDashboard({ collectorUserId }) {
                 Rejected Amount
               </dt>
               <dd className="mt-1 text-3xl font-semibold text-gray-900">
-                {rejectedAmount}
+                ₹ {liability.RejectedAmount}
               </dd>
             </div>
           </div>
         )}
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="overflow-y-auto border border-gray-200 rounded h-[400px]">
-            <table className="w-full table-auto divide-y divide-gray-200 text-xs">
-              <thead className="bg-gray-50 sticky top-0 z-10">
-                <tr>
-                  {columns.map(({ key, label, width }) => (
-                    <th
-                      key={key}
-                      className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase"
-                      style={{ width, whiteSpace: "nowrap" }}
-                    >
-                      <div className="flex flex-col min-w-fit">
-                        <span>{label}</span>
-                        {["TransactionTypes", "WorkFlows"].includes(key) &&
-                        masterData ? (
-                          <select
-                            value={filters[key]}
-                            onChange={(e) =>
-                              handleFilterChange(key, e.target.value)
-                            }
-                            className="mt-1 px-1 py-0.5 border border-gray-300 rounded text-xs"
-                            style={{ width }}
-                          >
-                            <option value="">All</option>
-                            {masterData[key]?.map((opt) => (
-                              <option key={opt.Id} value={opt.Id}>
-                                {opt.Description}
-                              </option>
-                            ))}
-                          </select>
-                        ) : (
-                          <input
-                            type="text"
-                            style={{ width }}
-                            value={filters[key] || ""}
-                            onChange={(e) =>
-                              handleFilterChange(key, e.target.value)
-                            }
-                            className="mt-1 px-1 py-0.5 border border-gray-300 rounded text-xs"
-                            placeholder="Filter"
-                          />
-                        )}
-                      </div>
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {filteredData.map((item) => (
-                  <tr
-                    title="Click to edit"
-                    key={item.Id}
-                    onClick={() => openEditLedger(item)}
-                    className="cursor-pointer hover:bg-gray-100"
-                  >
-                    <td className="px-2 py-2">
-                      <a
-                        title="Click to edit"
-                        className="text-blue-600 underline hover:text-blue-800"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          openEditLedger(item);
-                        }}
-                      >
-                        {item.Id}
-                      </a>
-                    </td>
-                    <td className="px-2 py-2">{item.CollectorName}</td>
-                    <td className="px-2 py-2">
-                      ₹{formatIndianNumber(item.Amount)}
-                    </td>
-                    <td className="px-2 py-2">
-                      {getMasterValue("TransactionTypes", item.TransactionType)}
-                    </td>
-                    <td className="px-2 py-2">
-                      {getMasterValue("WorkFlows", item.WorkFlow)}
-                    </td>
-                    <td className="px-2 py-2">
-                      {new Date(item.Date).toLocaleDateString()}
-                    </td>
-                    <td className="px-2 py-2">
-                      {new Date(item.GivenOn).toLocaleDateString()}
-                    </td>
-                    <td className="px-2 py-2 break-words max-w-[200px]">
-                      {item.Comment}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          {/* {ledger?.length == 0 && selectedDate && (
-            <div className="text-gray-500 mt-4">
-              No data available for selected date.
+
+        {filteredData.length > 0 ? (
+          <>
+            <div className="flex justify-start mb-2">
+              <input
+                type="checkbox"
+                id="show-all"
+                checked={showAll}
+                onChange={() => {
+                  setShowAll(!showAll);
+                }}
+              />
+              <label htmlFor="show-all" className="ml-2 text-md text-black-500">
+                Show All
+              </label>
             </div>
-          )} */}
-        </div>
+            <div className="bg-white rounded-lg shadow p-6">
+              <div className="overflow-y-auto border border-gray-200 rounded h-[400px]">
+                <table className="w-full table-auto divide-y divide-gray-200 text-xs">
+                  <thead className="bg-gray-50 sticky top-0 z-10 border-b border-gray-200">
+                    <tr>
+                      {columns.map(({ key, label, width }) => (
+                        <th
+                          key={key}
+                          className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase"
+                          style={{ whiteSpace: "nowrap" }}
+                        >
+                          <div className="flex flex-col min-w-fit">
+                            <span>{label}</span>
+                            {["TransactionTypes", "WorkFlows"].includes(key) &&
+                            masterData ? (
+                              <select
+                                value={filters[key]}
+                                onChange={(e) =>
+                                  handleFilterChange(key, e.target.value)
+                                }
+                                className="mt-1 px-1 py-0.5 border border-gray-300 rounded text-xs"
+                                // style={{ width }}
+                              >
+                                <option value="">All</option>
+                                {masterData[key]?.map((opt) => (
+                                  <option key={opt.Id} value={opt.Id}>
+                                    {opt.Description}
+                                  </option>
+                                ))}
+                              </select>
+                            ) : (
+                              <input
+                                type="text"
+                                // style={{ width }}
+                                value={filters[key] || ""}
+                                onChange={(e) =>
+                                  handleFilterChange(key, e.target.value)
+                                }
+                                className="mt-1 px-1 py-0.5 border border-gray-300 rounded text-xs"
+                                placeholder="Filter"
+                              />
+                            )}
+                          </div>
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {filteredData.map((item) => (
+                      <tr
+                        title="Click to edit"
+                        key={item.Id}
+                        // onClick={() => openEditLedger(item)}
+                        className={`cursor-pointer hover:bg-gray-100 ${getRowColor(
+                          item.WorkFlow
+                        )}`}
+                      >
+                        <td className="px-2 py-2">
+                          <a
+                            title="Click to edit"
+                            className="text-blue-600 underline hover:text-blue-800"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              openEditLedger(item);
+                            }}
+                          >
+                            {item.Id}
+                          </a>
+                        </td>
+                        <td className="px-2 py-2">{item.CollectorName}</td>
+                        <td className="px-2 py-2">
+                          ₹ {formatIndianNumber(item.Amount)}
+                        </td>
+                        <td className="px-2 py-2">
+                          {getMasterValue(
+                            "TransactionTypes",
+                            item.TransactionType
+                          )}
+                        </td>
+                        <td className="px-2 py-2">
+                          {getMasterValue("WorkFlows", item.WorkFlow)}
+                        </td>
+                        <td className="px-2 py-2">
+                          {new Date(item.Date).toLocaleDateString()}
+                        </td>
+                        <td className="px-2 py-2">
+                          {new Date(item.GivenOn).toLocaleDateString()}
+                        </td>
+                        <td className="px-2 py-2 break-words max-w-[200px]">
+                          {item.Comment}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </>
+        ) : (
+          <div className="bg-white rounded-lg shadow p-6">
+            <div className="overflow-y-auto border border-gray-200 rounded h-[400px] flex items-center justify-center">
+              <p className="text-gray-500 text-lg">
+                No data available for selected date.
+              </p>
+            </div>
+          </div>
+        )}
       </div>
 
       {isModalOpen && (
@@ -357,7 +373,6 @@ export default function CollectorDashboard({ collectorUserId }) {
           initialData={editData}
           modelFor="RetailerLedger"
           collectorId={collectorUserId}
-          selectedDate={selectedDate}
         />
       )}
     </>

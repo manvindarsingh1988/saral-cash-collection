@@ -21,7 +21,6 @@ export default function CollectorLedgerModal({
   cashiers,
   editData,
   modelFor,
-  selectedDate,
 }) {
   // Filter workflows based on modelFor
   const workflows =
@@ -38,7 +37,7 @@ export default function CollectorLedgerModal({
     CashierId: "",
     Amount: "",
     WorkFlow: "1",
-    Date: selectedDate,
+    Date: new Date(),
     GivenOn: today,
     Comment: "",
   });
@@ -112,7 +111,8 @@ export default function CollectorLedgerModal({
           // only show CashierId when TransactionType === "1"
           if (
             (key === "CashierId" && formData.TransactionType !== "1") ||
-            (key === "WorkFlow" && modelFor === "CollectorLedger")
+            (key === "WorkFlow" && modelFor === "CollectorLedger") ||
+            key === "Date"
           ) {
             return null;
           }
@@ -133,14 +133,16 @@ export default function CollectorLedgerModal({
                     Select {label}
                   </option>
                   {key === "WorkFlow" &&
-                    workflows?.filter(_ => { 
-                      if (_.Id === 1 || _.Id === 2 || _.Id === 3) return true;
-                      else return false;
-                    }).map((opt) => (
-                      <option key={opt.Id} value={opt.Id}>
-                        {opt.Description}
-                      </option>
-                    ))}
+                    workflows
+                      ?.filter((_) => {
+                        if (_.Id === 1 || _.Id === 2 || _.Id === 3) return true;
+                        else return false;
+                      })
+                      .map((opt) => (
+                        <option key={opt.Id} value={opt.Id}>
+                          {opt.Description}
+                        </option>
+                      ))}
                   {key === "TransactionType" &&
                     masterData?.TransactionTypes?.map((opt) => (
                       <option key={opt.Id} value={opt.Id}>

@@ -235,12 +235,12 @@ export const apiBase = {
   },
 
   getLadgerInfoByRetaileridAndCollectorId: async (
-    date,
+    all = false,
     retailerId,
     collectorId
   ) => {
     const response = await fetch(
-      `${API_URL}/GetLadgerInfoByRetaileridAndCollectorId?date=${date}&retailerId=${retailerId}&collectorId=${collectorId}`
+      `${API_URL}/GetLadgerInfoByRetaileridAndCollectorId?all=${all}&retailerId=${retailerId}&collectorId=${collectorId}`
     );
     if (!response.ok) {
       console.error(`Failed to fetch: ${response.statusText}`);

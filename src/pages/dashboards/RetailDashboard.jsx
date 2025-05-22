@@ -149,24 +149,6 @@ export default function RetailDashboard({ retailUserId }) {
     });
   });
 
-  const approvedAmount = (ledger || [])
-    .filter((item) => {
-      return item.WorkFlow === 5 || item.WorkFlow === 3;
-    })
-    .reduce((sum, item) => sum + (item.Amount || 0), 0);
-
-  const pendingApprovalAmount = (ledger || [])
-    .filter((item) => {
-      return item.WorkFlow === 1;
-    })
-    .reduce((sum, item) => sum + (item.Amount || 0), 0);
-
-  const rejectedAmount = (ledger || [])
-    .filter((item) => {
-      return item.WorkFlow === 2 || item.WorkFlow === 4;
-    })
-    .reduce((sum, item) => sum + (item.Amount || 0), 0);
-
   return (
     <>
       <div className="space-y-6">
