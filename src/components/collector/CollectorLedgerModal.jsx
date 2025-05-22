@@ -70,13 +70,13 @@ export default function CollectorLedgerModal({
       const payload = {
         Id: data?.Id,
         RetailerId: data?.RetailerId,
-        CashierId: data?.CashierId,
+        CashierId: parseInt(data.WorkFlow) == 1 ? data?.CashierId : "",
         CollectorId: collectorId,
         Amount: parseFloat(data.Amount),
         TransactionType: parseInt(data.TransactionType),
         WorkFlow: parseInt(data.WorkFlow),
-        Date: new Date(data.Date).toISOString(),
-        GivenOn: new Date(data.GivenOn).toISOString(),
+        Date: new Date(data.Date),
+        GivenOn: new Date(data.GivenOn),
         Comment: data.Comment,
       };
 
