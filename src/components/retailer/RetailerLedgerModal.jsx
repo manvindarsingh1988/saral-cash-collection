@@ -25,17 +25,15 @@ export default function RetailerLedgerModal({
   onClose,
   onSubmit,
   initialData,
-  selectedDate,
 }) {
   console.log("Initial Data:", initialData);
-  console.log("Selected Date:", selectedDate);
 
   const [formData, setFormData] = useState({
     CollectorId: "",
     Amount: "",
     TransactionType: "1",
     WorkFlow: "",
-    Date: selectedDate,
+    Date: new Date().toISOString().split("T")[0],
     Comment: "",
   });
 
@@ -86,7 +84,8 @@ export default function RetailerLedgerModal({
 
           if (
             (formData["TransactionType"] == "" && key === "CollectorId") ||
-            (formData["TransactionType"] == "2" && key === "CollectorId")
+            (formData["TransactionType"] == "2" && key === "CollectorId") ||
+            (key == "Date")
           ) {
             return null;
           }
