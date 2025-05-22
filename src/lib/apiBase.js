@@ -153,7 +153,7 @@ export const apiBase = {
 
   getLiabilityAmountByCollectorId: async (collectorId, date) => {
     const response = await fetch(
-      `${API_URL}/GetLiabilityAmountByCollectorId?userId=${collectorId}&date=${date}`
+      `${API_URL}/GetLiabilityAmountByCollectorId?userId=${collectorId}&all=${date}`
     );
     if (!response.ok) {
       console.error(`Failed to fetch: ${response.statusText}`);
@@ -222,9 +222,9 @@ export const apiBase = {
     return data;
   },
 
-  getLedgerInfoByCollectorId: async (date, collectorId) => {
+  getLedgerInfoByCollectorId: async (all, collectorId) => {
     const response = await fetch(
-      `${API_URL}/GetLadgerInfoByCollectorId?date=${date}&collectorId=${collectorId}`
+      `${API_URL}/GetLadgerInfoByCollectorId?all=${all}&collectorId=${collectorId}`
     );
     if (!response.ok) {
       console.error(`Failed to fetch: ${response.statusText}`);

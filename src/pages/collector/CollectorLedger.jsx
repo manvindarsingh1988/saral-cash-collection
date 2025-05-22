@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { apiBase } from "../../lib/apiBase"; // Adjust if needed
 import useDocumentTitle from "../../hooks/useDocumentTitle"; // Optional
 import CollectorLedgerModal from "../../components/collector/CollectorLedgerModal";
+import { getRowColor } from "../../lib/utils";
 
 const columns = [
   { key: "Id", label: "ID", width: "50px" },
@@ -17,9 +18,6 @@ const columns = [
 export default function CollectorLedger({ collectorUserId }) {
   useDocumentTitle("Collector Ledger");
 
-  const [selectedDate, setSelectedDate] = useState(
-    new Date().toISOString().split("T")[0]
-  );
   const [collectorLedgers, setCollectorLedgers] = useState([]);
   const [filteredLedgers, setFilteredLedgers] = useState([]);
   const [filters, setFilters] = useState({});
@@ -30,6 +28,7 @@ export default function CollectorLedger({ collectorUserId }) {
   const [cashiers, setCashiers] = useState([]);
   const [selectedLedger, setSelectedLedger] = useState(null);
   const [liability, setLiability] = useState({});
+  const [showAll, setShowAll] = useState(false);
 
   useEffect(() => {
     const loadMasterData = async () => {
@@ -48,14 +47,18 @@ export default function CollectorLedger({ collectorUserId }) {
     loadMasterData();
   }, []);
 
+  useEffect(() => {
+    fetchCollectorLedgers();
+  }, [showAll]);
+
   const fetchCollectorLedgers = async () => {
     try {
       setLoading(true);
       setError(null);
 
       const [data, liabilityData] = await Promise.all([
-        apiBase.getLedgerInfoByCollectorId(selectedDate, collectorUserId),
-        apiBase.getLiabilityAmountByCollectorId(collectorUserId, selectedDate),
+        apiBase.getLedgerInfoByCollectorId(showAll, collectorUserId),
+        apiBase.getLiabilityAmountByCollectorId(collectorUserId, showAll),
       ]);
 
       setCollectorLedgers(data);
@@ -72,7 +75,7 @@ export default function CollectorLedger({ collectorUserId }) {
   const updateData = async () => {
     setModalOpen(false);
     await fetchCollectorLedgers();
-  }
+  };
 
   const openAddLedger = () => {
     setSelectedLedger(null); // reset selected ledger
@@ -125,28 +128,10 @@ export default function CollectorLedger({ collectorUserId }) {
     setFilteredLedgers(filtered);
   };
 
-  const approvedAmount = (collectorLedgers || [])
-    .filter((item) => {
-      return item.WorkFlow === 5 || item.WorkFlow === 3;
-    })
-    .reduce((sum, item) => sum + (item.Amount || 0), 0);
-
-  const pendingApprovalAmount = (collectorLedgers || [])
-    .filter((item) => {
-      return item.WorkFlow === 1;
-    })
-    .reduce((sum, item) => sum + (item.Amount || 0), 0);
-
-  const rejectedAmount = (collectorLedgers || [])
-    .filter((item) => {
-      return item.WorkFlow === 2 || item.WorkFlow === 4;
-    })
-    .reduce((sum, item) => sum + (item.Amount || 0), 0);
-
   return (
     <div className="spacer-6">
       {/* Filter Section */}
-      <div className="bg-white rounded-lg shadow p-6 mb-6">
+      {/* <div className="bg-white rounded-lg shadow p-6 mb-6">
         <div className="flex flex-col sm:flex-row items-end gap-4">
           <div className="flex-1">
             <label className="block text-sm font-medium text-indigo-700 mb-1">
@@ -166,31 +151,13 @@ export default function CollectorLedger({ collectorUserId }) {
             🔍 Search
           </button>
         </div>
-      </div>
+      </div> */}
       {liability && collectorLedgers.length > 0 && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
           <div className="bg-white shadow rounded-lg p-4">
             <dt className="text-sm font-medium text-gray-500">Liability</dt>
             <dd className="mt-1 text-3xl font-semibold text-gray-900">
-              ₹{formatIndianNumber(liability.Amt)}
-            </dd>
-          </div>
-
-          <div className="bg-white shadow rounded-lg p-4">
-            <dt className="text-sm font-medium text-gray-500">
-              Approved Amount
-            </dt>
-            <dd className="mt-1 text-3xl font-semibold text-gray-900">
-              ₹{formatIndianNumber(approvedAmount)}
-            </dd>
-          </div>
-
-          <div className="bg-white shadow rounded-lg p-4">
-            <dt className="text-sm font-medium text-gray-500">
-              Pending Amount
-            </dt>
-            <dd className="mt-1 text-3xl font-semibold text-gray-900">
-              ₹{formatIndianNumber(pendingApprovalAmount)}
+              ₹ {formatIndianNumber(liability.LaibilityAmount)}
             </dd>
           </div>
 
@@ -199,7 +166,25 @@ export default function CollectorLedger({ collectorUserId }) {
               Rejected Amount
             </dt>
             <dd className="mt-1 text-3xl font-semibold text-gray-900">
-              {formatIndianNumber(rejectedAmount)}
+              ₹ {formatIndianNumber(liability.RejectedAmount)}
+            </dd>
+          </div>
+
+          <div className="bg-white shadow rounded-lg p-4">
+            <dt className="text-sm font-medium text-gray-500">
+              Pending Amount
+            </dt>
+            <dd className="mt-1 text-3xl font-semibold text-gray-900">
+              ₹ {formatIndianNumber(liability.PendingApprovalAmount)}
+            </dd>
+          </div>
+
+          <div className="bg-white shadow rounded-lg p-4">
+            <dt className="text-sm font-medium text-gray-500">
+              Projection Amount
+            </dt>
+            <dd className="mt-1 text-3xl font-semibold text-gray-900">
+              ₹ {formatIndianNumber(liability.ProjectionAmount)}
             </dd>
           </div>
         </div>
@@ -220,120 +205,138 @@ export default function CollectorLedger({ collectorUserId }) {
         {error && <div className="text-red-600">{error}</div>}
 
         {!loading && filteredLedgers.length >= 0 && (
-          <div className="overflow-y-auto border border-gray-200 rounded h-[400px]">
-            <table className="w-full table-auto divide-y divide-gray-200 text-sm">
-              <thead className="bg-gray-50 sticky top-0 z-10 border-b border-gray-200">
-                <tr>
-                  {columns.map(({ key, label, width }) => (
-                    <th
-                      key={key}
-                      className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase"
-                      style={{ width, whiteSpace: "nowrap" }}
-                    >
-                      <div className="flex flex-col min-w-fit">
-                        <span>{label}</span>
-                        {["TransactionType", "WorkFlow"].includes(key) &&
-                        masterData ? (
-                          <select
-                            value={filters[key] || ""}
-                            onChange={(e) =>
-                              handleFilterChange(key, e.target.value)
-                            }
-                            className="mt-1 px-1 py-0.5 border border-gray-300 rounded text-xs"
-                            style={{ width }}
-                          >
-                            <option value="">All</option>
-                            {masterData[key + "s"]?.map((opt) => (
-                              <option key={opt.Id} value={opt.Id}>
-                                {opt.Description}
-                              </option>
-                            ))}
-                          </select>
-                        ) : (
-                          <input
-                            type="text"
-                            style={{ width }}
-                            value={filters[key] || ""}
-                            onChange={(e) =>
-                              handleFilterChange(key, e.target.value)
-                            }
-                            className="mt-1 px-1 py-0.5 border border-gray-300 rounded text-xs"
-                            placeholder="Filter"
-                          />
-                        )}
-                      </div>
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200 text-xs">
-                {filteredLedgers.map((item) => (
-                  <tr
-                    key={item.Id}
-                    className="cursor-pointer hover:bg-gray-100"
-                  >
-                    <td className="px-2 py-2">
-                      <button
-                        className="text-indigo-600 hover:underline"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          openEditLedger(item);
-                        }}
+          <>
+            <div className="flex justify-start mb-2">
+              <input
+                type="checkbox"
+                id="show-all"
+                checked={showAll}
+                onChange={() => {
+                  setShowAll(!showAll);
+                }}
+              />
+              <label htmlFor="show-all" className="ml-2 text-md text-black-500">
+                Show All
+              </label>
+            </div>
+            <div className="overflow-y-auto border border-gray-200 rounded h-[400px]">
+              <table className="w-full table-auto divide-y divide-gray-200 text-sm">
+                <thead className="bg-gray-50 sticky top-0 z-10 border-b border-gray-200">
+                  <tr>
+                    {columns.map(({ key, label, width }) => (
+                      <th
+                        key={key}
+                        className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase"
+                        style={{ whiteSpace: "nowrap" }}
                       >
-                        {item.Id}
-                      </button>
-                    </td>
-                    <td
-                      className="px-2 py-2"
-                      onClick={() => openEditLedger(item)}
-                    >
-                      {item.CashierName}
-                    </td>
-                    <td
-                      className="px-2 py-2"
-                      onClick={() => openEditLedger(item)}
-                    >
-                      ₹{formatIndianNumber(item.Amount)}
-                    </td>
-                    <td
-                      className="px-2 py-2"
-                      onClick={() => openEditLedger(item)}
-                    >
-                      {getMasterValue("TransactionTypes", item.TransactionType)}
-                    </td>
-                    <td
-                      className="px-2 py-2"
-                      onClick={() => openEditLedger(item)}
-                    >
-                      {getMasterValue("WorkFlows", item.WorkFlow)}
-                    </td>
-                    <td
-                      className="px-2 py-2"
-                      onClick={() => openEditLedger(item)}
-                    >
-                      {item.GivenOn
-                        ? new Date(item.GivenOn).toLocaleDateString()
-                        : "-"}
-                    </td>
-                    <td
-                      className="px-2 py-2"
-                      onClick={() => openEditLedger(item)}
-                    >
-                      {item.Date
-                        ? new Date(item.Date).toLocaleDateString()
-                        : "-"}
-                    </td>
-                    <td
-                      className="px-2 py-2 break-words max-w-[200px]"
-                      onClick={() => openEditLedger(item)}
-                    >
-                      {item.Comment}
-                    </td>
+                        <div className="flex flex-col min-w-fit">
+                          <span>{label}</span>
+                          {["TransactionType", "WorkFlow"].includes(key) &&
+                          masterData ? (
+                            <select
+                              value={filters[key] || ""}
+                              onChange={(e) =>
+                                handleFilterChange(key, e.target.value)
+                              }
+                              className="mt-1 px-1 py-0.5 border border-gray-300 rounded text-xs"
+                            >
+                              <option value="">All</option>
+                              {masterData[key + "s"]?.map((opt) => (
+                                <option key={opt.Id} value={opt.Id}>
+                                  {opt.Description}
+                                </option>
+                              ))}
+                            </select>
+                          ) : (
+                            <input
+                              type="text"
+                              value={filters[key] || ""}
+                              onChange={(e) =>
+                                handleFilterChange(key, e.target.value)
+                              }
+                              className="mt-1 px-1 py-0.5 border border-gray-300 rounded text-xs"
+                              placeholder="Filter"
+                            />
+                          )}
+                        </div>
+                      </th>
+                    ))}
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200 text-xs">
+                  {filteredLedgers.map((item) => (
+                    <tr
+                      key={item.Id}
+                      className={`cursor-pointer hover:bg-gray-100 ${getRowColor(
+                        item.WorkFlow
+                      )}`}
+                    >
+                      <td className="px-2 py-2">
+                        <button
+                          className="text-indigo-600 hover:underline"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openEditLedger(item);
+                          }}
+                        >
+                          {item.Id}
+                        </button>
+                      </td>
+                      <td
+                        className="px-2 py-2"
+                        onClick={() => openEditLedger(item)}
+                      >
+                        {item.CashierName}
+                      </td>
+                      <td
+                        className="px-2 py-2"
+                        onClick={() => openEditLedger(item)}
+                      >
+                        ₹{formatIndianNumber(item.Amount)}
+                      </td>
+                      <td
+                        className="px-2 py-2"
+                        onClick={() => openEditLedger(item)}
+                      >
+                        {getMasterValue(
+                          "TransactionTypes",
+                          item.TransactionType
+                        )}
+                      </td>
+                      <td
+                        className="px-2 py-2"
+                        onClick={() => openEditLedger(item)}
+                      >
+                        {getMasterValue("WorkFlows", item.WorkFlow)}
+                      </td>
+                      <td
+                        className="px-2 py-2"
+                        onClick={() => openEditLedger(item)}
+                      >
+                        {item.GivenOn
+                          ? new Date(item.GivenOn).toLocaleDateString()
+                          : "-"}
+                      </td>
+                      <td
+                        className="px-2 py-2"
+                        onClick={() => openEditLedger(item)}
+                      >
+                        {item.Date
+                          ? new Date(item.Date).toLocaleDateString()
+                          : "-"}
+                      </td>
+                      <td
+                        className="px-2 py-2 break-words max-w-[200px]"
+                        onClick={() => openEditLedger(item)}
+                      >
+                        {item.Comment}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
       </div>
 
@@ -345,7 +348,6 @@ export default function CollectorLedger({ collectorUserId }) {
           onClose={updateData}
           modelFor="CollectorLedger"
           initialData={selectedLedger}
-          selectedDate={selectedDate}
         />
       )}
     </div>
