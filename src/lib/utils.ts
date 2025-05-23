@@ -35,3 +35,14 @@ export function formatToCustomDateTime(isoString: string): string {
     )}`
   );
 }
+
+export function formatToCustom(isoString: string): string {
+  if (isoString === "0001-01-01T00:00:00") return "";
+
+  const date = new Date(isoString);
+  const pad = (num: number) => String(num).padStart(2, "0");
+
+  return `${pad(date.getDate())}/${pad(
+    date.getMonth() + 1
+  )}/${date.getFullYear()}`;
+}

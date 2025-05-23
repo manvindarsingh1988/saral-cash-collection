@@ -3,6 +3,7 @@ import { apiBase } from "../../lib/apiBase";
 import UpdateOpeningBalanceModal from "../../components/admin/UpdateOpeningBalanceModal";
 import ConnectedCollectorsModal from "../../components/admin/ConnectedCollectorsModal";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
+import { formatToCustom } from "../../lib/utils";
 
 export default function UserInfo() {
   useDocumentTitle("User Info");
@@ -384,7 +385,7 @@ export default function UserInfo() {
                       {formatCurrency(user.OpeningBalance)}
                     </td>
                     <td style={{ padding: "8px 12px" }}>
-                      {formatDate(user.OpeningBalanceDate)}
+                      {formatToCustom(user.OpeningBalanceDate)}
                     </td>
                     <td style={{ padding: "8px 12px" }}>
                       {user.UserType == 5 ? (
