@@ -21,10 +21,10 @@ export default function CollectorLiabilities() {
   const [filters, setFilters] = useState({
     UserId: "",
     UserName: "",
-    LaibilityAmount: 0,
-    PendingApprovalAmount: 0,
-    ProjectionAmount: 0,
-    RejectedAmount: 0,
+    LaibilityAmount: "",
+    PendingApprovalAmount: "",
+    ProjectionAmount: "",
+    RejectedAmount: "",
   });
 
   const [openDialog, setOpenDialog] = useState(false);
