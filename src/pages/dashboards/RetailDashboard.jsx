@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { apiBase } from "../../lib/apiBase";
-import { formatIndianNumber, getRowColor } from "../../lib/utils";
+import { formatIndianNumber, formatToCustomDateTime, getRowColor } from "../../lib/utils";
 import RetailerLedgerModal from "../../components/retailer/RetailerLedgerModal";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
 
@@ -254,7 +254,7 @@ export default function RetailDashboard({ retailUserId }) {
                               ) : (
                                 <input
                                   type="text"
-                                  style={{ width }}
+                                  //style={{ width }}
                                   value={filters[key] || ""}
                                   onChange={(e) =>
                                     handleFilterChange(key, e.target.value)
@@ -311,10 +311,10 @@ export default function RetailDashboard({ retailUserId }) {
                             </td>
                             <td className="px-2 py-2">{item.CollectorName}</td>
                             <td className="px-2 py-2">
-                              {item.Date.split("T")[0]}
+                              {formatToCustomDateTime(item.Date)}
                             </td>
                             <td className="px-2 py-2">
-                              {item.GivenOn.split("T")[0]}
+                              {formatToCustomDateTime(item.GivenOn)}
                             </td>
                             <td className="px-2 py-2 break-words max-w-[200px]">
                               {item.Comment}

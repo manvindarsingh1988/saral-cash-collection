@@ -1,6 +1,6 @@
 import React, { use, useEffect, useState } from "react";
 import { apiBase } from "../../lib/apiBase";
-import { formatIndianNumber, getRowColor } from "../../lib/utils";
+import { formatIndianNumber, formatToCustomDateTime, getRowColor } from "../../lib/utils";
 import CollectorLedgerModal from "../../components/collector/CollectorLedgerModal";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
 
@@ -338,10 +338,10 @@ export default function CollectorDashboard({ collectorUserId }) {
                           {getMasterValue("WorkFlows", item.WorkFlow)}
                         </td>
                         <td className="px-2 py-2">
-                          {new Date(item.Date).toLocaleDateString()}
+                          {formatToCustomDateTime(item.Date)}
                         </td>
                         <td className="px-2 py-2">
-                          {new Date(item.GivenOn).toLocaleDateString()}
+                          {formatToCustomDateTime(item.GivenOn)}
                         </td>
                         <td className="px-2 py-2 break-words max-w-[200px]">
                           {item.Comment}
