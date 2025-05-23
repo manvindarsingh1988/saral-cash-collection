@@ -203,7 +203,7 @@ export default function PendingApprovals() {
                               <td
                                 key={col.accessor}
                                 className="px-4 py-2 text-sm text-gray-900"
-                                style={{ width: col.width }}
+                                //style={{ width: col.width }}
                               >
                                 {getMasterValue(
                                   "TransactionTypes",
@@ -216,7 +216,7 @@ export default function PendingApprovals() {
                               <td
                                 key={col.accessor}
                                 className="px-4 py-2 text-gray-900"
-                                style={{ width: col.width }}
+                                //style={{ width: col.width }}
                               >
                                 {getMasterValue("WorkFlows", item.WorkFlow)}
                               </td>
@@ -232,7 +232,7 @@ export default function PendingApprovals() {
                               <td
                                 key={col.accessor}
                                 className="px-4 py-2 text-gray-900"
-                                style={{ width: col.width }}
+                                //style={{ width: col.width }}
                               >
                                 {renderCell(item, col.accessor)}
                               </td>
