@@ -361,7 +361,7 @@ export default function UserInfo() {
                         color: user.UserType === 5 ? "#007bff" : "inherit",
                       }}
                       onClick={
-                        user.UserType === 5
+                        user.Active
                           ? () => handleIdClick(user.Id)
                           : undefined
                       }
