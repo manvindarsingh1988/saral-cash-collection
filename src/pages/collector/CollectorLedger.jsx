@@ -278,19 +278,16 @@ export default function CollectorLedger({ collectorUserId }) {
                       </td>
                       <td
                         className="px-2 py-2"
-                        onClick={() => openEditLedger(item)}
                       >
                         {item.CashierName}
                       </td>
                       <td
                         className="px-2 py-2"
-                        onClick={() => openEditLedger(item)}
                       >
                         ₹{formatIndianNumber(item.Amount)}
                       </td>
                       <td
                         className="px-2 py-2"
-                        onClick={() => openEditLedger(item)}
                       >
                         {getMasterValue(
                           "TransactionTypes",
@@ -299,25 +296,21 @@ export default function CollectorLedger({ collectorUserId }) {
                       </td>
                       <td
                         className="px-2 py-2"
-                        onClick={() => openEditLedger(item)}
                       >
                         {getMasterValue("WorkFlows", item.WorkFlow)}
                       </td>
                       <td
                         className="px-2 py-2"
-                        onClick={() => openEditLedger(item)}
                       >
                         {formatToCustomDateTime(item.GivenOn)}
                       </td>
                       <td
                         className="px-2 py-2"
-                        onClick={() => openEditLedger(item)}
                       >
                         {formatToCustomDateTime(item.Date)}
                       </td>
                       <td
                         className="px-2 py-2 break-words max-w-[200px]"
-                        onClick={() => openEditLedger(item)}
                       >
                         {item.Comment}
                       </td>
