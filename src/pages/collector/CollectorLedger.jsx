@@ -13,6 +13,7 @@ const columns = [
   { key: "GivenOn", label: "Given On", width: "120px" },
   { key: "Date", label: "Date", width: "120px" },
   { key: "Comments", label: "Comments", width: "150px" },
+  { key: "Action", label: "Actions", width: "100px" },
 ];
 
 export default function CollectorLedger({ collectorUserId }) {
@@ -128,30 +129,20 @@ export default function CollectorLedger({ collectorUserId }) {
     setFilteredLedgers(filtered);
   };
 
+  const handleDeleteLedger = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this ledger entry?"))
+      return;
+
+    try {
+      await apiBase.deleteLedgerInfo(id); // Make sure this API exists
+      await fetchCollectorLedgers();
+    } catch (err) {
+      console.error("Delete failed:", err);
+    }
+  };
+
   return (
     <div className="spacer-6">
-      {/* Filter Section */}
-      {/* <div className="bg-white rounded-lg shadow p-6 mb-6">
-        <div className="flex flex-col sm:flex-row items-end gap-4">
-          <div className="flex-1">
-            <label className="block text-sm font-medium text-indigo-700 mb-1">
-              Select Date
-            </label>
-            <input
-              type="date"
-              value={selectedDate}
-              onChange={(e) => setSelectedDate(e.target.value)}
-              className="w-full px-3 py-2 border border-indigo-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-            />
-          </div>
-          <button
-            onClick={fetchCollectorLedgers}
-            className="bg-indigo-600 text-white px-6 py-2 rounded-md hover:bg-indigo-700 transition duration-200"
-          >
-            🔍 Search
-          </button>
-        </div>
-      </div> */}
       {liability && collectorLedgers.length > 0 && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
           <div className="bg-white shadow rounded-lg p-4">
@@ -247,9 +238,10 @@ export default function CollectorLedger({ collectorUserId }) {
                                 </option>
                               ))}
                             </select>
-                          ) : (
+                          ) : key !== "Action" ? (
                             <input
                               type="text"
+                              // style={{ width }}
                               value={filters[key] || ""}
                               onChange={(e) =>
                                 handleFilterChange(key, e.target.value)
@@ -257,6 +249,8 @@ export default function CollectorLedger({ collectorUserId }) {
                               className="mt-1 px-1 py-0.5 border border-gray-300 rounded text-xs"
                               placeholder="Filter"
                             />
+                          ) : (
+                            ""
                           )}
                         </div>
                       </th>
@@ -330,6 +324,20 @@ export default function CollectorLedger({ collectorUserId }) {
                         onClick={() => openEditLedger(item)}
                       >
                         {item.Comment}
+                      </td>
+                      <td className="px-2 py-2">
+                        {getMasterValue("WorkFlows", item.WorkFlow) ===
+                          "Initiate" && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation(); // Prevent triggering row edit
+                              handleDeleteLedger(item.Id);
+                            }}
+                            className="text-red-600 hover:text-red-800 text-xs"
+                          >
+                            Delete
+                          </button>
+                        )}
                       </td>
                     </tr>
                   ))}

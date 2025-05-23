@@ -1,6 +1,10 @@
 import React, { use, useEffect, useState } from "react";
 import { apiBase } from "../../lib/apiBase";
-import { formatIndianNumber, formatToCustomDateTime, getRowColor } from "../../lib/utils";
+import {
+  formatIndianNumber,
+  formatToCustomDateTime,
+  getRowColor,
+} from "../../lib/utils";
 import CollectorLedgerModal from "../../components/collector/CollectorLedgerModal";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
 
@@ -13,6 +17,7 @@ const columns = [
   { key: "Date", label: "Transaction Date", width: "100px" },
   { key: "GivenOn", label: "Given On", width: "100px" },
   { key: "Comment", label: "Remarks", width: "150px" },
+  { key: "Action", label: "Action" },
 ];
 
 export default function CollectorDashboard({ collectorUserId }) {
@@ -153,25 +158,24 @@ export default function CollectorDashboard({ collectorUserId }) {
     });
   });
 
+  const handleDeleteLedger = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this ledger entry?"))
+      return;
+
+    try {
+      await apiBase.deleteLedgerInfo(id); // Make sure this API exists
+      await fetchData();
+    } catch (err) {
+      console.error("Delete failed:", err);
+    }
+  };
+
   return (
     <>
       <div className="space-y-6">
         <div className="bg-white shadow rounded-lg p-6">
           <div className="rounded-lg shadow-sm">
             <div className="flex flex-col sm:flex-row sm:items-end gap-4">
-              {/* Date Picker */}
-              {/* <div className="flex-1">
-                <label className="block text-sm font-medium text-indigo-700 mb-1">
-                  Select Date
-                </label>
-                <input
-                  type="date"
-                  value={selectedDate}
-                  onChange={(e) => setSelectedDate(e.target.value)}
-                  className="w-full px-3 py-2 border border-indigo-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                />
-              </div> */}
-
               {/* Retailer Dropdown */}
               <div className="flex-1">
                 <label className="block text-sm font-medium text-indigo-700 mb-1">
@@ -285,7 +289,7 @@ export default function CollectorDashboard({ collectorUserId }) {
                                   </option>
                                 ))}
                               </select>
-                            ) : (
+                            ) : key !== "Action" ? (
                               <input
                                 type="text"
                                 // style={{ width }}
@@ -296,6 +300,8 @@ export default function CollectorDashboard({ collectorUserId }) {
                                 className="mt-1 px-1 py-0.5 border border-gray-300 rounded text-xs"
                                 placeholder="Filter"
                               />
+                            ) : (
+                              ""
                             )}
                           </div>
                         </th>
@@ -312,7 +318,7 @@ export default function CollectorDashboard({ collectorUserId }) {
                           item.WorkFlow
                         )}`}
                       >
-                        <td className="px-2 py-2">
+                        <td className="px-4 py-2">
                           <a
                             title="Click to edit"
                             className="text-blue-600 underline hover:text-blue-800"
@@ -324,27 +330,41 @@ export default function CollectorDashboard({ collectorUserId }) {
                             {item.Id}
                           </a>
                         </td>
-                        <td className="px-2 py-2">{item.CollectorName}</td>
-                        <td className="px-2 py-2">
+                        <td className="px-4 py-2">{item.CollectorName}</td>
+                        <td className="px-4 py-2">
                           ₹ {formatIndianNumber(item.Amount)}
                         </td>
-                        <td className="px-2 py-2">
+                        <td className="px-4 py-2">
                           {getMasterValue(
                             "TransactionTypes",
                             item.TransactionType
                           )}
                         </td>
-                        <td className="px-2 py-2">
+                        <td className="px-4 py-2">
                           {getMasterValue("WorkFlows", item.WorkFlow)}
                         </td>
-                        <td className="px-2 py-2">
+                        <td className="px-4 py-2">
                           {formatToCustomDateTime(item.Date)}
                         </td>
-                        <td className="px-2 py-2">
+                        <td className="px-4 py-2">
                           {formatToCustomDateTime(item.GivenOn)}
                         </td>
-                        <td className="px-2 py-2 break-words max-w-[200px]">
+                        <td className="px-4 py-2 break-words max-w-[200px]">
                           {item.Comment}
+                        </td>
+                        <td className="px-4 py-2">
+                          {getMasterValue("WorkFlows", item.WorkFlow) ===
+                            "Initiate" && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation(); // Prevent triggering row edit
+                                handleDeleteLedger(item.Id);
+                              }}
+                              className="text-red-600 hover:text-red-800 text-xs"
+                            >
+                              Delete
+                            </button>
+                          )}
                         </td>
                       </tr>
                     ))}
