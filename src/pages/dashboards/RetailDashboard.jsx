@@ -222,7 +222,7 @@ export default function RetailDashboard({ retailUserId }) {
 
               <div className="flex justify-end mb-2">
                 <button
-                  disabled={liability.Amt - approvedAmount == 0}
+                  // disabled={liability.LaibilityAmount}
                   onClick={openAddLedger}
                   className="bg-green-600 text-white px-4 py-1.5 rounded hover:bg-green-700"
                 >

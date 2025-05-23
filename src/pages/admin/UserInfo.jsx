@@ -2,8 +2,10 @@ import React, { useEffect, useState, useCallback, useMemo } from "react";
 import { apiBase } from "../../lib/apiBase";
 import UpdateOpeningBalanceModal from "../../components/admin/UpdateOpeningBalanceModal";
 import ConnectedCollectorsModal from "../../components/admin/ConnectedCollectorsModal";
+import useDocumentTitle from "../../hooks/useDocumentTitle";
 
 export default function UserInfo() {
+  useDocumentTitle("User Info");
   const [userInfos, setUserInfos] = useState([]);
   const [filteredUserInfos, setFilteredUserInfos] = useState([]);
   const [loading, setLoading] = useState(true);
