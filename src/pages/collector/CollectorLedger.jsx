@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { apiBase } from "../../lib/apiBase"; // Adjust if needed
 import useDocumentTitle from "../../hooks/useDocumentTitle"; // Optional
 import CollectorLedgerModal from "../../components/collector/CollectorLedgerModal";
-import { getRowColor } from "../../lib/utils";
+import { formatToCustomDateTime, getRowColor } from "../../lib/utils";
 
 const columns = [
   { key: "Id", label: "ID", width: "50px" },
@@ -307,17 +307,13 @@ export default function CollectorLedger({ collectorUserId }) {
                         className="px-2 py-2"
                         onClick={() => openEditLedger(item)}
                       >
-                        {item.GivenOn
-                          ? new Date(item.GivenOn).toLocaleDateString()
-                          : "-"}
+                        {formatToCustomDateTime(item.GivenOn)}
                       </td>
                       <td
                         className="px-2 py-2"
                         onClick={() => openEditLedger(item)}
                       >
-                        {item.Date
-                          ? new Date(item.Date).toLocaleDateString()
-                          : "-"}
+                        {formatToCustomDateTime(item.Date)}
                       </td>
                       <td
                         className="px-2 py-2 break-words max-w-[200px]"
