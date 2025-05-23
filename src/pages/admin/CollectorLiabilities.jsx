@@ -10,9 +10,6 @@ export default function CollectorLiabilities() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [collectorLiabilities, setCollectorLiabilities] = useState([]);
-  const [selectedDate, setSelectedDate] = useState(
-    new Date().toISOString().split("T")[0]
-  );
   const [modelFor, setModelFor] = useState("Handover");
 
   const [filters, setFilters] = useState({
@@ -57,38 +54,16 @@ export default function CollectorLiabilities() {
   };
 
   useEffect(() => {
-    fetchCollectorLiabilities(selectedDate);
+    fetchCollectorLiabilities();
   }, []);
 
   return (
     <>
-      <div className="bg-white rounded-lg shadow p-6 space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-end gap-4">
-          <div className="flex-1">
-            <label className="block text-sm font-medium text-indigo-700 mb-1">
-              Select Date
-            </label>
-            <input
-              type="date"
-              value={selectedDate}
-              onChange={(e) => setSelectedDate(e.target.value)}
-              className="w-full px-3 py-2 border border-indigo-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            />
-          </div>
-          <button
-            onClick={() => fetchCollectorLiabilities(selectedDate)}
-            className="bg-indigo-600 text-white px-6 py-2 rounded-md hover:bg-indigo-700 transition"
-          >
-            🔍 Search
-          </button>
-        </div>
-      </div>
-
       {loading && <div>Loading...</div>}
       {error && <div className="text-red-600">{error}</div>}
 
       {collectorLiabilities.length > 0 && !loading && (
-        <div className="bg-white rounded-lg shadow p-6 mt-6">
+        <div className="bg-white rounded-lg shadow p-6">
           <div className="overflow-y-auto overflow-x-hidden max-h-[400px] border border-gray-200 rounded text-xs">
             <table className="min-w-full table-auto divide-y divide-gray-200">
               <thead className="bg-gray-50 sticky top-0 z-10">
@@ -98,7 +73,7 @@ export default function CollectorLiabilities() {
                       <span>Collector ID</span>
                       <input
                         type="text"
-                        value={filters.CollectorId}
+                        value={filters.UserId}
                         onChange={(e) =>
                           onFilterChange("CollectorId", e.target.value)
                         }
@@ -112,9 +87,9 @@ export default function CollectorLiabilities() {
                       <span>Collector Name</span>
                       <input
                         type="text"
-                        value={filters.CollectorUserName}
+                        value={filters.UserName}
                         onChange={(e) =>
-                          onFilterChange("CollectorUserName", e.target.value)
+                          onFilterChange("UserName", e.target.value)
                         }
                         placeholder="Filter"
                         className="mt-1 px-2 py-1 border border-gray-300 rounded text-xs"
@@ -167,33 +142,35 @@ export default function CollectorLiabilities() {
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {filteredData.map((item) => (
-                  <tr key={item.CollectorId}>
-                    <td className="px-4 py-4 whitespace-nowrap text-gray-900">
-                      {item.CollectorId}
+                  <tr key={item.UserId}>
+                    <td className="px-4 py-2 whitespace-nowrap text-gray-900">
+                      {item.UserId}
                     </td>
-                    <td className="px-4 py-4 whitespace-nowrap text-gray-900">
-                      {item.CollectorUserName || "—"}
+                    <td className="px-4 py-2 whitespace-nowrap text-gray-900">
+                      {item.UserName || "—"}
                     </td>
-                    <td className="px-4 py-4 whitespace-nowrap text-gray-900 font-semibold">
-                    <button
-                        onClick={() => handleMoreDetails(item.CollectorId, "Cleared")}
+                    <td className="px-4 py-2 whitespace-nowrap text-gray-900 font-semibold">
+                      <button
+                        onClick={() =>
+                          handleMoreDetails(item.UserId, "Cleared")
+                        }
                         className="underline hover:text-indigo-800"
                       >
                         ₹ {formatIndianNumber(item.Amount)}
                       </button>
-                      
                     </td>
-                    <td className="px-4 py-4 whitespace-nowrap text-gray-900 font-semibold">
+                    <td className="px-4 py-2 whitespace-nowrap text-gray-900 font-semibold">
                       <button
-                        onClick={() => handleMoreDetails(item.CollectorId, "Handover")}
+                        onClick={() =>
+                          handleMoreDetails(item.UserId, "Handover")
+                        }
                         className="underline hover:text-indigo-800"
                       >
                         ₹ {formatIndianNumber(item.HandoverAmt)}
                       </button>
                     </td>
-                    <td className="px-4 py-4 whitespace-nowrap text-gray-900 font-semibold">
-                      
-                        ₹ {formatIndianNumber(item.ClearedAmt)}
+                    <td className="px-4 py-2 whitespace-nowrap text-gray-900 font-semibold">
+                      ₹ {formatIndianNumber(item.ClearedAmt)}
                     </td>
                   </tr>
                 ))}
@@ -206,7 +183,6 @@ export default function CollectorLiabilities() {
       {openDialog && selectedCollector && (
         <LadgerDetailsDialog
           userId={selectedCollector}
-          date={selectedDate}
           onClose={() => {
             setOpenDialog(false);
             setSelectedCollector(null);
