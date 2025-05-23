@@ -36,11 +36,24 @@ export default function CollectorLiabilities() {
       const collectorData = await apiBase.getCollectorLiabilities(date);
       setCollectorLiabilities(collectorData);
       setSummary({
-        totalLaibilityAmount,
-        totalPendingApprovalAmount,
-        totalProjectionAmount,
-        totalRejectedAmount,
+        totalLaibilityAmount: collectorData.reduce(
+          (acc, item) => acc + (item.LaibilityAmount || 0),
+          0
+        ),
+        totalPendingApprovalAmount: collectorData.reduce(
+          (acc, item) => acc + (item.PendingApprovalAmount || 0),
+          0
+        ),
+        totalProjectionAmount: collectorData.reduce(
+          (acc, item) => acc + (item.ProjectionAmount || 0),
+          0
+        ),
+        totalRejectedAmount: collectorData.reduce(
+          (acc, item) => acc + (item.RejectedAmount || 0),
+          0
+        ),
       });
+      console.log("Summary Data:", summary);
     } catch (err) {
       console.error("Error fetching collector liabilities:", err);
       setError(err.message || "Failed to fetch data");
@@ -67,23 +80,6 @@ export default function CollectorLiabilities() {
     setOpenDialog(true);
     setModelFor(modelFor);
   };
-
-  const totalLaibilityAmount = collectorLiabilities.reduce(
-    (sum, item) => sum + (item.LaibilityAmount || 0),
-    0
-  );
-  const totalPendingApprovalAmount = collectorLiabilities.reduce(
-    (sum, item) => sum + (item.PendingApprovalAmount || 0),
-    0
-  );
-  const totalProjectionAmount = collectorLiabilities.reduce(
-    (sum, item) => sum + (item.ProjectionAmount || 0),
-    0
-  );
-  const totalRejectedAmount = collectorLiabilities.reduce(
-    (sum, item) => sum + (item.RejectedAmount || 0),
-    0
-  );
 
   useEffect(() => {
     fetchCollectorLiabilities();
