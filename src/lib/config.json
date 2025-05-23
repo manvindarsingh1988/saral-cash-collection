@@ -1,5 +1,5 @@
 {
     "api": {
-        "endpoint": "https://saralesuvidha.com/api/CashFlow"
+        "endpoint": "http://localhost:33203/api/CashFlow"
     }
 }
