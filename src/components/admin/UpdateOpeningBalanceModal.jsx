@@ -19,7 +19,7 @@ export default function UpdateOpeningBalanceModal({
       openingBalance,
       date
     );
-    if (!result) {
+    if (!result?.result) {
       alert("Failed to update opening balance");
       return;
     }
