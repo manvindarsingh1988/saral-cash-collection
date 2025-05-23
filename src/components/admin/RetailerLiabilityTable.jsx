@@ -3,10 +3,16 @@ import { formatIndianNumber } from "../../lib/utils";
 import LadgerDetailsDialog from "../LedgerDetailsDialog";
 
 const columns = [
+  { heading: "Retailer Id", key: "UserId", width: "200px" },
   { heading: "Retailer Name", key: "UserName", width: "200px" },
-  { heading: "Amount", key: "Amt", width: "80px" },
-  { heading: "Handover Amount", key: "HandoverAmt", width: "80px" },
-  { heading: "Clear Amount", key: "ClearedAmt", width: "80px" },
+  { heading: "Laibility Amount", key: "LaibilityAmount", width: "80px" },
+  {
+    heading: "Pending Approval Amount",
+    key: "PendingApprovalAmount",
+    width: "80px",
+  },
+  { heading: "Projection Amount", key: "ProjectionAmount", width: "80px" },
+  { heading: "Rejection Amount", key: "RejectedAmount", width: "80px" },
   { heading: "Action", key: "Action", width: "80px", isAction: true },
 ];
 
@@ -89,9 +95,10 @@ export default function RetailerLiabilityTable({ data }) {
                       >
                         More Details
                       </button>
-                    ) : col.key === "Amt" ||
-                      col.key === "HandoverAmt" ||
-                      col.key === "ClearedAmt" ? (
+                    ) : col.key === "LaibilityAmount" ||
+                      col.key === "PendingApprovalAmount" ||
+                      col.key === "ProjectionAmount" ||
+                      col.key === "RejectedAmount" ? (
                       `₹${formatIndianNumber(item[col.key])}`
                     ) : (
                       item[col.key]

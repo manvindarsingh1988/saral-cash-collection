@@ -13,9 +13,12 @@ export default function CollectorLiabilities() {
   const [modelFor, setModelFor] = useState("Handover");
 
   const [filters, setFilters] = useState({
-    CollectorId: "",
-    CollectorUserName: "",
-    Amount: "",
+    UserId: "",
+    UserName: "",
+    LaibilityAmount: 0,
+    PendingApprovalAmount:0,
+    ProjectionAmount:0,
+    RejectedAmount:0
   });
 
   const [openDialog, setOpenDialog] = useState(false);
@@ -98,12 +101,12 @@ export default function CollectorLiabilities() {
                   </th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     <div className="flex flex-col">
-                      <span>Amount (₹)</span>
+                      <span>Laibility Amount (₹)</span>
                       <input
                         type="text"
-                        value={filters.Amount}
+                        value={filters.LaibilityAmount}
                         onChange={(e) =>
-                          onFilterChange("Amount", e.target.value)
+                          onFilterChange("LaibilityAmount", e.target.value)
                         }
                         placeholder="Filter"
                         className="mt-1 px-2 py-1 border border-gray-300 rounded text-xs"
@@ -112,12 +115,12 @@ export default function CollectorLiabilities() {
                   </th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     <div className="flex flex-col">
-                      <span>Handover Amount (₹)</span>
+                      <span>Pending Approval Amount (₹)</span>
                       <input
                         type="text"
-                        value={filters.HandoverAmt}
+                        value={filters.PendingApprovalAmount}
                         onChange={(e) =>
-                          onFilterChange("Amount", e.target.value)
+                          onFilterChange("PendingApprovalAmount", e.target.value)
                         }
                         placeholder="Filter"
                         className="mt-1 px-2 py-1 border border-gray-300 rounded text-xs"
@@ -126,12 +129,26 @@ export default function CollectorLiabilities() {
                   </th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     <div className="flex flex-col">
-                      <span>Cleared Amount (₹)</span>
+                      <span>Rejected Amount (₹)</span>
                       <input
                         type="text"
-                        value={filters.ClearedAmt}
+                        value={filters.RejectedAmount}
                         onChange={(e) =>
-                          onFilterChange("Amount", e.target.value)
+                          onFilterChange("RejectedAmount", e.target.value)
+                        }
+                        placeholder="Filter"
+                        className="mt-1 px-2 py-1 border border-gray-300 rounded text-xs"
+                      />
+                    </div>
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <div className="flex flex-col">
+                      <span>Projection Amount (₹)</span>
+                      <input
+                        type="text"
+                        value={filters.ProjectionAmount}
+                        onChange={(e) =>
+                          onFilterChange("ProjectionAmount", e.target.value)
                         }
                         placeholder="Filter"
                         className="mt-1 px-2 py-1 border border-gray-300 rounded text-xs"
@@ -156,7 +173,7 @@ export default function CollectorLiabilities() {
                         }
                         className="underline hover:text-indigo-800"
                       >
-                        ₹ {formatIndianNumber(item.Amount)}
+                        ₹ {formatIndianNumber(item.LaibilityAmount)}
                       </button>
                     </td>
                     <td className="px-4 py-2 whitespace-nowrap text-gray-900 font-semibold">
@@ -166,11 +183,14 @@ export default function CollectorLiabilities() {
                         }
                         className="underline hover:text-indigo-800"
                       >
-                        ₹ {formatIndianNumber(item.HandoverAmt)}
+                        ₹ {formatIndianNumber(item.PendingApprovalAmount)}
                       </button>
                     </td>
                     <td className="px-4 py-2 whitespace-nowrap text-gray-900 font-semibold">
-                      ₹ {formatIndianNumber(item.ClearedAmt)}
+                      ₹ {formatIndianNumber(item.RejectedAmount)}
+                    </td>
+                    <td className="px-4 py-2 whitespace-nowrap text-gray-900 font-semibold">
+                      ₹ {formatIndianNumber(item.ProjectionAmount)}
                     </td>
                   </tr>
                 ))}

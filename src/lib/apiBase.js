@@ -115,9 +115,9 @@ export const apiBase = {
     return data;
   },
 
-  getLiabilityAmountOfAllRetailers: async (all) => {
+  getLiabilityAmountOfAllRetailers: async () => {
     const response = await fetch(
-      `${API_URL}/GetLiabilityAmountOfAllRetailers?all=${all}`
+      `${API_URL}/GetLiabilityAmountOfAllRetailers`
     );
     if (!response.ok) {
       console.error(`Failed to fetch: ${response.statusText}`);
