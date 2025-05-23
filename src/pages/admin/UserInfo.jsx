@@ -366,7 +366,7 @@ export default function UserInfo() {
                           : undefined
                       }
                       title={
-                        user.UserType === 5
+                        user.Active
                           ? "Click to view connected collectors"
                           : ""
                       }
@@ -414,7 +414,7 @@ export default function UserInfo() {
                       )}
                     </td>
                     <td>
-                      {user.UserType == 5 && user.Active ? (
+                      {user.Active ? (
                         <button
                           onClick={() =>
                             handleOpeningBalance(user.Id, user.OpeningBalance)
