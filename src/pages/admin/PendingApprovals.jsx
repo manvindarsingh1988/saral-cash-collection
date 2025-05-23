@@ -2,6 +2,7 @@ import React, { useState, useEffect, use } from "react";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
 import { apiBase } from "../../lib/apiBase";
 import ApprovalLedgerModal from "../../components/admin/ApprovalLedgerModal";
+import { formatToCustomDateTime } from "../../lib/utils";
 
 const columns = [
   { heading: "ID", accessor: "Id", width: "30px" },
@@ -74,7 +75,7 @@ export default function PendingApprovals() {
       return `₹ ${Number(value).toFixed(2)}`;
     }
     if (accessor === "Date" || accessor === "GivenOn") {
-      return value?.split("T")[0] || "—";
+      return formatToCustomDateTime(value) || "—";
     }
     return value || "—";
   };
@@ -173,10 +174,10 @@ export default function PendingApprovals() {
                     filteredData.map((item, idx) => (
                       <tr
                         key={idx}
-                        onClick={(e) => {
-                          e.preventDefault();
-                          openLedger(item);
-                        }}
+                        // onClick={(e) => {
+                        //   e.preventDefault();
+                        //   openLedger(item);
+                        // }}
                         className="hover:bg-gray-50 cursor-pointer"
                       >
                         {columns.map((col) => {

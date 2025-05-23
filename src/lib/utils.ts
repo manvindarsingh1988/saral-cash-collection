@@ -19,3 +19,19 @@ export function getRowColor(workFlow: number): string {
 
   return rowColor;
 }
+
+export function formatToCustomDateTime(isoString: string): string {
+  const date = new Date(isoString);
+  if (isNaN(date.getTime())) return ""; // Invalid date check
+
+  const pad = (num: number) => String(num).padStart(2, "0");
+
+  return (
+    `${pad(date.getDate())}/${pad(
+      date.getMonth() + 1
+    )}/${date.getFullYear()} ` +
+    `${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(
+      date.getSeconds()
+    )}`
+  );
+}
