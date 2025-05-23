@@ -10,6 +10,7 @@ const columns = [
   // { heading: "Retailer Name", accessor: "RetailerName", width: "150px" },
   { heading: "Cashier Name", accessor: "CashierName", width: "150px" },
   { heading: "Collector Name", accessor: "CollectorName", width: "100px" },
+  { heading: "Retailer Name", accessor: "RetailerName", width: "150px" },
   { heading: "Transaction Type", accessor: "TransactionType", width: "50px" },
   { heading: "Workflow", accessor: "WorkFlow", width: "70px" },
   { heading: "Date", accessor: "Date", width: "100px" },
