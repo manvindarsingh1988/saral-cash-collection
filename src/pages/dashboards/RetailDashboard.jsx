@@ -153,33 +153,6 @@ export default function RetailDashboard({ retailUserId }) {
     <>
       <div className="space-y-6">
         <div className="bg-white shadow rounded-lg p-6">
-          {/* <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-4 shadow-sm mb-6">
-            <div className="flex flex-col sm:flex-row sm:items-end gap-4">
-              <div className="flex-1">
-                <label
-                  htmlFor="transaction-date"
-                  className="block text-sm font-medium text-indigo-700 mb-1"
-                >
-                  Select Date
-                </label>
-                <input
-                  id="transaction-date"
-                  type="date"
-                  value={selectedDate}
-                  onChange={(e) => setSelectedDate(e.target.value)}
-                  className="w-full px-3 py-2 border border-indigo-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                />
-              </div>
-
-              <button
-                onClick={() => fetchData(selectedDate)}
-                className="bg-indigo-600 text-white px-6 py-2 rounded-md hover:bg-indigo-700 transition duration-200"
-              >
-                🔍 Search
-              </button>
-            </div>
-          </div> */}
-
           {liability && (
             <>
               <div className="grid grid-cols-1 sm:grid-cols-4 gap-6 mb-6">
@@ -372,7 +345,7 @@ export default function RetailDashboard({ retailUserId }) {
 
           {(!ledger || (liability && liability.Amt <= 0)) && (
             <div className="text-gray-500 mt-4">
-              No data available for selected date.
+              Loading...
             </div>
           )}
         </div>
