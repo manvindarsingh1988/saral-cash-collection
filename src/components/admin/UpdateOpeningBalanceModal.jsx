@@ -6,24 +6,24 @@ export default function UpdateOpeningBalanceModal({
   selectedUserId,
 }) {
   const [openingBalance, setOpeningBalance] = useState("");
-  const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
+  const [openingBalanceDate , setDate] = useState(new Date().toISOString().split("T")[0]);
 
   const handleSave = async () => {
     console.log("Saving for user:", selectedUserId, {
       openingBalance,
-      date,
+      openingBalanceDate,
     });
 
     const result = await apiBase.updateOpeningBalanceData(
       selectedUserId,
       openingBalance,
-      date
+      openingBalanceDate
     );
-    if (!result?.result) {
+    if (!result?.Response) {
       alert("Failed to update opening balance");
       return;
     }
-    handleOpeningBalanceModalClose(openingBalance, date);
+    handleOpeningBalanceModalClose(openingBalance, openingBalanceDate);
   };
 
   if (!selectedUserId) {
@@ -87,7 +87,7 @@ export default function UpdateOpeningBalanceModal({
           <input
             type="date"
             id="date"
-            value={date}
+            value={openingBalanceDate}
             onChange={(e) => setDate(e.target.value)}
             style={{ width: "100%", padding: "8px", marginTop: "4px" }}
             className="date-picker border-2 border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"

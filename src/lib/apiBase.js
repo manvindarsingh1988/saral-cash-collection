@@ -386,13 +386,13 @@ export const apiBase = {
     return data;
   },
 
-  updateOpeningBalanceData: async (userId, openingBalance, date) => {
+  updateOpeningBalanceData: async (userId, openingBalance, openingBalanceDate) => {
     const response = await fetch(`${API_URL}/UpdateOpeningBalanceData`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ userId, openingBalance, date }),
+      body: JSON.stringify({ userId, openingBalance, openingBalanceDate }),
     });
 
     if (!response.ok) {
