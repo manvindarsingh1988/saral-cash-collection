@@ -60,15 +60,15 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="">
       {loading && (
-        <div className="bg-white rounded-lg shadow p-6">Loading...</div>
+        <div className="bg-white rounded-lg shadow p-6 mt-2">Loading...</div>
       )}
       {error && <div className="text-red-600">{error}</div>}
 
       {liabilities.length > 0 && (
         <>
-          <div className="rounded-lg">
+          <div className="rounded-lg py-2">
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-4 mb-4">
               <div className="bg-white overflow-hidden shadow rounded-lg">
                 <div className="px-4 py-5 sm:p-3">
