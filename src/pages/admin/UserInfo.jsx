@@ -7,6 +7,7 @@ import { formatToCustom } from "../../lib/utils";
 
 export default function UserInfo() {
   useDocumentTitle("User Info");
+
   const [userInfos, setUserInfos] = useState([]);
   const [filteredUserInfos, setFilteredUserInfos] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -14,9 +15,11 @@ export default function UserInfo() {
 
   const [showModal, setShowModal] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState("");
-
   const [showOpeningBalanceModal, setShowOpeningBalanceModal] = useState(false);
+  const [pendingModalType, setPendingModalType] = useState(null); // 'main' or 'openingBalance'
 
+  console.log("selectedUserId in UserInfo:", selectedUserId);
+  console.log("pendingModalType in UserInfo:", pendingModalType);
   const [filters, setFilters] = useState({
     id: "",
     username: "",
@@ -26,6 +29,27 @@ export default function UserInfo() {
     balanceDate: "",
   });
 
+  const userTypeOptions = useMemo(
+    () => [
+      { Id: 5, Name: "Retailer" },
+      { Id: 12, Name: "Collector" },
+    ],
+    []
+  );
+
+  const formatDate = (dateStr) => {
+    if (!dateStr || dateStr === "0001-01-01T00:00:00") return "-";
+    const date = new Date(dateStr);
+    return date.toLocaleDateString();
+  };
+
+  const formatCurrency = (value) =>
+    new Intl.NumberFormat("en-IN", {
+      style: "currency",
+      currency: "INR",
+      maximumFractionDigits: 0,
+    }).format(value || 0);
+
   const fetchUserInfos = async () => {
     setLoading(true);
     try {
@@ -34,8 +58,8 @@ export default function UserInfo() {
         apiBase.getUserExtendedInfo(),
       ]);
       setUserInfos(response || []);
-      setMasterData(master || {});
       setFilteredUserInfos(response || []);
+      setMasterData(master || {});
     } catch (error) {
       console.error("Error fetching user info:", error);
     } finally {
@@ -47,36 +71,39 @@ export default function UserInfo() {
     fetchUserInfos();
   }, []);
 
+  useEffect(() => {
+    if (selectedUserId && pendingModalType) {
+      if (pendingModalType === "main") {
+        setShowOpeningBalanceModal(false);
+        setShowModal(true);
+      } else if (pendingModalType === "openingBalance") {
+        setShowModal(false);
+        setShowOpeningBalanceModal(true);
+      }
+      setPendingModalType(null); // Clear pending state
+    }
+  }, [selectedUserId, pendingModalType]);
+
   const handleIdClick = (userId) => {
     setSelectedUserId(userId);
-    setShowOpeningBalanceModal(false);
-    setShowModal(true);
+    setPendingModalType("main");
   };
 
-  const handleOpeningBalance = (userId, currentOpeningBalance) => {
+  const handleOpeningBalance = (userId) => {
     setSelectedUserId(userId);
-    setShowModal(false);
-    setShowOpeningBalanceModal(true);
+    setPendingModalType("openingBalance");
   };
 
-  const handleOpeningBalanceModalClose = (openingBalance, date) => {
-    if (openingBalance && date) {
-      const user = userInfos.find((user) => user.Id === selectedUserId);
-      if (user) {
-        setUserInfos((prev) =>
-          prev.map((u) =>
-            u.Id === selectedUserId
-              ? {
-                  ...u,
-                  OpeningBalance: openingBalance,
-                  OpeningBalanceDate: date,
-                }
-              : u
-          )
-        );
-      }
+  const handleOpeningBalanceModalClose = (balance, date) => {
+    if (balance && date) {
+      setUserInfos((prev) =>
+        prev.map((u) =>
+          u.Id === selectedUserId
+            ? { ...u, OpeningBalance: balance, OpeningBalanceDate: date }
+            : u
+        )
+      );
     }
-
     setShowOpeningBalanceModal(false);
     setSelectedUserId("");
   };
@@ -91,366 +118,211 @@ export default function UserInfo() {
           (filters.active === "no" && !user.Active)) &&
         (filters.userType === "" ||
           user.UserType ===
-            userTypeOptions.find((option) => option.Name === filters.userType)
-              ?.Id) &&
+            userTypeOptions.find((opt) => opt.Name === filters.userType)?.Id) &&
         (filters.balance === "" ||
           String(user.OpeningBalance || "").includes(filters.balance)) &&
         (filters.balanceDate === "" ||
           formatDate(user.OpeningBalanceDate).includes(filters.balanceDate))
       );
     });
-
     setFilteredUserInfos(filtered);
-  }, [filters, userInfos]);
+  }, [filters, userInfos, userTypeOptions]);
 
   useEffect(() => {
-    const timeout = setTimeout(() => {
-      applyFilters();
-    }, 300);
+    const timeout = setTimeout(() => applyFilters(), 300);
     return () => clearTimeout(timeout);
   }, [applyFilters]);
 
-  const formatDate = (dateStr) => {
-    if (!dateStr || dateStr === "0001-01-01T00:00:00") return "-";
-    const date = new Date(dateStr);
-    return date.toLocaleDateString();
-  };
-
-  const formatCurrency = (value) => {
-    return new Intl.NumberFormat("en-IN", {
-      style: "currency",
-      currency: "INR",
-      maximumFractionDigits: 0,
-    }).format(value || 0);
-  };
-
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
-    setFilters((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setFilters((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleIsThirdPartyChange = async (e, userId) => {
-    const isChecked = e.target.checked;
+  const updateFlag = async (userId, value, type) => {
     try {
-      const result = await apiBase.updateIsThirdPartyFlag(userId, isChecked);
-      if (!result.Response) {
-        alert(
-          `Failed to update 'Is Third Party' for user ${userId}: ${result.Message}`
-        );
-        return;
-      }
+      const updater =
+        type === "thirdParty"
+          ? apiBase.updateIsThirdPartyFlag
+          : apiBase.updateIsSelfSubmitterFlag;
+
+      const result = await updater(userId, value);
+      if (!result.Response) throw new Error(result.Message);
 
       setUserInfos((prev) =>
         prev.map((u) =>
-          u.Id === userId ? { ...u, IsThirdParty: isChecked } : u
+          u.Id === userId
+            ? {
+                ...u,
+                [type === "thirdParty" ? "IsThirdParty" : "IsSelfSubmitter"]:
+                  value,
+              }
+            : u
         )
       );
     } catch (error) {
-      alert(
-        `Failed to update 'Is Third Party' for user ${userId}: ${error.message}`
-      );
+      alert(`Failed to update flag: ${error.message}`);
       console.error(error);
     }
   };
-
-  const handleIsSelfSubmitterChange = async (e, userId) => {
-    const isChecked = e.target.checked;
-    try {
-      const result = await apiBase.updateIsSelfSubmitterFlag(userId, isChecked);
-      if (!result.Response) {
-        alert(
-          `Failed to update 'Is Self Submitter' for user ${userId}: ${result.Message}`
-        );
-        return;
-      }
-
-      setUserInfos((prev) =>
-        prev.map((u) =>
-          u.Id === userId ? { ...u, IsSelfSubmitter: isChecked } : u
-        )
-      );
-    } catch (error) {
-      alert(
-        `Failed to update 'Is Self Submitter' for user ${userId}: ${error.message}`
-      );
-      console.error(error);
-    }
-  };
-
-  const userTypeOptions = useMemo(
-    () => [
-      { Id: 5, Name: "Retailer" },
-      { Id: 12, Name: "Collector" },
-    ],
-    []
-  );
 
   return (
-    <div
-      className="rounded-lg shadow-lg border border-gray-200"
-      style={{ padding: "1rem", borderRadius: "8px", background: "#f8f9fa" }}
-    >
+    <div className="p-4 bg-gray-50 rounded-lg shadow border border-gray-200">
       {loading ? (
-        <p style={{ marginTop: "1rem" }}>Loading user info...</p>
+        <p>Loading user info...</p>
       ) : (
-        <div style={{ overflowX: "none" }}>
-          <table className="min-w-full divide-y border border-gray-200 rounded-lg text-xs">
-            <thead style={{ textAlign: "left" }}>
+        <div className="overflow-x-auto">
+          <table className="w-full table-auto text-xs sm:text-sm border border-gray-200 rounded-md">
+            <thead className="bg-gray-100 text-left">
               <tr>
-                <th style={{ padding: "8px 12px", fontWeight: 600 }}>
-                  Id
-                  <div style={{ marginTop: 4 }}>
-                    <input
-                      type="text"
-                      name="id"
-                      value={filters.id}
-                      onChange={handleFilterChange}
-                      placeholder="Filter"
-                      style={{
-                        width: "100%",
-                        padding: "4px 8px",
-                        borderRadius: 4,
-                        border: "1px solid #ccc",
-                        fontSize: "0.85rem",
-                      }}
-                    />
-                  </div>
-                </th>
-                <th style={{ padding: "8px 12px", fontWeight: 600 }}>
-                  Username
-                  <div style={{ marginTop: 4 }}>
-                    <input
-                      type="text"
-                      name="username"
-                      value={filters.username}
-                      onChange={handleFilterChange}
-                      placeholder="Filter"
-                      style={{
-                        width: "100%",
-                        padding: "4px 8px",
-                        borderRadius: 4,
-                        border: "1px solid #ccc",
-                        fontSize: "0.85rem",
-                      }}
-                    />
-                  </div>
-                </th>
-                <th style={{ padding: "8px 12px", fontWeight: 600 }}>
-                  Active
-                  <div style={{ marginTop: 4 }}>
-                    <select
-                      name="active"
-                      value={filters.active}
-                      onChange={handleFilterChange}
-                      style={{
-                        width: "100%",
-                        padding: "4px 8px",
-                        borderRadius: 4,
-                        border: "1px solid #ccc",
-                        fontSize: "0.85rem",
-                      }}
-                    >
-                      <option value="">All</option>
-                      <option value="yes">Yes</option>
-                      <option value="no">No</option>
-                    </select>
-                  </div>
-                </th>
-                <th style={{ padding: "8px 12px", fontWeight: 600 }}>
-                  User Type
-                  <div style={{ marginTop: 4 }}>
-                    <select
-                      name="userType"
-                      value={filters.userType}
-                      onChange={handleFilterChange}
-                      style={{
-                        width: "100%",
-                        padding: "4px 8px",
-                        borderRadius: 4,
-                        border: "1px solid #ccc",
-                        fontSize: "0.85rem",
-                      }}
-                    >
-                      <option value="">All</option>
-                      {userTypeOptions.map((type) => (
-                        <option key={type.Id} value={type.Name}>
-                          {type.Name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </th>
-                <th style={{ padding: "8px 12px", fontWeight: 600 }}>
-                  Opening Balance
-                  <div style={{ marginTop: 4 }}>
-                    <input
-                      type="text"
-                      name="balance"
-                      value={filters.balance}
-                      onChange={handleFilterChange}
-                      placeholder="Filter"
-                      style={{
-                        width: "100%",
-                        padding: "4px 8px",
-                        borderRadius: 4,
-                        border: "1px solid #ccc",
-                        fontSize: "0.85rem",
-                      }}
-                    />
-                  </div>
-                </th>
-                <th style={{ padding: "8px 12px", fontWeight: 600 }}>
-                  Opening Balance Date
-                  <div style={{ marginTop: 4 }}>
-                    <input
-                      type="text"
-                      name="balanceDate"
-                      value={filters.balanceDate}
-                      onChange={handleFilterChange}
-                      placeholder="dd/mm/yyyy"
-                      style={{
-                        width: "100%",
-                        padding: "4px 8px",
-                        borderRadius: 4,
-                        border: "1px solid #ccc",
-                        fontSize: "0.85rem",
-                      }}
-                    />
-                  </div>
-                </th>
-                <th style={{ padding: "8px 12px", fontWeight: 600 }}>
-                  Is Third Party
-                </th>
-                <th style={{ padding: "8px 12px", fontWeight: 600 }}>
-                  Is Self Submitter
-                </th>
-                <th></th>
+                {[
+                  "Id",
+                  "Username",
+                  "Active",
+                  "User Type",
+                  "Opening Balance",
+                  "Balance Date",
+                  "3rd Party",
+                  "Self Submitter",
+                  "Actions",
+                ].map((header) => (
+                  <th
+                    key={header}
+                    className="p-2 font-semibold whitespace-nowrap"
+                  >
+                    {header}
+                    {[
+                      "Id",
+                      "Username",
+                      "Active",
+                      "User Type",
+                      "Opening Balance",
+                      "Balance Date",
+                    ].includes(header) && (
+                      <div className="mt-1">
+                        {header === "Active" || header === "User Type" ? (
+                          <select
+                            name={
+                              header === "Active"
+                                ? "active"
+                                : header === "User Type"
+                                ? "userType"
+                                : ""
+                            }
+                            value={
+                              header === "Active"
+                                ? filters.active
+                                : filters.userType
+                            }
+                            onChange={handleFilterChange}
+                            className="w-full border border-gray-300 rounded px-2 py-1 text-xs"
+                          >
+                            <option value="">All</option>
+                            {header === "Active" && (
+                              <>
+                                <option value="yes">Yes</option>
+                                <option value="no">No</option>
+                              </>
+                            )}
+                            {header === "User Type" &&
+                              userTypeOptions.map((type) => (
+                                <option key={type.Id} value={type.Name}>
+                                  {type.Name}
+                                </option>
+                              ))}
+                          </select>
+                        ) : (
+                          <input
+                            type="text"
+                            name={
+                              header === "Id"
+                                ? "id"
+                                : header === "Username"
+                                ? "username"
+                                : header === "Opening Balance"
+                                ? "balance"
+                                : "balanceDate"
+                            }
+                            value={
+                              header === "Id"
+                                ? filters.id
+                                : header === "Username"
+                                ? filters.username
+                                : header === "Opening Balance"
+                                ? filters.balance
+                                : filters.balanceDate
+                            }
+                            onChange={handleFilterChange}
+                            placeholder="Filter"
+                            className="w-full border border-gray-300 rounded px-2 py-1 text-xs"
+                          />
+                        )}
+                      </div>
+                    )}
+                  </th>
+                ))}
               </tr>
             </thead>
             <tbody>
-              {filteredUserInfos.length === 0 ? (
-                <tr>
+              {filteredUserInfos.map((user) => (
+                <tr key={user.Id} className="even:bg-white odd:bg-gray-50">
                   <td
-                    colSpan={8}
-                    style={{
-                      padding: "1rem",
-                      textAlign: "center",
-                      color: "#666",
-                    }}
+                    className="p-2 font-medium text-blue-600 cursor-pointer"
+                    onClick={() => handleIdClick(user.Id)}
                   >
-                    No matching records.
+                    {user.Id}
+                  </td>
+                  <td className="p-2">{user.UserName}</td>
+                  <td className="p-2">{user.Active ? "Yes" : "No"}</td>
+                  <td className="p-2">
+                    {userTypeOptions.find((t) => t.Id === user.UserType)
+                      ?.Name || "-"}
+                  </td>
+                  <td className="p-2">{formatCurrency(user.OpeningBalance)}</td>
+                  <td className="p-2">{formatDate(user.OpeningBalanceDate)}</td>
+                  <td className="p-2">
+                    <input
+                      type="checkbox"
+                      checked={user.IsThirdParty}
+                      onChange={(e) =>
+                        updateFlag(user.Id, e.target.checked, "thirdParty")
+                      }
+                    />
+                  </td>
+                  <td className="p-2">
+                    <input
+                      type="checkbox"
+                      checked={user.IsSelfSubmitter}
+                      onChange={(e) =>
+                        updateFlag(user.Id, e.target.checked, "selfSubmitter")
+                      }
+                    />
+                  </td>
+                  <td className="p-2">
+                    <button
+                      className="text-indigo-600 underline text-xs"
+                      onClick={() => handleOpeningBalance(user.Id)}
+                    >
+                      Edit OB
+                    </button>
                   </td>
                 </tr>
-              ) : (
-                filteredUserInfos.map((user) => (
-                  <tr
-                    key={user.Id}
-                    style={{
-                      borderBottom: "1px solid #eee",
-                      backgroundColor: user.Active ? "white" : "#f1f1f1",
-                      color: user.Active ? "inherit" : "#888",
-                    }}
-                  >
-                    <td
-                      style={{
-                        padding: "8px 12px",
-                        cursor: user.UserType === 5 ? "pointer" : "default",
-                        color: user.UserType === 5 ? "#007bff" : "inherit",
-                      }}
-                      onClick={
-                        user.Active
-                          ? () => handleIdClick(user.Id)
-                          : undefined
-                      }
-                      title={
-                        user.Active
-                          ? "Click to view connected collectors"
-                          : ""
-                      }
-                    >
-                      {user.Id}
-                    </td>
-
-                    <td style={{ padding: "8px 12px" }}>{user.UserName}</td>
-                    <td style={{ padding: "8px 12px" }}>
-                      {user.Active ? "Yes" : "No"}
-                    </td>
-                    <td style={{ padding: "8px 12px" }}>
-                      {userTypeOptions.find((_) => _.Id == user.UserType)?.Name}
-                    </td>
-                    <td style={{ padding: "8px 12px", fontWeight: 600 }}>
-                      {formatCurrency(user.OpeningBalance)}
-                    </td>
-                    <td style={{ padding: "8px 12px" }}>
-                      {formatToCustom(user.OpeningBalanceDate)}
-                    </td>
-                    <td style={{ padding: "8px 12px" }}>
-                      {user.UserType == 5 ? (
-                        <input
-                          type="checkbox"
-                          checked={user.IsThirdParty}
-                          disabled={!user.Active}
-                          onChange={(e) => handleIsThirdPartyChange(e, user.Id)}
-                        />
-                      ) : (
-                        ""
-                      )}
-                    </td>
-                    <td style={{ padding: "8px 12px" }}>
-                      {user.UserType == 5 ? (
-                        <input
-                          type="checkbox"
-                          checked={user.IsSelfSubmitter}
-                          disabled={!user.Active}
-                          onChange={(e) =>
-                            handleIsSelfSubmitterChange(e, user.Id)
-                          }
-                        />
-                      ) : (
-                        ""
-                      )}
-                    </td>
-                    <td>
-                      {user.Active ? (
-                        <button
-                          onClick={() =>
-                            handleOpeningBalance(user.Id, user.OpeningBalance)
-                          }
-                          style={{
-                            padding: "4px 8px",
-                            borderRadius: "4px",
-                            backgroundColor: "#007bff",
-                            color: "white",
-                            border: "none",
-                            cursor: "pointer",
-                          }}
-                        >
-                          Update opening balance
-                        </button>
-                      ) : (
-                        ""
-                      )}
-                    </td>
-                  </tr>
-                ))
-              )}
+              ))}
             </tbody>
           </table>
         </div>
       )}
+
       {showModal && selectedUserId && (
         <ConnectedCollectorsModal
-          setShowModal={setShowModal}
           selectedUserId={selectedUserId}
+          setShowModal={setShowModal}
         />
       )}
+
       {showOpeningBalanceModal && selectedUserId && (
         <UpdateOpeningBalanceModal
-          handleOpeningBalanceModalClose={handleOpeningBalanceModalClose}
           selectedUserId={selectedUserId}
+          handleOpeningBalanceModalClose={handleOpeningBalanceModalClose}
         />
       )}
     </div>
