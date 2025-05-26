@@ -143,7 +143,7 @@ export default function CollectorLedger({ collectorUserId }) {
 
   return (
     <div className="spacer-6">
-      {liability && collectorLedgers.length > 0 && (
+      {liability && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 mb-6">
           <div className="bg-white shadow rounded-lg p-4">
             <dt className="text-sm font-medium text-gray-500">Liability</dt>
@@ -163,7 +163,7 @@ export default function CollectorLedger({ collectorUserId }) {
 
           <div className="bg-white shadow rounded-lg p-4">
             <dt className="text-sm font-medium text-gray-500">
-              Pending Amount
+              Pending Approval Amount
             </dt>
             <dd className="mt-1 text-3xl font-semibold text-gray-900">
               ₹ {formatIndianNumber(liability.PendingApprovalAmount)}

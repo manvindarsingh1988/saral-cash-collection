@@ -100,6 +100,7 @@ export default function PendingApprovals() {
         CollectorName: data.TransactionType == "2" ? "" : data.CollectorName,
         CashierId: apiBase.getCurrentUser()?.Id,
         CashierName: apiBase.getCurrentUser()?.UserName,
+        RetailerId: data.RetailerId
       };
 
       await apiBase.updateLedgerInfo(payload);

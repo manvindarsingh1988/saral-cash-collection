@@ -17,6 +17,9 @@ const allowedFields = [
   "Amount",
   "Date",
   "Comment",
+  "RetailerId",
+  "CollectorName",
+  "RetailerName"
 ];
 
 export default function ApprovalLedgerModal({
@@ -41,7 +44,6 @@ export default function ApprovalLedgerModal({
   useEffect(() => {
     if (initialData) {
       const formattedData = {};
-
       allowedFields.forEach((field) => {
         if (initialData[field]) {
           if (["Date"].includes(field)) {
@@ -81,9 +83,11 @@ export default function ApprovalLedgerModal({
           console.log("Key:", key, "Value:", formData[key]);
 
           if (
-            (key === "CollectorId" && formData["CollectorId"] === "") ||
-            (formData["TransactionType"] == "" && key === "CollectorId") ||
-            (formData["TransactionType"] == "2" && key === "CollectorId")
+            (key === "CollectorId") ||
+            (key === "RetailerId") || 
+            (key === "Date") || 
+            (key === "CollectorName" && !formData["CollectorName"]) ||
+            (key === "RetailerName" && !formData["RetailerName"]) 
           ) {
             return null;
           }
