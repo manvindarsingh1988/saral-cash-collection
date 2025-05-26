@@ -88,10 +88,8 @@ export default function AddUser() {
   };
 
   return (
-    <div className="flex justify-center mt-4">
-      <div className="bg-white p-6 rounded shadow-lg space-y-6 w-full max-w-5xl">
-        {/* <h1 className="text-2xl font-semibold text-gray-900">Add New User</h1> */}
-
+    <div className="flex justify-center mt-4 px-2 sm:px-4">
+      <div className="bg-white p-4 sm:p-6 rounded shadow-lg space-y-6 w-full max-w-5xl">
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && (
             <div className="rounded-md bg-red-50 p-4 text-sm text-red-700">
@@ -128,7 +126,8 @@ export default function AddUser() {
             </select>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          {/* Responsive Form Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {formFields.map(({ id, label, type = "text" }) => (
               <div key={id}>
                 <label
@@ -149,35 +148,38 @@ export default function AddUser() {
             ))}
           </div>
 
+          {/* Submit Button */}
           <button
             type="submit"
             disabled={loading}
             className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white 
-            bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+        bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
           >
             {loading ? "Creating..." : "Create Account"}
           </button>
         </form>
+
+        {/* Success Display Below Form on Mobile */}
+        {success && (
+          <div className="rounded-md bg-green-50 p-4 text-sm text-green-700 space-y-2">
+            <div>Account created successfully!</div>
+            {password && (
+              <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-2 space-y-2 sm:space-y-0">
+                <span className="font-mono bg-white px-2 py-1 border rounded text-gray-900 break-all">
+                  {password}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => navigator.clipboard.writeText(password)}
+                  className="text-sm px-2 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded"
+                >
+                  Copy
+                </button>
+              </div>
+            )}
+          </div>
+        )}
       </div>
-      {success && (
-        <div className="rounded-md bg-green-50 p-4 text-sm text-green-700 space-y-2">
-          <div>Account created successfully!</div>
-          {password && (
-            <div className="flex items-center space-x-2">
-              <span className="font-mono bg-white px-2 py-1 border rounded text-gray-900">
-                {password}
-              </span>
-              <button
-                type="button"
-                onClick={() => navigator.clipboard.writeText(password)}
-                className="text-sm px-2 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded"
-              >
-                Copy
-              </button>
-            </div>
-          )}
-        </div>
-      )}
     </div>
   );
 }
