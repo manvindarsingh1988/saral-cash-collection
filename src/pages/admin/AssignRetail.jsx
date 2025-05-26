@@ -96,11 +96,7 @@ export default function AssignRetail() {
   }
 
   return (
-    <div className="mx-auto max-w-7xl p-6 bg-white shadow-md rounded-lg">
-      {/* <h1 className="text-2xl font-semibold text-gray-900">
-        Assign Retail Users to Collectors
-      </h1> */}
-
+    <div className="mx-auto max-w-7xl p-4 sm:p-6 bg-white shadow-md rounded-lg">
       {error && (
         <div className="mt-4 rounded-md bg-red-50 p-4 text-sm text-red-700">
           {error}
@@ -113,7 +109,7 @@ export default function AssignRetail() {
         </div>
       )}
 
-      <div className="">
+      <div className="mb-6">
         <label
           htmlFor="collector"
           className="block text-sm font-medium text-gray-700"
@@ -136,67 +132,64 @@ export default function AssignRetail() {
       </div>
 
       {selectedCollector && (
-        <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <div className="grid gap-6 md:grid-cols-2">
           {/* Assigned Retail Users */}
           <div>
             <h2 className="text-lg font-medium text-gray-900">
               Assigned Retail Users
             </h2>
 
-            <div className="mt-4">
-              <input
-                type="text"
-                placeholder="Search assigned retailer..."
-                className="mb-4 block w-full rounded-md border border-gray-300 px-4 py-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-black"
-                onChange={(e) => {
-                  const filtered = mappedRetailers.filter((r) =>
-                    r.RetailerUserName.toLowerCase().includes(
-                      e.target.value.toLowerCase()
-                    )
-                  );
-                  setSelectedMappedRetailers(filtered);
-                }}
-              />
+            <input
+              type="text"
+              placeholder="Search assigned retailer..."
+              className="mt-4 mb-4 block w-full rounded-md border border-gray-300 px-4 py-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-black"
+              onChange={(e) => {
+                const filtered = mappedRetailers.filter((r) =>
+                  r.RetailerUserName.toLowerCase().includes(
+                    e.target.value.toLowerCase()
+                  )
+                );
+                setSelectedMappedRetailers(filtered);
+              }}
+            />
 
-              <div className="overflow-y-auto" style={{ height: "400px" }}>
-                <div className="bg-white shadow-md rounded-md border border-gray-300 overflow-hidden">
-                  <table className="w-full table-fixed divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
-                      <tr>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-5/6">
-                          Retailer Name
-                        </th>
-                        <th className="px-4 py-3 w-1/6"></th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-200">
-                      {selectedMappedRetailers?.length > 0 &&
-                        selectedMappedRetailers.map((mappedRetailer) => (
-                          <tr key={mappedRetailer.RetailerId}>
-                            <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
-                              {mappedRetailer.RetailerUserName}
-                            </td>
-                            <td className="px-4 py-4 whitespace-nowrap text-right text-sm font-medium">
-                              <button
-                                onClick={() =>
-                                  handleUnassign(mappedRetailer.RetailerId)
-                                }
-                                className="text-red-600 hover:text-red-900"
-                              >
-                                Remove
-                              </button>
-                            </td>
-                          </tr>
-                        ))}
-                    </tbody>
-                  </table>
-
-                  {selectedMappedRetailers?.length === 0 && (
-                    <div className="mt-4 text-sm text-gray-500 text-center">
-                      No assigned retailers found.
-                    </div>
-                  )}
-                </div>
+            <div className="overflow-y-auto max-h-[400px]">
+              <div className="overflow-x-auto rounded-md border border-gray-300 shadow-sm">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Retailer Name
+                      </th>
+                      <th className="px-4 py-3 text-right"></th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200">
+                    {selectedMappedRetailers?.length > 0 &&
+                      selectedMappedRetailers.map((mappedRetailer) => (
+                        <tr key={mappedRetailer.RetailerId}>
+                          <td className="px-4 py-4 text-sm text-gray-900">
+                            {mappedRetailer.RetailerUserName}
+                          </td>
+                          <td className="px-4 py-4 text-right text-sm">
+                            <button
+                              onClick={() =>
+                                handleUnassign(mappedRetailer.RetailerId)
+                              }
+                              className="text-red-600 hover:text-red-900"
+                            >
+                              Remove
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                  </tbody>
+                </table>
+                {selectedMappedRetailers?.length === 0 && (
+                  <div className="p-4 text-sm text-gray-500 text-center">
+                    No assigned retailers found.
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -207,58 +200,55 @@ export default function AssignRetail() {
               Available Retail Users
             </h2>
 
-            <div className="mt-4">
-              <input
-                type="text"
-                placeholder="Search retailer..."
-                className="mb-4 block w-full rounded-md border border-gray-300 px-4 py-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-black"
-                onChange={(e) =>
-                  setUnassignedRetailers(
-                    retailers.filter((r) =>
-                      r.UserName?.toLowerCase().includes(
-                        e.target.value?.toLowerCase()
-                      )
+            <input
+              type="text"
+              placeholder="Search retailer..."
+              className="mt-4 mb-4 block w-full rounded-md border border-gray-300 px-4 py-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-black"
+              onChange={(e) =>
+                setUnassignedRetailers(
+                  retailers.filter((r) =>
+                    r.UserName?.toLowerCase().includes(
+                      e.target.value?.toLowerCase()
                     )
                   )
-                }
-              />
+                )
+              }
+            />
 
-              <div className="overflow-y-auto" style={{ height: "400px" }}>
-                <div className="bg-white shadow-md rounded-md border border-gray-300 overflow-hidden">
-                  <table className="w-full table-fixed divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
-                      <tr>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-5/6">
-                          Retailer Name
-                        </th>
-                        <th className="px-4 py-3 w-1/6"></th>
+            <div className="overflow-y-auto max-h-[400px]">
+              <div className="overflow-x-auto rounded-md border border-gray-300 shadow-sm">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Retailer Name
+                      </th>
+                      <th className="px-4 py-3 text-right"></th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200">
+                    {unassignedRetailers.map((retailer) => (
+                      <tr key={retailer.Id}>
+                        <td className="px-4 py-4 text-sm text-gray-900">
+                          {retailer.UserName}
+                        </td>
+                        <td className="px-4 py-4 text-right text-sm">
+                          <button
+                            onClick={() => handleAssign(retailer.Id)}
+                            className="text-indigo-600 hover:text-indigo-900"
+                          >
+                            Assign
+                          </button>
+                        </td>
                       </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-200">
-                      {unassignedRetailers.map((retailer) => (
-                        <tr key={retailer.Id}>
-                          <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
-                            {retailer.UserName}
-                          </td>
-                          <td className="px-4 py-4 whitespace-nowrap text-right text-sm font-medium">
-                            <button
-                              onClick={() => handleAssign(retailer.Id)}
-                              className="text-indigo-600 hover:text-indigo-900"
-                            >
-                              Assign
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-
-                  {unassignedRetailers.length === 0 && (
-                    <div className="mt-4 text-sm text-gray-500 text-center">
-                      No retailers found.
-                    </div>
-                  )}
-                </div>
+                    ))}
+                  </tbody>
+                </table>
+                {unassignedRetailers.length === 0 && (
+                  <div className="p-4 text-sm text-gray-500 text-center">
+                    No retailers found.
+                  </div>
+                )}
               </div>
             </div>
           </div>
