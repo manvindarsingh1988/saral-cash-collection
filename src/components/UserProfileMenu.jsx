@@ -1,24 +1,33 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 
 export default function UserProfileMenu({ user, onSignOut }) {
   const [showMenu, setShowMenu] = useState(false);
+  const menuRef = useRef(null);
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (menuRef.current && !menuRef.current.contains(e.target)) {
+        setShowMenu(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   return (
-    <div className="relative">
+    <div className="relative" ref={menuRef}>
       <button
         onClick={() => setShowMenu(!showMenu)}
-        className="text-white flex items-center space-x-2 px-3 py-2 text-sm font-medium hover:bg-indigo-700 rounded"
+        className="text-white flex items-center space-x-2 px-3 py-2 text-sm font-medium hover:bg-indigo-700 rounded focus:outline-none"
       >
-        <div className="text-left">
-          <div className="font-semibold truncate max-w sm:max-w">
-            {user?.UserName || "User"}
-          </div>
-          <div className="text-xs opacity-80 truncate max-w sm:max-w">
-            {user?.UserType || "Role"}
-          </div>
+        <div className="text-left truncate max-w-[100px] sm:max-w-[160px]">
+          <div className="font-semibold">{user?.UserName || "User"}</div>
+          <div className="text-xs opacity-80">{user?.UserType || "Role"}</div>
         </div>
+        {/* Dropdown arrow icon (pure SVG) */}
         <svg
-          className="w-4 h-4 ml-2"
+          className="ml-1 h-4 w-4 text-white"
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
           viewBox="0 0 24 24"
@@ -29,7 +38,7 @@ export default function UserProfileMenu({ user, onSignOut }) {
       </button>
 
       {showMenu && (
-        <div className="absolute right-0 mt-2 min-w-[180px] bg-white rounded-md shadow-lg z-50">
+        <div className="absolute right-0 mt-2 w-44 bg-white rounded-md shadow-lg z-50">
           <button
             onClick={() => {
               setShowMenu(false);

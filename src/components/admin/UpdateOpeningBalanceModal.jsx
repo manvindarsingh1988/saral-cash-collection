@@ -6,7 +6,9 @@ export default function UpdateOpeningBalanceModal({
   selectedUserId,
 }) {
   const [openingBalance, setOpeningBalance] = useState("");
-  const [openingBalanceDate , setDate] = useState(new Date().toISOString().split("T")[0]);
+  const [openingBalanceDate, setDate] = useState(
+    new Date().toISOString().split("T")[0]
+  );
 
   const handleSave = async () => {
     console.log("Saving for user:", selectedUserId, {
@@ -25,7 +27,7 @@ export default function UpdateOpeningBalanceModal({
     }
     handleOpeningBalanceModalClose(openingBalance, openingBalanceDate);
   };
-
+  console.log("Selected User ID:", selectedUserId);
   if (!selectedUserId) {
     return "";
   }
