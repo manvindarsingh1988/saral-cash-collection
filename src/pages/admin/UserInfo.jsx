@@ -170,7 +170,7 @@ export default function UserInfo() {
       {loading ? (
         <p>Loading user info...</p>
       ) : (
-        <div className="overflow-x-auto">
+        <div className="max-h-[calc(100vh-150px)] overflow-y-auto overflow-x-auto px-2 sm:px-0">
           <table className="w-full table-auto text-xs sm:text-sm border border-gray-200 rounded-md">
             <thead className="bg-gray-100 text-left">
               <tr>
