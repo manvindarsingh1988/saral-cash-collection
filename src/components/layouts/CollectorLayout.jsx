@@ -54,7 +54,11 @@ export default function CollectorLayout({ children }) {
         {/* Mobile menu */}
         {mobileMenuOpen && (
           <div className="md:hidden bg-indigo-500 px-2 pt-2 pb-3 space-y-1">
-            <NavLinks isActive={isActive} mobile />
+            <NavLinks
+              isActive={isActive}
+              mobile
+              setMobileMenuOpen={setMobileMenuOpen}
+            />
           </div>
         )}
       </nav>
@@ -66,7 +70,7 @@ export default function CollectorLayout({ children }) {
   );
 }
 
-function NavLinks({ isActive, mobile = false }) {
+function NavLinks({ isActive, mobile = false, setMobileMenuOpen }) {
   const baseClass = "text-white rounded-md px-3 py-2 text-sm font-medium block";
   const links = [
     { to: "/", label: "Retailer Liabilities" },
@@ -79,7 +83,10 @@ function NavLinks({ isActive, mobile = false }) {
       to={to}
       className={`${baseClass} ${isActive(to)}`}
       onClick={() => {
-        if (mobile) document.activeElement?.blur();
+        if (mobile) {
+          document.activeElement?.blur();
+          setMobileMenuOpen(false); // Close menu on link click
+        }
       }}
     >
       {label}

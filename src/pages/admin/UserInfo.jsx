@@ -264,7 +264,14 @@ export default function UserInfo() {
             </thead>
             <tbody>
               {filteredUserInfos.map((user) => (
-                <tr key={user.Id} className="even:bg-white odd:bg-gray-50">
+                <tr
+                  key={user.Id}
+                  className={`${
+                    !user.Active
+                      ? "bg-gray-300"
+                      : "even:bg-white odd:bg-gray-50"
+                  }`}
+                >
                   <td
                     className="p-2 font-medium text-blue-600 cursor-pointer"
                     onClick={() => handleIdClick(user.Id)}
@@ -280,30 +287,44 @@ export default function UserInfo() {
                   <td className="p-2">{formatCurrency(user.OpeningBalance)}</td>
                   <td className="p-2">{formatDate(user.OpeningBalanceDate)}</td>
                   <td className="p-2">
-                    <input
-                      type="checkbox"
-                      checked={user.IsThirdParty}
-                      onChange={(e) =>
-                        updateFlag(user.Id, e.target.checked, "thirdParty")
-                      }
-                    />
+                    {user.UserType == 5 ? (
+                      <input
+                        type="checkbox"
+                        checked={user.IsThirdParty}
+                        disabled={!user.Active}
+                        onChange={(e) =>
+                          updateFlag(user.Id, e.target.checked, "thirdParty")
+                        }
+                      />
+                    ) : (
+                      ""
+                    )}
                   </td>
                   <td className="p-2">
-                    <input
-                      type="checkbox"
-                      checked={user.IsSelfSubmitter}
-                      onChange={(e) =>
-                        updateFlag(user.Id, e.target.checked, "selfSubmitter")
-                      }
-                    />
+                    {user.UserType == 5 ? (
+                      <input
+                        type="checkbox"
+                        checked={user.IsSelfSubmitter}
+                        disabled={!user.Active}
+                        onChange={(e) =>
+                          updateFlag(user.Id, e.target.checked, "selfSubmitter")
+                        }
+                      />
+                    ) : (
+                      ""
+                    )}
                   </td>
                   <td className="p-2">
-                    <button
-                      className="text-indigo-600 underline text-xs"
-                      onClick={() => handleOpeningBalance(user.Id)}
-                    >
-                      Edit OB
-                    </button>
+                    {user.Active ? (
+                      <button
+                        className="text-indigo-600 underline text-xs"
+                        onClick={() => handleOpeningBalance(user.Id)}
+                      >
+                        Edit OB
+                      </button>
+                    ) : (
+                      ""
+                    )}
                   </td>
                 </tr>
               ))}
