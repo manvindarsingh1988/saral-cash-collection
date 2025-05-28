@@ -417,5 +417,44 @@ export const apiBase = {
     const data = await response.json();
     console.log(data);
     return data;
-  }
+  },
+
+  linkAllRetailersToNewCollector: async (fromCollectorId, toCollectorId) => {
+    const response = await fetch(`${API_URL}/LinkAllRetailersToNewCollector`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ fromCollectorId, toCollectorId }),
+    });
+
+    if (!response.ok) {
+      console.error(`Failed to fetch: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    console.log(data);
+    return data;
+  },
+
+  deleteLinking: async (collectorId, retailerId) => {
+    const response = await fetch(
+      `${API_URL}/DeleteLinking?collectorId=${collectorId}&retailerId=${retailerId}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ collectorId, retailerId }),
+      }
+    );
+
+    if (!response.ok) {
+      console.error(`Failed to fetch: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    console.log(data);
+    return data;
+  },
 };
