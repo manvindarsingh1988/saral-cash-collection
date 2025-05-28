@@ -19,6 +19,8 @@ export default function CollectorLiabilities() {
     totalPendingApprovalAmount: 0,
     totalProjectionAmount: 0,
     totalRejectedAmount: 0,
+    totalCurrentAmount: 0,
+    totalClosingAmount: 0,
   });
 
   const [filters, setFilters] = useState({
@@ -28,6 +30,8 @@ export default function CollectorLiabilities() {
     PendingApprovalAmount: "",
     ProjectionAmount: "",
     RejectedAmount: "",
+    CurrentAmount: "",
+    ClosingAmount: "",
   });
 
   useEffect(() => {
@@ -45,6 +49,8 @@ export default function CollectorLiabilities() {
         totalPendingApprovalAmount: data.reduce((acc, x) => acc + (x.PendingApprovalAmount || 0), 0),
         totalProjectionAmount: data.reduce((acc, x) => acc + (x.ProjectionAmount || 0), 0),
         totalRejectedAmount: data.reduce((acc, x) => acc + (x.RejectedAmount || 0), 0),
+        totalCurrentAmount: data.reduce((acc, x) => acc + (x.CurrentAmount || 0), 0),
+        totalClosingAmount: data.reduce((acc, x) => acc + (x.ClosingAmount || 0), 0),
       });
     } catch (err) {
       console.error(err);
@@ -79,12 +85,14 @@ export default function CollectorLiabilities() {
       {!loading && collectorLiabilities.length > 0 && (
         <>
           {/* Summary Cards */}
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-6">
             {[
               { label: "Liability Amount", value: summary.totalLaibilityAmount },
               { label: "Pending Approval", value: summary.totalPendingApprovalAmount },
               { label: "Projection Amount", value: summary.totalProjectionAmount },
               { label: "Rejected Amount", value: summary.totalRejectedAmount },
+              { label: "Current Amount", value: summary.totalCurrentAmount },
+              { label: "Closing Amount", value: summary.totalClosingAmount },
             ].map((item) => (
               <div key={item.label} className="bg-white rounded-lg shadow p-4">
                 <span className="text-sm text-gray-500">{item.label}</span>
@@ -106,6 +114,8 @@ export default function CollectorLiabilities() {
                   <th className="px-4 py-2 text-left">Pending (₹)</th>
                   <th className="px-4 py-2 text-left">Rejected (₹)</th>
                   <th className="px-4 py-2 text-left">Projection (₹)</th>
+                  <th className="px-4 py-2 text-left">Current</th>
+                  <th className="px-4 py-2 text-left">Closing</th>
                 </tr>
                 <tr className="bg-white">
                   {Object.entries(filters).map(([key, value]) => (
@@ -144,6 +154,8 @@ export default function CollectorLiabilities() {
                     </td>
                     <td className="px-4 py-2">₹ {formatIndianNumber(item.RejectedAmount)}</td>
                     <td className="px-4 py-2">₹ {formatIndianNumber(item.ProjectionAmount)}</td>
+                    <td className="px-4 py-2">₹ {formatIndianNumber(item.CurrentAmount)}</td>
+                    <td className="px-4 py-2">₹ {formatIndianNumber(item.ClosingAmount)}</td>
                   </tr>
                 ))}
               </tbody>

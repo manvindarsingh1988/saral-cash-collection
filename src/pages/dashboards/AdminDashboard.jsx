@@ -15,6 +15,8 @@ export default function AdminDashboard() {
     totalPendingApprovalAmount: 0,
     totalProjectionAmount: 0,
     totalRejectedAmount: 0,
+    totalCurrentAmount: 0,
+    totalClosingAmount: 0,
   });
 
   useEffect(() => {
@@ -44,6 +46,14 @@ export default function AdminDashboard() {
         (sum, item) => sum + (item.RejectedAmount || 0),
         0
       );
+      const totalCurrentAmount = retailerData.reduce(
+        (sum, item) => sum + (item.CurrentAmount || 0),
+        0
+      );
+      const totalClosingAmount = retailerData.reduce(
+        (sum, item) => sum + (item.ClosingAmount || 0),
+        0
+      );
 
       setSummary({
         totalLaibilityAmount,
@@ -69,7 +79,7 @@ export default function AdminDashboard() {
       {liabilities.length > 0 && (
         <>
           <div className="rounded-lg py-2">
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-4 mb-4">
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-6 mb-4">
               <div className="bg-white overflow-hidden shadow rounded-lg">
                 <div className="px-4 py-5 sm:p-3">
                   <dt className="text-sm font-medium text-gray-500 truncate">
@@ -107,6 +117,26 @@ export default function AdminDashboard() {
                   </dt>
                   <dd className="mt-1 text-3xl font-semibold text-gray-900">
                     ₹ {formatIndianNumber(summary.totalRejectedAmount)}
+                  </dd>
+                </div>
+              </div>
+              <div className="bg-white overflow-hidden shadow rounded-lg">
+                <div className="px-4 py-5 sm:p-3">
+                  <dt className="text-sm font-medium text-gray-500 truncate">
+                    Current Amount
+                  </dt>
+                  <dd className="mt-1 text-3xl font-semibold text-gray-900">
+                    ₹ {formatIndianNumber(summary.totalCurrentAmount)}
+                  </dd>
+                </div>
+              </div>
+              <div className="bg-white overflow-hidden shadow rounded-lg">
+                <div className="px-4 py-5 sm:p-3">
+                  <dt className="text-sm font-medium text-gray-500 truncate">
+                    Closing Amount
+                  </dt>
+                  <dd className="mt-1 text-3xl font-semibold text-gray-900">
+                    ₹ {formatIndianNumber(summary.totalClosingAmount)}
                   </dd>
                 </div>
               </div>
