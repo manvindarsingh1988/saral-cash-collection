@@ -19,7 +19,7 @@ const routesForRoles = {
     "/pending-approvals",
     "/user-info",
   ],
-  Collector: ["/", "/ledgers"],
+  Collector: ["/", "/pending-approvals"],
   Retailer: ["/"],
 };
 

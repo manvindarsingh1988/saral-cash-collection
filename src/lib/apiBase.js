@@ -128,6 +128,16 @@ export const apiBase = {
     return data;
   },
 
+  getLiabilityAmountOfAllRetailersByCollectorId: async (collectorId) => {
+    const response = await fetch(`${API_URL}/GetLiabilityAmountOfAllRetailersByCollectorId?collectorId=${collectorId}`);
+    if (!response.ok) {
+      console.error(`Failed to fetch: ${response.statusText}`);
+    }
+    const data = await response.json();
+    console.log(data);
+    return data;
+  },
+
   getLadgerInfosCreatedByCollectors: async (date) => {
     const response = await fetch(
       `${API_URL}/GetLadgerInfosCreatedByCollectors?date=${date}`
@@ -321,6 +331,16 @@ export const apiBase = {
 
   getPendingApprovals: async () => {
     const response = await fetch(`${API_URL}/GetPendingApprovalLedgers`);
+    if (!response.ok) {
+      console.error(`Failed to fetch: ${response.statusText}`);
+    }
+    const data = await response.json();
+    console.log(data);
+    return data;
+  },
+
+    getPendingApprovalsByCollectorId: async (collectorId) => {
+    const response = await fetch(`${API_URL}/GetPendingApprovalLedgersByCollectorId?collectorId=${collectorId}`);
     if (!response.ok) {
       console.error(`Failed to fetch: ${response.statusText}`);
     }

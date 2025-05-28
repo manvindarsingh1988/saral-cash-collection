@@ -74,8 +74,9 @@ export default function CollectorLayout({ children }) {
 function NavLinks({ isActive, mobile = false, setMobileMenuOpen }) {
   const baseClass = "text-white rounded-md px-3 py-2 text-sm font-medium block";
   const links = [
+    // { to: "/", label: "Retailer Liabilities" },
     { to: "/", label: "Retailer Liabilities" },
-    { to: "/ledgers", label: "Ledgers" },
+    { to: "/pending-approvals", label: "Pending Approvals" },
   ];
 
   return links.map(({ to, label }) => (

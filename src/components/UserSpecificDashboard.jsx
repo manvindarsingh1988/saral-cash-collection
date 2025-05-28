@@ -13,6 +13,8 @@ import CollectorLiabilities from "../pages/admin/CollectorLiabilities";
 import CollectorLedger from "../pages/collector/CollectorLedger";
 import PendingApprovals from "../pages/admin/PendingApprovals";
 import UserInfo from "../pages/admin/UserInfo";
+import RetailerLiabilitiesForCollector from "../pages/collector/RetailerLiabilitiesForCollector";
+import PendingApprovalsForCollector from "../pages/collector/PendingApprovalsForCollector";
 
 export default function UserSpecificDashboard() {
   const user = apiBase.getCurrentUser();
@@ -34,11 +36,20 @@ export default function UserSpecificDashboard() {
     return (
       <CollectorLayout>
         <Routes>
-          <Route
+          {/* <Route
             path="/"
             element={<CollectorDashboard collectorUserId={user.Id} />}
+          /> */}
+          <Route
+            path="/"
+            element={
+              <RetailerLiabilitiesForCollector collectorUserId={user.Id} />
+            }
           />
-          <Route path="/ledgers" element={<CollectorLedger collectorUserId={user.Id} />} />
+          <Route
+            path="/pending-approvals"
+            element={<PendingApprovalsForCollector collectorUserId={user.Id} />}
+          />
         </Routes>
       </CollectorLayout>
     );
