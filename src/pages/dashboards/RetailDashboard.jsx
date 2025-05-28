@@ -1,6 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { apiBase } from "../../lib/apiBase";
-import { formatIndianNumber, formatToCustomDateTime, getRowColor } from "../../lib/utils";
+import {
+  formatIndianNumber,
+  formatToCustomDateTime,
+  getRowColor,
+} from "../../lib/utils";
 import RetailerLedgerModal from "../../components/retailer/RetailerLedgerModal";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
 
@@ -103,7 +107,7 @@ export default function RetailDashboard({ retailUserId }) {
         ...data,
         Amount: parseFloat(data.Amount),
         TransactionType: parseInt(data.TransactionType),
-        WorkFlow: 1,
+        WorkFlow: data?.StuckInBank ? 6 : 1,
         Date: new Date(data.Date).toISOString(),
         GivenOn: new Date().toISOString(),
         CollectorId: data.TransactionType == "2" ? "" : data.CollectorId,
@@ -155,7 +159,7 @@ export default function RetailDashboard({ retailUserId }) {
         <div className="bg-white shadow rounded-lg p-6">
           {liability && (
             <>
-              <div className="grid grid-cols-1 sm:grid-cols-4 gap-6 mb-6">
+              <div className="grid grid-cols-1 sm:grid-cols-6 gap-6 mb-6">
                 <div className="bg-white shadow rounded-lg p-4">
                   <dt className="text-sm font-medium text-gray-500">
                     Liability
@@ -189,6 +193,22 @@ export default function RetailDashboard({ retailUserId }) {
                   </dt>
                   <dd className="mt-1 text-3xl font-semibold text-gray-900">
                     ₹ {formatIndianNumber(liability.ProjectionAmount)}
+                  </dd>
+                </div>
+                <div className="bg-white shadow rounded-lg p-4">
+                  <dt className="text-sm font-medium text-gray-500">
+                    Closing Amount
+                  </dt>
+                  <dd className="mt-1 text-3xl font-semibold text-gray-900">
+                    ₹ {formatIndianNumber(liability.ClosingAmount)}
+                  </dd>
+                </div>
+                <div className="bg-white shadow rounded-lg p-4">
+                  <dt className="text-sm font-medium text-gray-500">
+                    Current Amount
+                  </dt>
+                  <dd className="mt-1 text-3xl font-semibold text-gray-900">
+                    ₹ {formatIndianNumber(liability.CurrentAmount)}
                   </dd>
                 </div>
               </div>
@@ -251,6 +271,8 @@ export default function RetailDashboard({ retailUserId }) {
                                     </option>
                                   ))}
                                 </select>
+                              ) : key === "Actions" ? (
+                                ""
                               ) : (
                                 <input
                                   type="text"
@@ -279,7 +301,7 @@ export default function RetailDashboard({ retailUserId }) {
                               item.WorkFlow
                             )}`}
                           >
-                            <td className="px-2 py-2">
+                            <td className="px-4 py-2">
                               {item.WorkFlow == "5" ? (
                                 <span className="text-green-600">
                                   {item.Id}
@@ -297,29 +319,29 @@ export default function RetailDashboard({ retailUserId }) {
                                 </a>
                               )}
                             </td>
-                            <td className="px-2 py-2">
+                            <td className="px-4 py-2">
                               {getMasterValue(
                                 "TransactionTypes",
                                 item.TransactionType
                               )}
                             </td>
-                            <td className="px-2 py-2">
+                            <td className="px-4 py-2">
                               ₹{formatIndianNumber(item.Amount)}
                             </td>
-                            <td className="px-2 py-2">
+                            <td className="px-4 py-2">
                               {getMasterValue("WorkFlows", item.WorkFlow)}
                             </td>
-                            <td className="px-2 py-2">{item.CollectorName}</td>
-                            <td className="px-2 py-2">
+                            <td className="px-4 py-2">{item.CollectorName}</td>
+                            <td className="px-4 py-2">
                               {formatToCustomDateTime(item.Date)}
                             </td>
-                            <td className="px-2 py-2">
+                            <td className="px-4 py-2">
                               {formatToCustomDateTime(item.GivenOn)}
                             </td>
-                            <td className="px-2 py-2 break-words max-w-[200px]">
+                            <td className="px-4 py-2 break-words max-w-[200px]">
                               {item.Comment}
                             </td>
-                            <td className="px-2 py-2">
+                            <td className="px-4 py-2">
                               {getMasterValue("WorkFlows", item.WorkFlow) ===
                                 "Initiate" && (
                                 <button
@@ -344,9 +366,7 @@ export default function RetailDashboard({ retailUserId }) {
           )}
 
           {(!ledger || (liability && liability.Amt <= 0)) && (
-            <div className="text-gray-500 mt-4">
-              Loading...
-            </div>
+            <div className="text-gray-500 mt-4">Loading...</div>
           )}
         </div>
       </div>

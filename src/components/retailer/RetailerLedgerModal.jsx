@@ -7,6 +7,7 @@ const fieldLabels = {
   Amount: "Amount (₹)",
   Date: "Transaction Date",
   Comment: "Comment",
+  StuckInBank: "Stuck In Bank",
 };
 
 const allowedFields = [
@@ -16,6 +17,7 @@ const allowedFields = [
   "Amount",
   "Date",
   "Comment",
+  "StuckInBank",
 ];
 
 export default function RetailerLedgerModal({
@@ -85,7 +87,9 @@ export default function RetailerLedgerModal({
           if (
             (formData["TransactionType"] == "" && key === "CollectorId") ||
             (formData["TransactionType"] == "2" && key === "CollectorId") ||
-            (key == "Date")
+            (formData["TransactionType"] == "3" && key === "CollectorId") ||
+            (formData["TransactionType"] !== "2" && key === "StuckInBank") ||
+            key == "Date"
           ) {
             return null;
           }
@@ -138,13 +142,46 @@ export default function RetailerLedgerModal({
                   ))}
                 </select>
                 {key === "TransactionType" &&
-                  formData["TransactionType"] === "2" && (
+                  (formData["TransactionType"] === "2" ||
+                    formData["TransactionType"] === "3") && (
                     <p className="text-xs text-gray-500 mt-1">
                       <strong>Note:</strong> Please mention transaction details
                       in comment to avoid rejection.
                     </p>
                   )}
               </>
+            );
+          } else if (
+            key === "StuckInBank" &&
+            formData["TransactionType"] === "2"
+          ) {
+            inputElement = (
+              <label className="flex items-center gap-2">
+                <input
+                  name={key}
+                  type="checkbox"
+                  checked={formData[key] ?? false}
+                  onChange={(e) =>
+                    handleChange({
+                      target: {
+                        name: key,
+                        value: e.target.checked ? true : false,
+                      },
+                    })
+                  }
+                  className="border rounded"
+                />
+                {fieldLabels[key]}
+              </label>
+            );
+          } else if (key === "Comment") {
+            inputElement = (
+              <textarea
+                name={key}
+                value={formData[key]}
+                onChange={handleChange}
+                className="border px-2 py-1 rounded"
+              />
             );
           } else {
             const inputType = ["Amount", "WorkFlow", "Id"].includes(key)
@@ -168,7 +205,9 @@ export default function RetailerLedgerModal({
 
           return (
             <div key={key} className="flex flex-col">
-              <label className="text-sm text-gray-600">{label}</label>
+              {key !== "StuckInBank" && (
+                <label className="text-sm text-gray-600">{label}</label>
+              )}{" "}
               {inputElement}
             </div>
           );
