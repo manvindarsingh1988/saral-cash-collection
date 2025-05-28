@@ -17,6 +17,9 @@ export const apiBase = {
       if (!user) {
         throw new Error("Invalid email or password");
       }
+      if (user?.IsFailed) {
+        throw new Error(user?.Message || "Login failed");
+      }
     }
 
     currentUser = user;
@@ -116,9 +119,7 @@ export const apiBase = {
   },
 
   getLiabilityAmountOfAllRetailers: async () => {
-    const response = await fetch(
-      `${API_URL}/GetLiabilityAmountOfAllRetailers`
-    );
+    const response = await fetch(`${API_URL}/GetLiabilityAmountOfAllRetailers`);
     if (!response.ok) {
       console.error(`Failed to fetch: ${response.statusText}`);
     }
@@ -386,7 +387,11 @@ export const apiBase = {
     return data;
   },
 
-  updateOpeningBalanceData: async (userId, openingBalance, openingBalanceDate) => {
+  updateOpeningBalanceData: async (
+    userId,
+    openingBalance,
+    openingBalanceDate
+  ) => {
     const response = await fetch(`${API_URL}/UpdateOpeningBalanceData`, {
       method: "POST",
       headers: {
@@ -403,4 +408,14 @@ export const apiBase = {
     console.log(data);
     return data;
   },
+
+  getPassword: async (userId) => {
+    const response = await fetch(`${API_URL}/GetPassword?userId=${userId}`);
+    if (!response.ok) {
+      console.error(`Failed to fetch: ${response.statusText}`);
+    }
+    const data = await response.json();
+    console.log(data);
+    return data;
+  }
 };

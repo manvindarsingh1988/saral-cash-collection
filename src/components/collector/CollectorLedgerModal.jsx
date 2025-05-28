@@ -40,6 +40,7 @@ export default function CollectorLedgerModal({
     Date: new Date(),
     GivenOn: today,
     Comment: "",
+    File: null,
   });
 
   useEffect(() => {
@@ -65,6 +66,11 @@ export default function CollectorLedgerModal({
     setFormData((p) => ({ ...p, [name]: value }));
   };
 
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    setFormData((p) => ({ ...p, File: file }));
+  };
+
   const handleLedgerSubmit = async (data) => {
     try {
       const payload = {
@@ -80,10 +86,20 @@ export default function CollectorLedgerModal({
         Comment: data.Comment,
       };
 
+      // If you're uploading the file to an API, use FormData
+      const formPayload = new FormData();
+      for (const key in payload) {
+        formPayload.append(key, payload[key]);
+      }
+
+      if (data.File) {
+        formPayload.append("File", data.File);
+      }
+
       if (initialData?.Id) {
-        await apiBase.updateLedgerInfo(payload);
+        await apiBase.updateLedgerInfo(formPayload); // assumes backend accepts multipart/form-data
       } else {
-        await apiBase.addLedgerInfo(payload);
+        await apiBase.addLedgerInfo(formPayload);
       }
 
       onClose();
@@ -199,6 +215,15 @@ export default function CollectorLedgerModal({
             </div>
           );
         })}
+
+        <div className="flex flex-col">
+          <label className="text-sm text-gray-600">Upload Slip</label>
+          <input
+            type="file"
+            onChange={handleFileChange}
+            className="border px-2 py-1 rounded"
+          />
+        </div>
 
         <div className="flex justify-end gap-2">
           <button onClick={onClose} className="px-4 py-1 rounded border">

@@ -109,7 +109,7 @@ export default function AssignRetail() {
         </div>
       )}
 
-      <div className="mb-6">
+      <div className="">
         <label
           htmlFor="collector"
           className="block text-sm font-medium text-gray-700"
@@ -132,7 +132,7 @@ export default function AssignRetail() {
       </div>
 
       {selectedCollector && (
-        <div className="grid gap-6 md:grid-cols-2">
+        <div className="grid gap-6 md:grid-cols-2 mt-6">
           {/* Assigned Retail Users */}
           <div>
             <h2 className="text-lg font-medium text-gray-900">
@@ -157,7 +157,7 @@ export default function AssignRetail() {
               <div className="overflow-x-auto rounded-md border border-gray-300 shadow-sm">
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
-                    <tr>
+                    <tr key={"header"}>
                       <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Retailer Name
                       </th>
@@ -219,7 +219,7 @@ export default function AssignRetail() {
               <div className="overflow-x-auto rounded-md border border-gray-300 shadow-sm">
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
-                    <tr>
+                    <tr key={"header"}>
                       <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Retailer Name
                       </th>

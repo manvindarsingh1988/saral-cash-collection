@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { apiBase } from "../../lib/apiBase";
 import UserProfileMenu from "../UserProfileMenu";
+import { Menu, X } from "lucide-react";
 
 export default function CollectorLayout({ children }) {
   const [user] = React.useState(() => apiBase.getCurrentUser());
@@ -29,7 +30,7 @@ export default function CollectorLayout({ children }) {
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                 className="text-white focus:outline-none"
               >
-                {mobileMenuOpen ? "✖" : "☰"}
+                {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
               </button>
             </div>
 

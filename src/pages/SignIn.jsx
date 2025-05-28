@@ -1,27 +1,33 @@
-import React, { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { apiBase } from '../lib/apiBase'
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { apiBase } from "../lib/apiBase";
 
 export default function SignIn() {
-  const navigate = useNavigate()
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [error, setError] = useState(null)
-  const [loading, setLoading] = useState(false)
+  const navigate = useNavigate();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const handleSignIn = async (e) => {
-    e.preventDefault()
+    e.preventDefault();
     try {
-      setLoading(true)
-      setError(null)
-      await apiBase.signIn(email, password)
-      navigate('/')
+      setLoading(true);
+      setError(null);
+      try{
+        await apiBase.signIn(email, password);
+      }
+      catch (err) {
+        alert("Invalid User ID or Password");
+        return;
+      }
+      navigate("/");
     } catch (error) {
-      setError(error.message)
+      setError(error.message);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <div className="flex min-h-screen items-center justify-center">
@@ -94,10 +100,10 @@ export default function SignIn() {
             disabled={loading}
             className="group relative flex w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50"
           >
-            {loading ? 'Signing in...' : 'Sign in'}
+            {loading ? "Signing in..." : "Sign in"}
           </button>
         </form>
       </div>
     </div>
-  )
+  );
 }

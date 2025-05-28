@@ -4,6 +4,7 @@ import UpdateOpeningBalanceModal from "../../components/admin/UpdateOpeningBalan
 import ConnectedCollectorsModal from "../../components/admin/ConnectedCollectorsModal";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
 import { formatToCustom } from "../../lib/utils";
+import ShowPasswordModal from "../../components/admin/ShowPasswordModal";
 
 export default function UserInfo() {
   useDocumentTitle("User Info");
@@ -12,6 +13,8 @@ export default function UserInfo() {
   const [filteredUserInfos, setFilteredUserInfos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [masterData, setMasterData] = useState({});
+  const [currentUser, setCurrentUser] = useState(null);
+  const [showPasswordDialog, setShowPasswordDialog] = useState(false);
 
   const [showModal, setShowModal] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState("");
@@ -68,6 +71,8 @@ export default function UserInfo() {
   };
 
   useEffect(() => {
+    const user = apiBase.getCurrentUser();
+    setCurrentUser(user);
     fetchUserInfos();
   }, []);
 
@@ -75,10 +80,16 @@ export default function UserInfo() {
     if (selectedUserId && pendingModalType) {
       if (pendingModalType === "main") {
         setShowOpeningBalanceModal(false);
+        setShowPasswordDialog(false);
         setShowModal(true);
       } else if (pendingModalType === "openingBalance") {
         setShowModal(false);
+        setShowPasswordDialog(false);
         setShowOpeningBalanceModal(true);
+      } else if (pendingModalType === "password") {
+        setShowModal(false);
+        setShowOpeningBalanceModal(false);
+        setShowPasswordDialog(true);
       }
       setPendingModalType(null); // Clear pending state
     }
@@ -165,6 +176,11 @@ export default function UserInfo() {
     }
   };
 
+  const handleShowUserPassword = async (userId) => {
+    setPendingModalType("password");
+    setSelectedUserId(userId);
+  };
+
   return (
     <div className="p-4 bg-gray-50 rounded-lg shadow border border-gray-200">
       {loading ? (
@@ -184,84 +200,93 @@ export default function UserInfo() {
                   "3rd Party",
                   "Self Submitter",
                   "Actions",
-                ].map((header) => (
-                  <th
-                    key={header}
-                    className="p-2 font-semibold whitespace-nowrap"
-                  >
-                    {header}
-                    {[
-                      "Id",
-                      "Username",
-                      "Active",
-                      "User Type",
-                      "Opening Balance",
-                      "Balance Date",
-                    ].includes(header) && (
-                      <div className="mt-1">
-                        {header === "Active" || header === "User Type" ? (
-                          <select
-                            name={
-                              header === "Active"
-                                ? "active"
-                                : header === "User Type"
-                                ? "userType"
-                                : ""
-                            }
-                            value={
-                              header === "Active"
-                                ? filters.active
-                                : filters.userType
-                            }
-                            onChange={handleFilterChange}
-                            className="w-full border border-gray-300 rounded px-2 py-1 text-xs"
-                          >
-                            <option value="">All</option>
-                            {header === "Active" && (
-                              <>
-                                <option value="yes">Yes</option>
-                                <option value="no">No</option>
-                              </>
-                            )}
-                            {header === "User Type" &&
-                              userTypeOptions.map((type) => (
-                                <option key={type.Id} value={type.Name}>
-                                  {type.Name}
-                                </option>
-                              ))}
-                          </select>
-                        ) : (
-                          <input
-                            type="text"
-                            name={
-                              header === "Id"
-                                ? "id"
-                                : header === "Username"
-                                ? "username"
-                                : header === "Opening Balance"
-                                ? "balance"
-                                : "balanceDate"
-                            }
-                            value={
-                              header === "Id"
-                                ? filters.id
-                                : header === "Username"
-                                ? filters.username
-                                : header === "Opening Balance"
-                                ? filters.balance
-                                : filters.balanceDate
-                            }
-                            onChange={handleFilterChange}
-                            placeholder="Filter"
-                            className="w-full border border-gray-300 rounded px-2 py-1 text-xs"
-                          />
-                        )}
-                      </div>
-                    )}
-                  </th>
-                ))}
+                  "Password",
+                ]
+                  .filter(
+                    (header) =>
+                      (header === "Password" &&
+                        currentUser?.UserType === "Admin") ||
+                      header !== "Password"
+                  )
+                  .map((header) => (
+                    <th
+                      key={header}
+                      className="p-2 font-semibold whitespace-nowrap"
+                    >
+                      {header}
+                      {[
+                        "Id",
+                        "Username",
+                        "Active",
+                        "User Type",
+                        "Opening Balance",
+                        "Balance Date",
+                      ].includes(header) && (
+                        <div className="mt-1">
+                          {header === "Active" || header === "User Type" ? (
+                            <select
+                              name={
+                                header === "Active"
+                                  ? "active"
+                                  : header === "User Type"
+                                  ? "userType"
+                                  : ""
+                              }
+                              value={
+                                header === "Active"
+                                  ? filters.active
+                                  : filters.userType
+                              }
+                              onChange={handleFilterChange}
+                              className="w-full border border-gray-300 rounded px-2 py-1 text-xs"
+                            >
+                              <option value="">All</option>
+                              {header === "Active" && (
+                                <>
+                                  <option value="yes">Yes</option>
+                                  <option value="no">No</option>
+                                </>
+                              )}
+                              {header === "User Type" &&
+                                userTypeOptions.map((type) => (
+                                  <option key={type.Id} value={type.Name}>
+                                    {type.Name}
+                                  </option>
+                                ))}
+                            </select>
+                          ) : (
+                            <input
+                              type="text"
+                              name={
+                                header === "Id"
+                                  ? "id"
+                                  : header === "Username"
+                                  ? "username"
+                                  : header === "Opening Balance"
+                                  ? "balance"
+                                  : "balanceDate"
+                              }
+                              value={
+                                header === "Id"
+                                  ? filters.id
+                                  : header === "Username"
+                                  ? filters.username
+                                  : header === "Opening Balance"
+                                  ? filters.balance
+                                  : filters.balanceDate
+                              }
+                              onChange={handleFilterChange}
+                              placeholder="Filter"
+                              className="w-full border border-gray-300 rounded px-2 py-1 text-xs"
+                            />
+                          )}
+                        </div>
+                      )}
+                    </th>
+                  ))}
               </tr>
             </thead>
+
             <tbody>
               {filteredUserInfos.map((user) => (
                 <tr
@@ -326,6 +351,16 @@ export default function UserInfo() {
                       ""
                     )}
                   </td>
+                  {currentUser?.UserType === "Admin" && (
+                    <td className="p-2 relative">
+                      <button
+                        className="text-blue-600 underline"
+                        onClick={() => handleShowUserPassword(user.Id)}
+                      >
+                        Get Password
+                      </button>
+                    </td>
+                  )}
                 </tr>
               ))}
             </tbody>
@@ -344,6 +379,12 @@ export default function UserInfo() {
         <UpdateOpeningBalanceModal
           selectedUserId={selectedUserId}
           handleOpeningBalanceModalClose={handleOpeningBalanceModalClose}
+        />
+      )}
+      {showPasswordDialog && (
+        <ShowPasswordModal
+          userId={selectedUserId}
+          setShowPasswordDialog={setShowPasswordDialog}
         />
       )}
     </div>
