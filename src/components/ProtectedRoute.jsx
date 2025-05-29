@@ -19,6 +19,14 @@ const routesForRoles = {
     "/pending-approvals",
     "/user-info",
   ],
+  MasterCashier: [
+    "/",
+    "/collector-ledgers",
+    "/add-user",
+    "/assign-retail",
+    "/pending-approvals",
+    "/user-info",
+  ],
   Collector: ["/", "/ledgers", "/pending-approvals"],
   Retailer: ["/"],
 };

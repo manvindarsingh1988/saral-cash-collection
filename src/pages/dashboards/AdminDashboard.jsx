@@ -60,6 +60,8 @@ export default function AdminDashboard() {
         totalPendingApprovalAmount,
         totalProjectionAmount,
         totalRejectedAmount,
+        totalCurrentAmount,
+        totalClosingAmount
       });
       setLoading(false);
     } catch (err) {

@@ -19,7 +19,7 @@ import PendingApprovalsForCollector from "../pages/collector/PendingApprovalsFor
 export default function UserSpecificDashboard() {
   const user = apiBase.getCurrentUser();
 
-  if (user.UserType === "Admin" || user.UserType === "Cashier") {
+  if (user.UserType === "Admin" || user.UserType === "Cashier" || user.UserType === "MasterCashier") {
     return (
       <AdminLayout>
         <Routes>

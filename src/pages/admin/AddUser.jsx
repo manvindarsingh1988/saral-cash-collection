@@ -123,6 +123,11 @@ export default function AddUser() {
               ) : (
                 <option value="13">Cashier</option>
               )}
+              {user?.UserType === "MasterCashier" || user?.UserType === "Cashier" ? (
+                ""
+              ) : (
+                <option value="14">MasterCashier</option>
+              )}
             </select>
           </div>
 
