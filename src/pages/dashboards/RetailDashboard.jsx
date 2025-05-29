@@ -342,8 +342,7 @@ export default function RetailDashboard({ retailUserId }) {
                               {item.Comment}
                             </td>
                             <td className="px-4 py-2">
-                              {getMasterValue("WorkFlows", item.WorkFlow) ===
-                                "Initiate" && (
+                              {[1, 6].includes(item.WorkFlow) && (
                                 <button
                                   onClick={(e) => {
                                     e.stopPropagation(); // Prevent triggering row edit

@@ -37,6 +37,7 @@ export default function RetailerLedgerModal({
     WorkFlow: "",
     Date: new Date(),
     Comment: "",
+    StuckInBank: false,
   });
 
   console.log("Form Data:", formData);
@@ -52,6 +53,12 @@ export default function RetailerLedgerModal({
           } else {
             formattedData[field] = initialData[field];
           }
+        }
+        if (field === "StuckInBank") {
+          formattedData[field] = initialData["WorkFlow"] === 6;
+        }
+        if (field === "CollectorId") {
+          formattedData[field] = initialData["Id"] || "";
         }
       });
 
@@ -88,9 +95,10 @@ export default function RetailerLedgerModal({
             (formData["TransactionType"] == "" && key === "CollectorId") ||
             (formData["TransactionType"] == "2" && key === "CollectorId") ||
             (formData["TransactionType"] == "3" && key === "CollectorId") ||
-            (formData["TransactionType"] !== "2" && key === "StuckInBank") ||
+            (formData["TransactionType"] != "2" && key === "StuckInBank") ||
             key == "Date"
           ) {
+            console.log(`Skipping field ${key} due to conditions`);
             return null;
           }
 
@@ -153,8 +161,9 @@ export default function RetailerLedgerModal({
             );
           } else if (
             key === "StuckInBank" &&
-            formData["TransactionType"] === "2"
+            formData["TransactionType"] == "2"
           ) {
+            console.log("Rendering StuckInBank checkbox");
             inputElement = (
               <label className="flex items-center gap-2">
                 <input
