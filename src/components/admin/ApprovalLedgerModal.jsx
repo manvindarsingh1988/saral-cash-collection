@@ -103,7 +103,7 @@ export default function ApprovalLedgerModal({
             inputElement = (
               <>
                 <select
-                  disabled={key === "TransactionType"}
+                  disabled={key !== "WorkFlow"}
                   name={key}
                   value={formData[key]}
                   onChange={handleChange}
@@ -146,8 +146,8 @@ export default function ApprovalLedgerModal({
 
             inputElement = (
               <input
-                readOnly={key === "Id"}
-                disabled={key === "Id"}
+                readOnly={key !== "WorkFlow"}
+                disabled={key !== "WorkFlow"}
                 name={key}
                 type={inputType}
                 value={formData[key]}

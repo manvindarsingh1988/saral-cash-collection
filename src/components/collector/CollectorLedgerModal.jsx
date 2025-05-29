@@ -11,6 +11,7 @@ const allowedFields = [
   "Date",
   // "GivenOn",  ← we’ll still track it, but won’t render it
   "Comment",
+  "StuckInBank", // assuming this is needed
 ];
 
 export default function CollectorLedgerModal({
@@ -19,7 +20,6 @@ export default function CollectorLedgerModal({
   onClose,
   initialData,
   cashiers,
-  editData,
   modelFor,
 }) {
   // Filter workflows based on modelFor
@@ -40,7 +40,7 @@ export default function CollectorLedgerModal({
     Date: new Date(),
     GivenOn: today,
     Comment: "",
-    File: null,
+    StuckInBank: false, // assuming this is needed
   });
 
   useEffect(() => {
@@ -56,6 +56,7 @@ export default function CollectorLedgerModal({
         Date: initialData.Date ? initialData.Date.split("T")[0] : "",
         GivenOn: today, // always keep today
         Comment: initialData.Comment ?? "",
+        StuckInBank: initialData.WorkFlow === 6, // assuming 6 is the StuckInBank workflow
       };
       setFormData(fd);
     }
@@ -80,26 +81,26 @@ export default function CollectorLedgerModal({
         CollectorId: collectorId,
         Amount: parseFloat(data.Amount),
         TransactionType: parseInt(data.TransactionType),
-        WorkFlow: parseInt(data.WorkFlow),
+        WorkFlow: data.StuckInBank ? 6 : parseInt(data.WorkFlow),
         Date: new Date(data.Date),
         GivenOn: new Date(data.GivenOn),
         Comment: data.Comment,
       };
 
       // If you're uploading the file to an API, use FormData
-      const formPayload = new FormData();
-      for (const key in payload) {
-        formPayload.append(key, payload[key]);
-      }
+      // const formPayload = new FormData();
+      // for (const key in payload) {
+      //   formPayload.append(key, payload[key]);
+      // }
 
-      if (data.File) {
-        formPayload.append("File", data.File);
-      }
+      // if (data.File) {
+      //   formPayload.append("File", data.File);
+      // }
 
       if (initialData?.Id) {
-        await apiBase.updateLedgerInfo(formPayload); // assumes backend accepts multipart/form-data
+        await apiBase.updateLedgerInfo(payload); // assumes backend accepts multipart/form-data
       } else {
-        await apiBase.addLedgerInfo(formPayload);
+        await apiBase.addLedgerInfo(payload);
       }
 
       onClose();
@@ -128,6 +129,7 @@ export default function CollectorLedgerModal({
           if (
             (key === "CashierId" && formData.TransactionType !== "1") ||
             (key === "WorkFlow" && modelFor === "CollectorLedger") ||
+            key === "StuckInBank" ||
             key === "Date"
           ) {
             return null;
@@ -167,7 +169,8 @@ export default function CollectorLedgerModal({
                     ))}
                 </select>
                 {key === "TransactionType" &&
-                  formData.TransactionType === "2" && (
+                  (formData.TransactionType === "2" ||
+                    formData.TransactionType === "3") && (
                     <p className="text-xs text-gray-500 mt-1">
                       <strong>Note:</strong> Please mention transaction details
                       in comments to avoid rejection.
@@ -215,6 +218,28 @@ export default function CollectorLedgerModal({
             </div>
           );
         })}
+
+        {formData.TransactionType == "2" && (
+          <div className="flex flex-col">
+            <label className="flex items-center gap-2">
+              <input
+                name="StuckInBank"
+                type="checkbox"
+                checked={formData["StuckInBank"] ?? false}
+                onChange={(e) =>
+                  handleChange({
+                    target: {
+                      name: "StuckInBank",
+                      value: e.target.checked ? true : false,
+                    },
+                  })
+                }
+                className="border rounded"
+              />
+              Stuck in Bank
+            </label>
+          </div>
+        )}
 
         <div className="flex flex-col">
           <label className="text-sm text-gray-600">Upload Slip</label>
