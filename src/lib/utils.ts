@@ -15,7 +15,7 @@ export function getRowColor(workFlow: number): string {
   let rowColor = "";
   if (workFlow === 1) rowColor = "bg-blue-100";
   else if (workFlow === 2 || workFlow === 4) rowColor = "bg-red-100";
-  else if (workFlow === 5) rowColor = "bg-green-100";
+  else if (workFlow === 5 || workFlow === 3) rowColor = "bg-green-100";
   else if (workFlow === 6) rowColor = "bg-yellow-100";
 
   return rowColor;

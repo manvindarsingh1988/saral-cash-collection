@@ -41,18 +41,18 @@ export default function UserSpecificDashboard() {
             element={<CollectorDashboard collectorUserId={user.Id} />}
           /> */}
           <Route
-            path="/"
-            element={
-              <RetailerLiabilitiesForCollector collectorUserId={user.Id} />
-            }
-          />
-          <Route
             path="/ledgers"
             element={<CollectorLedger collectorUserId={user.Id} />}
           />
           <Route
             path="/pending-approvals"
             element={<PendingApprovalsForCollector collectorUserId={user.Id} />}
+          />
+          <Route
+            path="/"
+            element={
+              <RetailerLiabilitiesForCollector collectorUserId={user.Id} />
+            }
           />
         </Routes>
       </CollectorLayout>
