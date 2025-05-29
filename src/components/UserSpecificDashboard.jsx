@@ -47,6 +47,10 @@ export default function UserSpecificDashboard() {
             }
           />
           <Route
+            path="/ledgers"
+            element={<CollectorLedger collectorUserId={user.Id} />}
+          />
+          <Route
             path="/pending-approvals"
             element={<PendingApprovalsForCollector collectorUserId={user.Id} />}
           />

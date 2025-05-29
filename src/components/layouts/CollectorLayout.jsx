@@ -76,6 +76,7 @@ function NavLinks({ isActive, mobile = false, setMobileMenuOpen }) {
   const links = [
     // { to: "/", label: "Retailer Liabilities" },
     { to: "/", label: "Retailer Liabilities" },
+    { to: "ledgers", label: "Ledgers" },
     { to: "/pending-approvals", label: "Pending Approvals" },
   ];
 
