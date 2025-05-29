@@ -79,7 +79,8 @@ export default function SignIn() {
           <div className="flex items-center justify-between">
             <div className="text-sm">
               <Link
-                to="/forgot-password"
+                //to="/forgot-password"
+                onClick={() => alert("Contact your admin to get your password")}
                 className="font-medium text-indigo-600 hover:text-indigo-500"
               >
                 Forgot your password?

@@ -23,18 +23,18 @@ export const apiBase = {
     }
 
     currentUser = user;
-    localStorage.setItem("currentUser", JSON.stringify(user));
+    sessionStorage.setItem("currentUser", JSON.stringify(user));
     return { user };
   },
 
   signOut: async () => {
     currentUser = null;
-    localStorage.removeItem("currentUser");
+    sessionStorage.removeItem("currentUser");
   },
 
   getCurrentUser: () => {
     if (!currentUser) {
-      const stored = localStorage.getItem("currentUser");
+      const stored = sessionStorage.getItem("currentUser");
       if (stored) {
         currentUser = JSON.parse(stored);
       }
@@ -129,7 +129,9 @@ export const apiBase = {
   },
 
   getLiabilityAmountOfAllRetailersByCollectorId: async (collectorId) => {
-    const response = await fetch(`${API_URL}/GetLiabilityAmountOfAllRetailersByCollectorId?collectorId=${collectorId}`);
+    const response = await fetch(
+      `${API_URL}/GetLiabilityAmountOfAllRetailersByCollectorId?collectorId=${collectorId}`
+    );
     if (!response.ok) {
       console.error(`Failed to fetch: ${response.statusText}`);
     }
@@ -339,8 +341,10 @@ export const apiBase = {
     return data;
   },
 
-    getPendingApprovalsByCollectorId: async (collectorId) => {
-    const response = await fetch(`${API_URL}/GetPendingApprovalLedgersByCollectorId?collectorId=${collectorId}`);
+  getPendingApprovalsByCollectorId: async (collectorId) => {
+    const response = await fetch(
+      `${API_URL}/GetPendingApprovalLedgersByCollectorId?collectorId=${collectorId}`
+    );
     if (!response.ok) {
       console.error(`Failed to fetch: ${response.statusText}`);
     }
