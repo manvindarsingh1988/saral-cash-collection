@@ -50,13 +50,12 @@ export default function RetailerLiabilityTable({ data }) {
     <div className="bg-white rounded-lg shadow p-4 sm:p-6">
       <div className="overflow-x-auto">
         <div className="overflow-y-auto max-h-[600px] border border-gray-200 rounded text-xs">
-          <table className="min-w-[700px] table-auto divide-y divide-gray-200">
+          <table className="min-w-full table-auto divide-y divide-gray-200">
             <thead className="bg-gray-50 sticky top-0 z-10">
               <tr>
                 {columns.map((col) => (
                   <th
                     key={col.key}
-                    style={{ width: col.width }}
                     className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                   >
                     {col.isAction ? (
@@ -85,7 +84,6 @@ export default function RetailerLiabilityTable({ data }) {
                   {columns.map((col) => (
                     <td
                       key={col.key}
-                      style={{ width: col.width }}
                       className="px-4 py-2 whitespace-nowrap text-sm text-gray-900"
                     >
                       {col.isAction ? (
