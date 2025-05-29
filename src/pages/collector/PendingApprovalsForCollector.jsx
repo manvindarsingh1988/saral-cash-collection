@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
 import { apiBase } from "../../lib/apiBase";
 import ApprovalLedgerModal from "../../components/admin/ApprovalLedgerModal";
-import { formatToCustomDateTime } from "../../lib/utils";
+import { formatToCustomDateTime, getRowColor } from "../../lib/utils";
 
 const columns = [
   { heading: "ID", accessor: "Id" },
@@ -27,17 +27,18 @@ export default function PendingApprovalsForCollector({ collectorUserId }) {
   const [pendingApprovals, setPendingApprovals] = useState([]);
   const [filters, setFilters] = useState({});
   const [masterData, setMasterData] = useState({});
+  const [showAll, setShowAll] = useState(false);
 
   useEffect(() => {
     fetchPendingApprovals();
-  }, []);
+  }, [showAll]);
 
   const fetchPendingApprovals = async () => {
     try {
       setLoading(true);
       const [master, approvals] = await Promise.all([
         apiBase.getMasterData(),
-        apiBase.getPendingApprovalsByCollectorId(collectorUserId),
+        apiBase.getPendingApprovalsByCollectorId(collectorUserId, showAll),
       ]);
       setMasterData(master || {});
       setPendingApprovals(approvals);
@@ -107,6 +108,20 @@ export default function PendingApprovalsForCollector({ collectorUserId }) {
           {loading && <div>Loading...</div>}
           {error && <div className="text-red-600">{error}</div>}
 
+          <div className="flex justify-start mb-2">
+            <input
+              type="checkbox"
+              id="show-all"
+              checked={showAll}
+              onChange={() => {
+                setShowAll(!showAll);
+              }}
+            />
+            <label htmlFor="show-all" className="ml-2 text-md text-black-500">
+              Show All
+            </label>
+          </div>
+
           <div className="overflow-x-auto">
             <table className="min-w-full text-sm divide-y divide-gray-200 border border-gray-200 rounded-md">
               <thead className="bg-gray-50">
@@ -157,21 +172,30 @@ export default function PendingApprovalsForCollector({ collectorUserId }) {
               <tbody className="bg-white divide-y divide-gray-100">
                 {filteredData.length > 0 ? (
                   filteredData.map((item, idx) => (
-                    <tr key={idx} className="hover:bg-gray-50 cursor-pointer">
+                    <tr
+                      key={idx}
+                      className={`cursor-pointer hover:bg-gray-100 ${getRowColor(
+                        item.WorkFlow
+                      )}`}
+                    >
                       {columns.map((col) => {
                         const val = col.accessor;
                         if (val === "Id") {
                           return (
                             <td key={val} className="px-4 py-2">
-                              <button
-                                onClick={(e) => {
-                                  e.preventDefault();
-                                  openLedger(item);
-                                }}
-                                className="text-indigo-600 underline hover:text-indigo-800"
-                              >
-                                {item[val]}
-                              </button>
+                              {[1].includes(item.WorkFlow) ? (
+                                <button
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    openLedger(item);
+                                  }}
+                                  className="text-indigo-600 underline hover:text-indigo-800"
+                                >
+                                  {item[val]}
+                                </button>
+                              ) : (
+                                item[val]
+                              )}
                             </td>
                           );
                         } else if (val === "TransactionType") {

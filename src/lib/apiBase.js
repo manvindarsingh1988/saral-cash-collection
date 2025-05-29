@@ -341,9 +341,9 @@ export const apiBase = {
     return data;
   },
 
-  getPendingApprovalsByCollectorId: async (collectorId) => {
+  getPendingApprovalsByCollectorId: async (collectorId, all) => {
     const response = await fetch(
-      `${API_URL}/GetPendingApprovalLedgersByCollectorId?collectorId=${collectorId}`
+      `${API_URL}/GetPendingApprovalLedgersByCollectorId?collectorId=${collectorId}&showAll=${all}` // 'all' is a boolean
     );
     if (!response.ok) {
       console.error(`Failed to fetch: ${response.statusText}`);
