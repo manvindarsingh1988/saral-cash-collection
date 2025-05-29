@@ -21,6 +21,7 @@ export default function CollectorLiabilities() {
     totalRejectedAmount: 0,
     totalCurrentAmount: 0,
     totalClosingAmount: 0,
+    totalRetailerInitiatedAmount: 0
   });
 
   const [filters, setFilters] = useState({
@@ -32,6 +33,7 @@ export default function CollectorLiabilities() {
     RejectedAmount: "",
     CurrentAmount: "",
     ClosingAmount: "",
+    RetailerInitiatedAmount: ""
   });
 
   useEffect(() => {
@@ -51,6 +53,7 @@ export default function CollectorLiabilities() {
         totalRejectedAmount: data.reduce((acc, x) => acc + (x.RejectedAmount || 0), 0),
         totalCurrentAmount: data.reduce((acc, x) => acc + (x.CurrentAmount || 0), 0),
         totalClosingAmount: data.reduce((acc, x) => acc + (x.ClosingAmount || 0), 0),
+        totalRetailerInitiatedAmount: data.reduce((acc, x) => acc + (x.RetailerInitiatedAmount || 0), 0),
       });
     } catch (err) {
       console.error(err);
@@ -93,6 +96,7 @@ export default function CollectorLiabilities() {
               { label: "Rejected Amount", value: summary.totalRejectedAmount },
               { label: "Current Amount", value: summary.totalCurrentAmount },
               { label: "Closing Amount", value: summary.totalClosingAmount },
+              { label: "Retailers Initiated Amount", value: summary.totalRetailerInitiatedAmount },
             ].map((item) => (
               <div key={item.label} className="bg-white rounded-lg shadow p-4">
                 <span className="text-sm text-gray-500">{item.label}</span>
@@ -116,6 +120,7 @@ export default function CollectorLiabilities() {
                   <th className="px-4 py-2 text-left">Projection (₹)</th>
                   <th className="px-4 py-2 text-left">Current</th>
                   <th className="px-4 py-2 text-left">Closing</th>
+                  <th className="px-4 py-2 text-left">Retailers Initiated Amount</th>
                 </tr>
                 <tr className="bg-white">
                   {Object.entries(filters).map(([key, value]) => (
@@ -156,6 +161,7 @@ export default function CollectorLiabilities() {
                     <td className="px-4 py-2">₹ {formatIndianNumber(item.ProjectionAmount)}</td>
                     <td className="px-4 py-2">₹ {formatIndianNumber(item.CurrentAmount)}</td>
                     <td className="px-4 py-2">₹ {formatIndianNumber(item.ClosingAmount)}</td>
+                    <td className="px-4 py-2">₹ {formatIndianNumber(item.RetailerInitiatedAmount)}</td>
                   </tr>
                 ))}
               </tbody>

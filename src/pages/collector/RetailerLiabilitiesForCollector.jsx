@@ -61,6 +61,8 @@ export default function RetailerLiabilitiesForCollector({ collectorUserId }) {
         totalPendingApprovalAmount,
         totalProjectionAmount,
         totalRejectedAmount,
+        totalCurrentAmount,
+        totalClosingAmount
       });
       setLoading(false);
     } catch (err) {
