@@ -285,47 +285,30 @@ export default function CollectorLedger({ collectorUserId }) {
                           {item.Id}
                         </button>
                       </td>
-                      <td
-                        className="px-2 py-2"
-                      >
-                        {item.CashierName}
-                      </td>
-                      <td
-                        className="px-2 py-2"
-                      >
+                      <td className="px-2 py-2">{item.CashierName}</td>
+                      <td className="px-2 py-2">
                         ₹{formatIndianNumber(item.Amount)}
                       </td>
-                      <td
-                        className="px-2 py-2"
-                      >
+                      <td className="px-2 py-2">
                         {getMasterValue(
                           "TransactionTypes",
                           item.TransactionType
                         )}
                       </td>
-                      <td
-                        className="px-2 py-2"
-                      >
+                      <td className="px-2 py-2">
                         {getMasterValue("WorkFlows", item.WorkFlow)}
                       </td>
-                      <td
-                        className="px-2 py-2"
-                      >
+                      <td className="px-2 py-2">
                         {formatToCustomDateTime(item.GivenOn)}
                       </td>
-                      <td
-                        className="px-2 py-2"
-                      >
+                      <td className="px-2 py-2">
                         {formatToCustomDateTime(item.Date)}
                       </td>
-                      <td
-                        className="px-2 py-2 break-words max-w-[200px]"
-                      >
+                      <td className="px-2 py-2 break-words max-w-[200px]">
                         {item.Comment}
                       </td>
                       <td className="px-2 py-2">
-                        {getMasterValue("WorkFlows", item.WorkFlow) ===
-                          "Initiate" && (
+                        {[1, 6].includes(item.WorkFlow) && (
                           <button
                             onClick={(e) => {
                               e.stopPropagation(); // Prevent triggering row edit
