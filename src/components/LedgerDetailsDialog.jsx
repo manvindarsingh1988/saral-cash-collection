@@ -60,6 +60,22 @@ export default function LadgerDetailsDialog({
 
           setLadgerData(retailerData || []);
           setMasterData(masterData || {});
+        } else if (modelFor === "CashierHandover") {
+          const [retailerData, masterData] = await Promise.all([
+            apiBase.getCashierLedgerDetails(userId),
+            apiBase.getMasterData(),
+          ]);
+
+          setLadgerData(retailerData || []);
+          setMasterData(masterData || {});
+        } else if (modelFor === "CashierCleared") {
+          const [retailerData, masterData] = await Promise.all([
+            apiBase.getCashierLiabilityDetails(userId),
+            apiBase.getMasterData(),
+          ]);
+
+          setLadgerData(retailerData || []);
+          setMasterData(masterData || {});
         }
       } catch (err) {
         console.error("Failed to fetch ladger info", err);

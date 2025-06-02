@@ -307,9 +307,20 @@ export const apiBase = {
     return data;
   },
 
-  getCollectorLiabilityDetails: async (collectorId) => {
+  
+  getCashierLiabilities: async () => {
+    const response = await fetch(`${API_URL}/GetCashierLiabilities`);
+    if (!response.ok) {
+      console.error(`Failed to fetch: ${response.statusText}`);
+    }
+    const data = await response.json();
+    console.log(data);
+    return data;
+  },
+
+  getCollectorLiabilityDetails: async (cashierId) => {
     const response = await fetch(
-      `${API_URL}/GetCollectorLiabilityDetails?collectorId=${collectorId}`
+      `${API_URL}/GetCollectorLiabilityDetails?cashierId=${cashierId}`
     );
     if (!response.ok) {
       console.error(`Failed to fetch: ${response.statusText}`);
@@ -319,9 +330,34 @@ export const apiBase = {
     return data;
   },
 
+  getCashierLiabilityDetails: async (cashierId) => {
+    const response = await fetch(
+      `${API_URL}/GetCashierLiabilityDetails?cashierId=${cashierId}`
+    );
+    if (!response.ok) {
+      console.error(`Failed to fetch: ${response.statusText}`);
+    }
+    const data = await response.json();
+    console.log(data);
+    return data;
+  },
+
+
   getCollectorLedgerDetails: async (collectorId) => {
     const response = await fetch(
       `${API_URL}/GetCollectorLedgerDetails?collectorId=${collectorId}`
+    );
+    if (!response.ok) {
+      console.error(`Failed to fetch: ${response.statusText}`);
+    }
+    const data = await response.json();
+    console.log(data);
+    return data;
+  },
+
+  getCashierLedgerDetails: async (cashierId) => {
+    const response = await fetch(
+      `${API_URL}/GetCashierLedgerDetails?cashierId=${cashierId}`
     );
     if (!response.ok) {
       console.error(`Failed to fetch: ${response.statusText}`);

@@ -15,15 +15,24 @@ import PendingApprovals from "../pages/admin/PendingApprovals";
 import UserInfo from "../pages/admin/UserInfo";
 import RetailerLiabilitiesForCollector from "../pages/collector/RetailerLiabilitiesForCollector";
 import PendingApprovalsForCollector from "../pages/collector/PendingApprovalsForCollector";
+import CashierLiabilities from "../pages/admin/CashierLiabilities";
 
 export default function UserSpecificDashboard() {
   const user = apiBase.getCurrentUser();
 
-  if (user.UserType === "Admin" || user.UserType === "Cashier" || user.UserType === "MasterCashier") {
+  if (
+    user.UserType === "Admin" ||
+    user.UserType === "Cashier" ||
+    user.UserType === "MasterCashier"
+  ) {
     return (
       <AdminLayout>
         <Routes>
-          <Route path="/collector-ledgers" element={<CollectorLiabilities />} />
+          <Route
+            path="/collector-liabilities"
+            element={<CollectorLiabilities />}
+          />
+          <Route path="/cashier-liabilities" element={<CashierLiabilities />} />
           <Route path="/add-user" element={<AddUser />} />
           <Route path="/assign-retail" element={<AssignRetail />} />
           <Route path="/pending-approvals" element={<PendingApprovals />} />
