@@ -21,7 +21,7 @@ export default function CollectorLiabilities() {
     totalRejectedAmount: 0,
     totalCurrentAmount: 0,
     totalClosingAmount: 0,
-    totalRetailerInitiatedAmount: 0
+    totalRetailerInitiatedAmount: 0,
   });
 
   const [filters, setFilters] = useState({
@@ -33,7 +33,7 @@ export default function CollectorLiabilities() {
     RejectedAmount: "",
     CurrentAmount: "",
     ClosingAmount: "",
-    RetailerInitiatedAmount: ""
+    RetailerInitiatedAmount: "",
   });
 
   useEffect(() => {
@@ -47,13 +47,34 @@ export default function CollectorLiabilities() {
       setCollectorLiabilities(data || []);
 
       setSummary({
-        totalLaibilityAmount: data.reduce((acc, x) => acc + (x.LaibilityAmount || 0), 0),
-        totalPendingApprovalAmount: data.reduce((acc, x) => acc + (x.PendingApprovalAmount || 0), 0),
-        totalProjectionAmount: data.reduce((acc, x) => acc + (x.ProjectionAmount || 0), 0),
-        totalRejectedAmount: data.reduce((acc, x) => acc + (x.RejectedAmount || 0), 0),
-        totalCurrentAmount: data.reduce((acc, x) => acc + (x.CurrentAmount || 0), 0),
-        totalClosingAmount: data.reduce((acc, x) => acc + (x.ClosingAmount || 0), 0),
-        totalRetailerInitiatedAmount: data.reduce((acc, x) => acc + (x.RetailerInitiatedAmount || 0), 0),
+        totalLaibilityAmount: data.reduce(
+          (acc, x) => acc + (x.LaibilityAmount || 0),
+          0
+        ),
+        totalPendingApprovalAmount: data.reduce(
+          (acc, x) => acc + (x.PendingApprovalAmount || 0),
+          0
+        ),
+        totalProjectionAmount: data.reduce(
+          (acc, x) => acc + (x.ProjectionAmount || 0),
+          0
+        ),
+        totalRejectedAmount: data.reduce(
+          (acc, x) => acc + (x.RejectedAmount || 0),
+          0
+        ),
+        totalCurrentAmount: data.reduce(
+          (acc, x) => acc + (x.CurrentAmount || 0),
+          0
+        ),
+        totalClosingAmount: data.reduce(
+          (acc, x) => acc + (x.ClosingAmount || 0),
+          0
+        ),
+        totalRetailerInitiatedAmount: data.reduce(
+          (acc, x) => acc + (x.RetailerInitiatedAmount || 0),
+          0
+        ),
       });
     } catch (err) {
       console.error(err);
@@ -90,13 +111,25 @@ export default function CollectorLiabilities() {
           {/* Summary Cards */}
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-6">
             {[
-              { label: "Liability Amount", value: summary.totalLaibilityAmount },
-              { label: "Pending Approval", value: summary.totalPendingApprovalAmount },
-              { label: "Projection Amount", value: summary.totalProjectionAmount },
+              {
+                label: "Liability Amount",
+                value: summary.totalLaibilityAmount,
+              },
+              {
+                label: "Pending Approval",
+                value: summary.totalPendingApprovalAmount,
+              },
+              {
+                label: "Projection Amount",
+                value: summary.totalProjectionAmount,
+              },
               { label: "Rejected Amount", value: summary.totalRejectedAmount },
               { label: "Current Amount", value: summary.totalCurrentAmount },
               { label: "Closing Amount", value: summary.totalClosingAmount },
-              { label: "Retailers Initiated Amount", value: summary.totalRetailerInitiatedAmount },
+              {
+                label: "Retailers Initiated Amount",
+                value: summary.totalRetailerInitiatedAmount,
+              },
             ].map((item) => (
               <div key={item.label} className="bg-white rounded-lg shadow p-4">
                 <span className="text-sm text-gray-500">{item.label}</span>
@@ -107,65 +140,82 @@ export default function CollectorLiabilities() {
             ))}
           </div>
 
-          {/* Responsive Table */}
-          <div className="overflow-x-auto bg-white rounded-lg shadow mt-4">
-            <table className="min-w-full text-sm text-gray-700">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-4 py-2 text-left">ID</th>
-                  <th className="px-4 py-2 text-left">Name</th>
-                  <th className="px-4 py-2 text-left">Liability (₹)</th>
-                  <th className="px-4 py-2 text-left">Pending (₹)</th>
-                  <th className="px-4 py-2 text-left">Rejected (₹)</th>
-                  <th className="px-4 py-2 text-left">Projection (₹)</th>
-                  <th className="px-4 py-2 text-left">Current</th>
-                  <th className="px-4 py-2 text-left">Closing</th>
-                  <th className="px-4 py-2 text-left">Retailers Initiated Amount</th>
-                </tr>
-                <tr className="bg-white">
-                  {Object.entries(filters).map(([key, value]) => (
-                    <td key={key} className="px-4 py-2">
-                      <input
-                        type="text"
-                        placeholder={key}
-                        className="w-full border rounded px-2 py-1 text-sm"
-                        value={value}
-                        onChange={(e) => onFilterChange(key, e.target.value)}
-                      />
-                    </td>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {filteredData.map((item) => (
-                  <tr key={item.UserId} className="border-t">
-                    <td className="px-4 py-2">{item.UserId}</td>
-                    <td className="px-4 py-2">{item.UserName || "—"}</td>
-                    <td className="px-4 py-2">
-                      <button
-                        onClick={() => handleMoreDetails(item.UserId, "Cleared")}
-                        className="text-blue-600 underline"
-                      >
-                        ₹ {formatIndianNumber(item.LaibilityAmount)}
-                      </button>
-                    </td>
-                    <td className="px-4 py-2">
-                      <button
-                        onClick={() => handleMoreDetails(item.UserId, "Handover")}
-                        className="text-blue-600 underline"
-                      >
-                        ₹ {formatIndianNumber(item.PendingApprovalAmount)}
-                      </button>
-                    </td>
-                    <td className="px-4 py-2">₹ {formatIndianNumber(item.RejectedAmount)}</td>
-                    <td className="px-4 py-2">₹ {formatIndianNumber(item.ProjectionAmount)}</td>
-                    <td className="px-4 py-2">₹ {formatIndianNumber(item.CurrentAmount)}</td>
-                    <td className="px-4 py-2">₹ {formatIndianNumber(item.ClosingAmount)}</td>
-                    <td className="px-4 py-2">₹ {formatIndianNumber(item.RetailerInitiatedAmount)}</td>
+          <div className="bg-white rounded-lg shadow p-4 sm:p-6">
+            <div className="overflow-x-auto border border-gray-200 rounded">
+              <table className="min-w-full text-sm text-gray-700">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-4 py-2 text-left">ID</th>
+                    <th className="px-4 py-2 text-left">Name</th>
+                    <th className="px-4 py-2 text-left">Liability (₹)</th>
+                    <th className="px-4 py-2 text-left">Pending (₹)</th>
+                    <th className="px-4 py-2 text-left">Rejected (₹)</th>
+                    <th className="px-4 py-2 text-left">Projection (₹)</th>
+                    <th className="px-4 py-2 text-left">Current</th>
+                    <th className="px-4 py-2 text-left">Closing</th>
+                    <th className="px-4 py-2 text-left">
+                      Retailers Initiated Amount
+                    </th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                  <tr className="bg-white">
+                    {Object.entries(filters).map(([key, value]) => (
+                      <td key={key} className="px-4 py-2">
+                        <input
+                          type="text"
+                          placeholder={key}
+                          className="w-full border rounded px-2 py-1 text-sm"
+                          value={value}
+                          onChange={(e) => onFilterChange(key, e.target.value)}
+                        />
+                      </td>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredData.map((item) => (
+                    <tr key={item.UserId} className="border-t text-xs">
+                      <td className="px-4 py-2">{item.UserId}</td>
+                      <td className="px-4 py-2">{item.UserName || "—"}</td>
+                      <td className="px-4 py-2">
+                        <button
+                          onClick={() =>
+                            handleMoreDetails(item.UserId, "Cleared")
+                          }
+                          className="text-blue-600 underline"
+                        >
+                          ₹ {formatIndianNumber(item.LaibilityAmount)}
+                        </button>
+                      </td>
+                      <td className="px-4 py-2">
+                        <button
+                          onClick={() =>
+                            handleMoreDetails(item.UserId, "Handover")
+                          }
+                          className="text-blue-600 underline"
+                        >
+                          ₹ {formatIndianNumber(item.PendingApprovalAmount)}
+                        </button>
+                      </td>
+                      <td className="px-4 py-2">
+                        ₹ {formatIndianNumber(item.RejectedAmount)}
+                      </td>
+                      <td className="px-4 py-2">
+                        ₹ {formatIndianNumber(item.ProjectionAmount)}
+                      </td>
+                      <td className="px-4 py-2">
+                        ₹ {formatIndianNumber(item.CurrentAmount)}
+                      </td>
+                      <td className="px-4 py-2">
+                        ₹ {formatIndianNumber(item.ClosingAmount)}
+                      </td>
+                      <td className="px-4 py-2">
+                        ₹ {formatIndianNumber(item.RetailerInitiatedAmount)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </>
       )}

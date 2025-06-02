@@ -86,7 +86,7 @@ export default function RetailerLiabilityTable({ data }) {
                   {columns.map((col) => (
                     <td
                       key={col.key}
-                      className="px-4 py-2 whitespace-nowrap text-sm text-gray-900"
+                      className="px-4 py-2 whitespace-nowrap text-xs text-gray-900"
                     >
                       {col.isAction ? (
                         <button
