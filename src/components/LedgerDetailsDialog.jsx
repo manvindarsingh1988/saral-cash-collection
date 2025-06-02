@@ -14,68 +14,34 @@ const columns = [
   { heading: "Cashier", key: "CashierName", width: "200px" },
 ];
 
-export default function LadgerDetailsDialog({
-  userId,
-  onClose,
-  modelFor = "Retailer",
-}) {
+// Mapping of model types to their corresponding data fetchers
+const fetchMap = {
+  Retailer: (id) => apiBase.getLadgerInfoByRetailerid(false, id),
+  Collector: (id) => apiBase.getCollectorLiabilityDetails(id),
+  Cleared: (id) => apiBase.getCollectorLiabilityDetails(id),
+  Handover: (id) => apiBase.getCollectorLedgerDetails(id),
+  CashierHandover: (id) => apiBase.getCashierLedgerDetails(id),
+  CashierCleared: (id) => apiBase.getCashierLiabilityDetails(id),
+};
+
+export default function LadgerDetailsDialog({ userId, onClose, modelFor = "Retailer" }) {
   const [ladgerData, setLadgerData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [masterData, setMasterData] = useState({});
 
-  console.log("LadgerDetailsDialog", userId, modelFor);
-
   useEffect(() => {
-    const fetchLadger = async () => {
+    const fetchData = async () => {
       try {
-        if (modelFor === "Collector") {
-          const [retailerData, masterData] = await Promise.all([
-            apiBase.getCollectorLiabilityDetails(userId),
+        const fetchLadgerFn = fetchMap[modelFor];
+        if (fetchLadgerFn) {
+          const [ladger, master] = await Promise.all([
+            fetchLadgerFn(userId),
             apiBase.getMasterData(),
           ]);
-
-          setLadgerData(retailerData || []);
-          setMasterData(masterData || {});
-        } else if (modelFor === "Retailer") {
-          const [retailerData, masterData] = await Promise.all([
-            apiBase.getLadgerInfoByRetailerid(false, userId),
-            apiBase.getMasterData(),
-          ]);
-
-          setLadgerData(retailerData || []);
-          setMasterData(masterData || {});
-        } else if (modelFor === "Handover") {
-          const [retailerData, masterData] = await Promise.all([
-            apiBase.getCollectorLedgerDetails(userId),
-            apiBase.getMasterData(),
-          ]);
-
-          setLadgerData(retailerData || []);
-          setMasterData(masterData || {});
-        } else if (modelFor === "Cleared") {
-          const [retailerData, masterData] = await Promise.all([
-            apiBase.getCollectorLiabilityDetails(userId),
-            apiBase.getMasterData(),
-          ]);
-
-          setLadgerData(retailerData || []);
-          setMasterData(masterData || {});
-        } else if (modelFor === "CashierHandover") {
-          const [retailerData, masterData] = await Promise.all([
-            apiBase.getCashierLedgerDetails(userId),
-            apiBase.getMasterData(),
-          ]);
-
-          setLadgerData(retailerData || []);
-          setMasterData(masterData || {});
-        } else if (modelFor === "CashierCleared") {
-          const [retailerData, masterData] = await Promise.all([
-            apiBase.getCashierLiabilityDetails(userId),
-            apiBase.getMasterData(),
-          ]);
-
-          setLadgerData(retailerData || []);
-          setMasterData(masterData || {});
+          setLadgerData(ladger || []);
+          setMasterData(master || {});
+        } else {
+          console.warn(`No fetcher configured for modelFor: ${modelFor}`);
         }
       } catch (err) {
         console.error("Failed to fetch ladger info", err);
@@ -84,8 +50,8 @@ export default function LadgerDetailsDialog({
       }
     };
 
-    fetchLadger();
-  }, [userId]);
+    fetchData();
+  }, [userId, modelFor]);
 
   const getMasterValue = (type, id) => {
     const list = masterData?.[type] || [];
@@ -93,16 +59,17 @@ export default function LadgerDetailsDialog({
   };
 
   const getCellValue = (entry, key) => {
-    if (key === "TransactionType") {
-      return getMasterValue("TransactionTypes", entry[key]);
+    switch (key) {
+      case "TransactionType":
+        return getMasterValue("TransactionTypes", entry[key]);
+      case "WorkFlow":
+        return getMasterValue("WorkFlows", entry[key]);
+      case "Date":
+      case "GivenOn":
+        return entry[key]?.split("T")[0] || "";
+      default:
+        return entry[key];
     }
-    if (key === "WorkFlow") {
-      return getMasterValue("WorkFlows", entry[key]);
-    }
-    if (key === "Date" || key === "GivenOn") {
-      return entry[key]?.split("T")[0] || "";
-    }
-    return entry[key];
   };
 
   return (
