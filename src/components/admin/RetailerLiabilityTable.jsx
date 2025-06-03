@@ -5,6 +5,7 @@ import LadgerDetailsDialog from "../LedgerDetailsDialog";
 const columns = [
   { heading: "Retailer Id", key: "UserId", width: "60px" },
   { heading: "Retailer Name", key: "UserName", width: "120px" },
+  { heading: "Opening Amount", key: "ClosingAmount", width: "80px" },
   { heading: "Laibility Amount", key: "LaibilityAmount", width: "80px" },
   {
     heading: "Pending Approval Amount",
@@ -12,8 +13,7 @@ const columns = [
     width: "80px",
   },
   { heading: "Projection Amount", key: "ProjectionAmount", width: "80px" },
-  { heading: "Rejection Amount", key: "RejectedAmount", width: "80px" },
-  { heading: "Closing Amount", key: "ClosingAmount", width: "80px" },
+  { heading: "Rejection Amount", key: "RejectedAmount", width: "80px" },  
   { heading: "Current Amount", key: "CurrentAmount", width: "80px" },
   { heading: "Action", key: "Action", width: "80px", isAction: true },
 ];

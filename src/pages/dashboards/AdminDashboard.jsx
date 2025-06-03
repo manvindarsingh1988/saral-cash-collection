@@ -85,6 +85,16 @@ export default function AdminDashboard() {
               <div className="bg-white overflow-hidden shadow rounded-lg">
                 <div className="px-4 py-5 sm:p-3">
                   <dt className="text-sm font-medium text-gray-500 truncate">
+                    Opening Amount
+                  </dt>
+                  <dd className="mt-1 text-2xl font-semibold text-gray-900">
+                    ₹ {formatIndianNumber(summary.totalClosingAmount)}
+                  </dd>
+                </div>
+              </div>
+              <div className="bg-white overflow-hidden shadow rounded-lg">
+                <div className="px-4 py-5 sm:p-3">
+                  <dt className="text-sm font-medium text-gray-500 truncate">
                     Liability Amount
                   </dt>
                   <dd className="mt-1 text-2xl font-semibold text-gray-900">
@@ -131,17 +141,7 @@ export default function AdminDashboard() {
                     ₹ {formatIndianNumber(summary.totalCurrentAmount)}
                   </dd>
                 </div>
-              </div>
-              <div className="bg-white overflow-hidden shadow rounded-lg">
-                <div className="px-4 py-5 sm:p-3">
-                  <dt className="text-sm font-medium text-gray-500 truncate">
-                    Closing Amount
-                  </dt>
-                  <dd className="mt-1 text-2xl font-semibold text-gray-900">
-                    ₹ {formatIndianNumber(summary.totalClosingAmount)}
-                  </dd>
-                </div>
-              </div>
+              </div>              
             </div>
           </div>
           <RetailerLiabilityTable data={liabilities} />

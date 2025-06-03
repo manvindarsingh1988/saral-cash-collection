@@ -162,6 +162,14 @@ export default function RetailDashboard({ retailUserId }) {
               <div className="grid grid-cols-1 sm:grid-cols-6 gap-6 mb-6">
                 <div className="bg-white shadow rounded-lg p-4">
                   <dt className="text-sm font-medium text-gray-500">
+                    Opening Amount
+                  </dt>
+                  <dd className="mt-1 text-3xl font-semibold text-gray-900">
+                    ₹ {formatIndianNumber(liability.ClosingAmount)}
+                  </dd>
+                </div>
+                <div className="bg-white shadow rounded-lg p-4">
+                  <dt className="text-sm font-medium text-gray-500">
                     Liability
                   </dt>
                   <dd className="mt-1 text-3xl font-semibold text-gray-900">
@@ -194,15 +202,7 @@ export default function RetailDashboard({ retailUserId }) {
                   <dd className="mt-1 text-3xl font-semibold text-gray-900">
                     ₹ {formatIndianNumber(liability.ProjectionAmount)}
                   </dd>
-                </div>
-                <div className="bg-white shadow rounded-lg p-4">
-                  <dt className="text-sm font-medium text-gray-500">
-                    Closing Amount
-                  </dt>
-                  <dd className="mt-1 text-3xl font-semibold text-gray-900">
-                    ₹ {formatIndianNumber(liability.ClosingAmount)}
-                  </dd>
-                </div>
+                </div>                
                 <div className="bg-white shadow rounded-lg p-4">
                   <dt className="text-sm font-medium text-gray-500">
                     Current Amount

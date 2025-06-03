@@ -110,7 +110,9 @@ export default function CashierLiabilities() {
         <>
           {/* Summary Cards */}
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-6">
+            
             {[
+              { label: "Opening Amount", value: summary.totalClosingAmount },
               {
                 label: "Liability Amount",
                 value: summary.totalLaibilityAmount,
@@ -125,9 +127,9 @@ export default function CashierLiabilities() {
               },
               { label: "Rejected Amount", value: summary.totalRejectedAmount },
               { label: "Current Amount", value: summary.totalCurrentAmount },
-              { label: "Closing Amount", value: summary.totalClosingAmount },
+              
               {
-                label: "Retailers Initiated Amount",
+                label: "Collectors Initiated Amount",
                 value: summary.totalRetailerInitiatedAmount,
               },
             ].map((item) => (
@@ -144,17 +146,17 @@ export default function CashierLiabilities() {
             <div className="overflow-x-auto border border-gray-200 rounded">
               <table className="min-w-full text-sm text-gray-700">
                 <thead className="bg-gray-50">
-                  <tr>
+                  <tr>                    
                     <th className="px-4 py-2 text-left">ID</th>
                     <th className="px-4 py-2 text-left">Name</th>
+                    <th className="px-4 py-2 text-left">Opening</th>
                     <th className="px-4 py-2 text-left">Liability (₹)</th>
                     <th className="px-4 py-2 text-left">Pending (₹)</th>
                     <th className="px-4 py-2 text-left">Rejected (₹)</th>
                     <th className="px-4 py-2 text-left">Projection (₹)</th>
-                    <th className="px-4 py-2 text-left">Current</th>
-                    <th className="px-4 py-2 text-left">Closing</th>
+                    <th className="px-4 py-2 text-left">Current</th>                    
                     <th className="px-4 py-2 text-left">
-                      Retailers Initiated Amount
+                      Collectors Initiated Amount
                     </th>
                   </tr>
                   <tr className="bg-white">
@@ -176,6 +178,9 @@ export default function CashierLiabilities() {
                     <tr key={item.UserId} className="border-t text-xs">
                       <td className="px-4 py-2">{item.UserId}</td>
                       <td className="px-4 py-2">{item.UserName || "—"}</td>
+                      <td className="px-4 py-2">
+                        ₹ {formatIndianNumber(item.ClosingAmount)}
+                      </td>
                       <td className="px-4 py-2">
                         <button
                           onClick={() =>
@@ -204,10 +209,7 @@ export default function CashierLiabilities() {
                       </td>
                       <td className="px-4 py-2">
                         ₹ {formatIndianNumber(item.CurrentAmount)}
-                      </td>
-                      <td className="px-4 py-2">
-                        ₹ {formatIndianNumber(item.ClosingAmount)}
-                      </td>
+                      </td>                      
                       <td className="px-4 py-2">
                         ₹ {formatIndianNumber(item.RetailerInitiatedAmount)}
                       </td>

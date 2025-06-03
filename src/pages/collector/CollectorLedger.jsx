@@ -144,7 +144,15 @@ export default function CollectorLedger({ collectorUserId }) {
   return (
     <div className="spacer-6">
       {liability && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 mb-6">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-6">
+          <div className="bg-white shadow rounded-lg p-4">
+            <dt className="text-sm font-medium text-gray-500">
+              Opening Amount
+            </dt>
+            <dd className="mt-1 text-3xl font-semibold text-gray-900">
+              ₹ {formatIndianNumber(liability.ClosingAmount)}
+            </dd>
+          </div>
           <div className="bg-white shadow rounded-lg p-4">
             <dt className="text-sm font-medium text-gray-500">Liability</dt>
             <dd className="mt-1 text-3xl font-semibold text-gray-900">
@@ -185,6 +193,14 @@ export default function CollectorLedger({ collectorUserId }) {
             </dt>
             <dd className="mt-1 text-3xl font-semibold text-gray-900">
               ₹ {formatIndianNumber(liability.RetailerInitiatedAmount)}
+            </dd>
+          </div>
+          <div className="bg-white shadow rounded-lg p-4">
+            <dt className="text-sm font-medium text-gray-500">
+              Current Amount
+            </dt>
+            <dd className="mt-1 text-3xl font-semibold text-gray-900">
+              ₹ {formatIndianNumber(liability.CurrentAmount)}
             </dd>
           </div>
         </div>
