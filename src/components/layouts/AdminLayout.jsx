@@ -80,7 +80,7 @@ function NavLinks({ isActive, mobile = false, setMobileMenuOpen }) {
   const links = [
     { to: "/", label: "Retailer Liabilities" },
     { to: "/collector-liabilities", label: "Collector Liabilities" },
-    { to: "/cashier-ledger", label: "Ledger" },
+    { to: "/cashier-ledger", label: "Ledgers" },
     { to: "/cashier-liabilities", label: "Cashier Liabilities" },
     { to: "/pending-approvals", label: "Pending Approvals" },
     { to: "/add-user", label: "Add User" },
