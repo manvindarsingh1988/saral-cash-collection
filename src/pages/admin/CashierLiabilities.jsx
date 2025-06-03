@@ -4,15 +4,15 @@ import useDocumentTitle from "../../hooks/useDocumentTitle";
 import { formatIndianNumber } from "../../lib/utils";
 import LadgerDetailsDialog from "../../components/LedgerDetailsDialog";
 
-export default function CollectorLiabilities() {
-  useDocumentTitle("Collector Liabilities");
+export default function CashierLiabilities() {
+  useDocumentTitle("Cashier Liabilities");
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [collectorLiabilities, setCollectorLiabilities] = useState([]);
-  const [modelFor, setModelFor] = useState("Handover");
+  const [cashierLiabilities, setCashierLiabilities] = useState([]);
+  const [modelFor, setModelFor] = useState("CashierHandover");
   const [openDialog, setOpenDialog] = useState(false);
-  const [selectedCollector, setSelectedCollector] = useState(null);
+  const [selectedCashier, setSelectedCashier] = useState(null);
 
   const [summary, setSummary] = useState({
     totalLaibilityAmount: 0,
@@ -37,14 +37,14 @@ export default function CollectorLiabilities() {
   });
 
   useEffect(() => {
-    fetchCollectorLiabilities();
+    fetchCashierLiabilities();
   }, []);
 
-  const fetchCollectorLiabilities = async () => {
+  const fetchCashierLiabilities = async () => {
     try {
       setLoading(true);
-      const data = await apiBase.getCollectorLiabilities();
-      setCollectorLiabilities(data || []);
+      const data = await apiBase.getCashierLiabilities();
+      setCashierLiabilities(data || []);
 
       setSummary({
         totalLaibilityAmount: data.reduce(
@@ -88,15 +88,15 @@ export default function CollectorLiabilities() {
     setFilters((prev) => ({ ...prev, [key]: value }));
   };
 
-  const filteredData = collectorLiabilities.filter((item) =>
+  const filteredData = cashierLiabilities.filter((item) =>
     Object.entries(filters).every(([key, value]) => {
       if (!value) return true;
       return item[key]?.toString().toLowerCase().includes(value.toLowerCase());
     })
   );
 
-  const handleMoreDetails = (collectorId, model) => {
-    setSelectedCollector(collectorId);
+  const handleMoreDetails = (cashierId, model) => {
+    setSelectedCashier(cashierId);
     setModelFor(model);
     setOpenDialog(true);
   };
@@ -106,7 +106,7 @@ export default function CollectorLiabilities() {
       {loading && <div className="text-center text-gray-600">Loading...</div>}
       {error && <div className="text-red-600">{error}</div>}
 
-      {!loading && collectorLiabilities.length > 0 && (
+      {!loading && cashierLiabilities.length > 0 && (
         <>
           {/* Summary Cards */}
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-6">
@@ -179,7 +179,7 @@ export default function CollectorLiabilities() {
                       <td className="px-4 py-2">
                         <button
                           onClick={() =>
-                            handleMoreDetails(item.UserId, "Cleared")
+                            handleMoreDetails(item.UserId, "CashierCleared")
                           }
                           className="text-blue-600 underline"
                         >
@@ -189,7 +189,7 @@ export default function CollectorLiabilities() {
                       <td className="px-4 py-2">
                         <button
                           onClick={() =>
-                            handleMoreDetails(item.UserId, "Handover")
+                            handleMoreDetails(item.UserId, "CashierHandover")
                           }
                           className="text-blue-600 underline"
                         >
@@ -225,9 +225,9 @@ export default function CollectorLiabilities() {
         <LadgerDetailsDialog
           onClose={() => {
             setOpenDialog(false);
-            setSelectedCollector(null);
+            setSelectedCashier(null);
           }}
-          userId={selectedCollector}
+          userId={selectedCashier}
           modelFor={modelFor}
         />
       )}

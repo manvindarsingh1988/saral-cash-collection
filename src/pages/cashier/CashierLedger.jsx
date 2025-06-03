@@ -16,10 +16,10 @@ const columns = [
   { key: "Action", label: "Actions", width: "100px" },
 ];
 
-export default function CollectorLedger({ collectorUserId }) {
-  useDocumentTitle("Collector Ledger");
+export default function CashierLedger({ cashierUserId }) {
+  useDocumentTitle("Cashier Ledger");
 
-  const [collectorLedgers, setCollectorLedgers] = useState([]);
+  const [cashierLedgers, setCashierLedgers] = useState([]);
   const [filteredLedgers, setFilteredLedgers] = useState([]);
   const [filters, setFilters] = useState({});
   const [loading, setLoading] = useState(false);
@@ -49,25 +49,25 @@ export default function CollectorLedger({ collectorUserId }) {
   }, []);
 
   useEffect(() => {
-    fetchCollectorLedgers();
+    fetchCashierLedgers();
   }, [showAll]);
 
-  const fetchCollectorLedgers = async () => {
+  const fetchCashierLedgers = async () => {
     try {
       setLoading(true);
       setError(null);
 
       const [data, liabilityData] = await Promise.all([
-        apiBase.getLedgerInfoByCollectorId(showAll, collectorUserId),
-        apiBase.getLiabilityAmountByCollectorId(collectorUserId),
+        apiBase.GetLadgerInfoCreatedByCashierId(showAll, cashierUserId),
+        apiBase.getLiabilityAmountByCashierId(cashierUserId, showAll),
       ]);
 
-      setCollectorLedgers(data);
+      setCashierLedgers(data);
       setFilteredLedgers(data);
       setLiability(liabilityData);
     } catch (err) {
       console.error(err);
-      setError("Failed to fetch collector ledgers");
+      setError("Failed to fetch cashier ledgers");
     } finally {
       setLoading(false);
     }
@@ -75,7 +75,7 @@ export default function CollectorLedger({ collectorUserId }) {
 
   const updateData = async () => {
     setModalOpen(false);
-    await fetchCollectorLedgers();
+    await fetchCashierLedgers();
   };
 
   const openAddLedger = () => {
@@ -101,7 +101,7 @@ export default function CollectorLedger({ collectorUserId }) {
     const updatedFilters = { ...filters, [key]: value };
     setFilters(updatedFilters);
 
-    let filtered = collectorLedgers.filter((item) => {
+    let filtered = cashierLedgers.filter((item) => {
       return Object.keys(updatedFilters).every((filterKey) => {
         const filterValue = updatedFilters[filterKey];
         if (!filterValue) return true;
@@ -135,7 +135,7 @@ export default function CollectorLedger({ collectorUserId }) {
 
     try {
       await apiBase.deleteLedgerInfo(id); // Make sure this API exists
-      await fetchCollectorLedgers();
+      await fetchCashierLedgers();
     } catch (err) {
       console.error("Delete failed:", err);
     }
@@ -147,7 +147,7 @@ export default function CollectorLedger({ collectorUserId }) {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 mb-6">
           <div className="bg-white shadow rounded-lg p-4">
             <dt className="text-sm font-medium text-gray-500">Liability</dt>
-            <dd className="mt-1 text-3xl font-semibold text-gray-900">
+            <dd className="mt-1 text-2xl font-semibold text-gray-900">
               ₹ {formatIndianNumber(liability.LaibilityAmount)}
             </dd>
           </div>
@@ -156,7 +156,7 @@ export default function CollectorLedger({ collectorUserId }) {
             <dt className="text-sm font-medium text-gray-500">
               Rejected Amount
             </dt>
-            <dd className="mt-1 text-3xl font-semibold text-gray-900">
+            <dd className="mt-1 text-2xl font-semibold text-gray-900">
               ₹ {formatIndianNumber(liability.RejectedAmount)}
             </dd>
           </div>
@@ -165,7 +165,7 @@ export default function CollectorLedger({ collectorUserId }) {
             <dt className="text-sm font-medium text-gray-500">
               Pending Approval Amount
             </dt>
-            <dd className="mt-1 text-3xl font-semibold text-gray-900">
+            <dd className="mt-1 text-2xl font-semibold text-gray-900">
               ₹ {formatIndianNumber(liability.PendingApprovalAmount)}
             </dd>
           </div>
@@ -174,17 +174,17 @@ export default function CollectorLedger({ collectorUserId }) {
             <dt className="text-sm font-medium text-gray-500">
               Projection Amount
             </dt>
-            <dd className="mt-1 text-3xl font-semibold text-gray-900">
+            <dd className="mt-1 text-2xl font-semibold text-gray-900">
               ₹ {formatIndianNumber(liability.ProjectionAmount)}
             </dd>
           </div>
 
           <div className="bg-white shadow rounded-lg p-4">
             <dt className="text-sm font-medium text-gray-500">
-              Retailer Initiated Amount
+              Collector Initiated Amount
             </dt>
-            <dd className="mt-1 text-3xl font-semibold text-gray-900">
-              ₹ {formatIndianNumber(liability.RetailerInitiatedAmount)}
+            <dd className="mt-1 text-2xl font-semibold text-gray-900">
+              ₹ {formatIndianNumber(liability.CollectorInitiatedAmount)}
             </dd>
           </div>
         </div>
@@ -274,7 +274,7 @@ export default function CollectorLedger({ collectorUserId }) {
                         item.WorkFlow
                       )}`}
                     >
-                      <td className="px-2 py-2">
+                      <td className="px-4 py-2">
                         <button
                           className="text-indigo-600 hover:underline"
                           onClick={(e) => {
@@ -285,29 +285,29 @@ export default function CollectorLedger({ collectorUserId }) {
                           {item.Id}
                         </button>
                       </td>
-                      <td className="px-2 py-2">{item.CashierName}</td>
-                      <td className="px-2 py-2">
+                      <td className="px-4 py-2">{item.CashierName}</td>
+                      <td className="px-4 py-2">
                         ₹{formatIndianNumber(item.Amount)}
                       </td>
-                      <td className="px-2 py-2">
+                      <td className="px-4 py-2">
                         {getMasterValue(
                           "TransactionTypes",
                           item.TransactionType
                         )}
                       </td>
-                      <td className="px-2 py-2">
+                      <td className="px-4 py-2">
                         {getMasterValue("WorkFlows", item.WorkFlow)}
                       </td>
-                      <td className="px-2 py-2">
+                      <td className="px-4 py-2">
                         {formatToCustomDateTime(item.GivenOn)}
                       </td>
-                      <td className="px-2 py-2">
+                      <td className="px-4 py-2">
                         {formatToCustomDateTime(item.Date)}
                       </td>
-                      <td className="px-2 py-2 break-words max-w-[200px]">
+                      <td className="px-4 py-2 break-words max-w-[200px]">
                         {item.Comment}
                       </td>
-                      <td className="px-2 py-2">
+                      <td className="px-4 py-2">
                         {[1, 6].includes(item.WorkFlow) && (
                           <button
                             onClick={(e) => {
@@ -331,11 +331,11 @@ export default function CollectorLedger({ collectorUserId }) {
 
       {isModalOpen && (
         <LedgerModal
-          userId={collectorUserId}
+          userId={cashierUserId}
           masterData={masterData}
           cashiers={cashiers}
           onClose={updateData}
-          modelFor="CollectorLedger"
+          modelFor="CashierLedger"
           initialData={selectedLedger}
         />
       )}

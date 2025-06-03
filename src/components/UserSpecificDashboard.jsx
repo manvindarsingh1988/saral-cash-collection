@@ -1,12 +1,16 @@
 import React from "react";
 import { Routes, Route } from "react-router-dom";
 import { apiBase } from "../lib/apiBase";
-import AdminDashboard from "../pages/dashboards/AdminDashboard";
-import CollectorDashboard from "../pages/dashboards/CollectorDashboard";
-import RetailDashboard from "../pages/dashboards/RetailDashboard";
+
+// Layouts
 import AdminLayout from "./layouts/AdminLayout";
 import RetailUserLayout from "./layouts/RetailUserLayout";
 import CollectorLayout from "./layouts/CollectorLayout";
+
+// Pages
+import AdminDashboard from "../pages/dashboards/AdminDashboard";
+import RetailDashboard from "../pages/dashboards/RetailDashboard";
+import CollectorDashboard from "../pages/dashboards/CollectorDashboard";
 import AddUser from "../pages/admin/AddUser";
 import AssignRetail from "../pages/admin/AssignRetail";
 import CollectorLiabilities from "../pages/admin/CollectorLiabilities";
@@ -15,61 +19,72 @@ import PendingApprovals from "../pages/admin/PendingApprovals";
 import UserInfo from "../pages/admin/UserInfo";
 import RetailerLiabilitiesForCollector from "../pages/collector/RetailerLiabilitiesForCollector";
 import PendingApprovalsForCollector from "../pages/collector/PendingApprovalsForCollector";
+import CashierLiabilities from "../pages/admin/CashierLiabilities";
+import CashierLedger from "../pages/cashier/CashierLedger";
 
 export default function UserSpecificDashboard() {
   const user = apiBase.getCurrentUser();
+  const { UserType, Id } = user || {};
 
-  if (user.UserType === "Admin" || user.UserType === "Cashier" || user.UserType === "MasterCashier") {
-    let userType = user.UserType === "Cashier" ? 13 : 14;
-    return (
-      <AdminLayout>
-        <Routes>
-          <Route path="/collector-ledgers" element={<CollectorLiabilities />} />
-          <Route path="/add-user" element={<AddUser />} />
-          <Route path="/assign-retail" element={<AssignRetail />} />
-          <Route path="/pending-approvals" element={<PendingApprovals userType={userType} />} />
-          <Route path="/user-info" element={<UserInfo />} />
-          <Route path="/" element={<AdminDashboard />} />
-        </Routes>
-      </AdminLayout>
-    );
-  } else if (user.UserType === "Collector") {
-    return (
-      <CollectorLayout>
-        <Routes>
-          {/* <Route
-            path="/"
-            element={<CollectorDashboard collectorUserId={user.Id} />}
-          /> */}
-          <Route
-            path="/ledgers"
-            element={<CollectorLedger collectorUserId={user.Id} />}
-          />
-          <Route
-            path="/pending-approvals"
-            element={<PendingApprovalsForCollector collectorUserId={user.Id} />}
-          />
-          <Route
-            path="/"
-            element={
-              <RetailerLiabilitiesForCollector collectorUserId={user.Id} />
-            }
-          />
-        </Routes>
-      </CollectorLayout>
-    );
-  } else if (user.UserType === "Retailer") {
-    return (
-      <RetailUserLayout>
-        <Routes>
-          <Route
-            path="/"
-            element={<RetailDashboard retailUserId={user.Id} />}
-          />
-        </Routes>
-      </RetailUserLayout>
-    );
-  } else {
-    return null; // or maybe redirect to /signin if needed
+  const renderAdminRoutes = () => (
+    <Routes>
+      <Route path="/collector-liabilities" element={<CollectorLiabilities />} />
+      {(UserType === "Admin" || UserType === "MasterCashier") && (
+        <Route path="/cashier-liabilities" element={<CashierLiabilities />} />
+      )}
+      {UserType === "Cashier" && (
+        <Route
+          path="/cashier-ledger"
+          element={<CashierLedger cashierUserId={Id} />}
+        />
+      )}
+      <Route path="/add-user" element={<AddUser />} />
+      <Route path="/assign-retail" element={<AssignRetail />} />
+      <Route path="/pending-approvals" element={<PendingApprovals userType={ UserType === "Cashier" ? 13 : 14 } />} />
+      <Route path="/user-info" element={<UserInfo />} />
+      <Route path="/" element={<AdminDashboard />} />
+    </Routes>
+  );
+
+  const renderCollectorRoutes = () => (
+    <Routes>
+      <Route
+        path="/ledgers"
+        element={<CollectorLedger collectorUserId={Id} />}
+      />
+      <Route
+        path="/pending-approvals"
+        element={<PendingApprovalsForCollector collectorUserId={Id} />}
+      />
+      <Route
+        path="/"
+        element={<RetailerLiabilitiesForCollector collectorUserId={Id} />}
+      />
+    </Routes>
+  );
+
+  const renderRetailRoutes = () => (
+    <Routes>
+      <Route path="/" element={<RetailDashboard retailUserId={Id} />} />
+    </Routes>
+  );
+
+  if (
+    UserType === "Admin" ||
+    UserType === "Cashier" ||
+    UserType === "MasterCashier"
+  ) {
+    return <AdminLayout>{renderAdminRoutes()}</AdminLayout>;
   }
+
+  if (UserType === "Collector") {
+    return <CollectorLayout>{renderCollectorRoutes()}</CollectorLayout>;
+  }
+
+  if (UserType === "Retailer") {
+    return <RetailUserLayout>{renderRetailRoutes()}</RetailUserLayout>;
+  }
+
+  // Optional: Redirect or fallback
+  return null;
 }

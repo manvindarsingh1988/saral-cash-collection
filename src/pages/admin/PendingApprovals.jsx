@@ -174,7 +174,7 @@ export default function PendingApprovals({userType}) {
                   filteredData.map((item, idx) => (
                     <tr
                       key={idx}
-                      className={`cursor-pointer hover:bg-gray-100 ${getRowColor(
+                      className={`text-xs cursor-pointer hover:bg-gray-100 ${getRowColor(
                         item.WorkFlow
                       )}`}
                     >

@@ -5,7 +5,7 @@ import UserProfileMenu from "../UserProfileMenu";
 import { Menu, X } from "lucide-react";
 
 export default function AdminLayout({ children }) {
-  const [user] = React.useState(() => apiBase.getCurrentUser());
+  const user = apiBase.getCurrentUser();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const location = useLocation();
@@ -59,6 +59,7 @@ export default function AdminLayout({ children }) {
               isActive={isActive}
               mobile
               setMobileMenuOpen={setMobileMenuOpen}
+              user={user}
             />
           </div>
         )}
@@ -73,28 +74,40 @@ export default function AdminLayout({ children }) {
 
 // Extracted nav links for reuse in desktop and mobile
 function NavLinks({ isActive, mobile = false, setMobileMenuOpen }) {
+  const user = apiBase.getCurrentUser();
+
   const baseClass = "text-white rounded-md px-3 py-2 text-sm font-medium block";
   const links = [
     { to: "/", label: "Retailer Liabilities" },
-    { to: "/collector-ledgers", label: "Collector Liabilities" },
+    { to: "/collector-liabilities", label: "Collector Liabilities" },
+    { to: "/cashier-ledger", label: "Ledger" },
+    { to: "/cashier-liabilities", label: "Cashier Liabilities" },
     { to: "/pending-approvals", label: "Pending Approvals" },
     { to: "/add-user", label: "Add User" },
     { to: "/assign-retail", label: "Assign Retail Users" },
     { to: "/user-info", label: "User Info" },
   ];
 
-  return links.map(({ to, label }) => (
-    <Link
-      key={to}
-      to={to}
-      className={`${baseClass} ${isActive(to)}`}
-      onClick={() => {
-        if (mobile && setMobileMenuOpen) {
-          setMobileMenuOpen(false); // ✅ close menu on selection
-        }
-      }}
-    >
-      {label}
-    </Link>
-  ));
+  return links
+    .filter((l) => {
+      if (user?.UserType === "Cashier") {
+        return l.to != "/cashier-liabilities"; // Admin sees all links
+      } else {
+        return l.to !== "/cashier-ledger"; // Cashier sees all except cashier ledger/liabilities
+      }
+    })
+    .map(({ to, label }) => (
+      <Link
+        key={to}
+        to={to}
+        className={`${baseClass} ${isActive(to)}`}
+        onClick={() => {
+          if (mobile && setMobileMenuOpen) {
+            setMobileMenuOpen(false); // ✅ close menu on selection
+          }
+        }}
+      >
+        {label}
+      </Link>
+    ));
 }

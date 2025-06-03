@@ -36,6 +36,8 @@ export default function UserInfo() {
     () => [
       { Id: 5, Name: "Retailer" },
       { Id: 12, Name: "Collector" },
+      { Id: 13, Name: "Cashier" },
+      { Id: 14, Name: "MasterCashier" },
     ],
     []
   );
@@ -287,7 +289,7 @@ export default function UserInfo() {
               </tr>
             </thead>
 
-            <tbody>
+            <tbody className="text-xs">
               {filteredUserInfos.map((user) => (
                 <tr
                   key={user.Id}

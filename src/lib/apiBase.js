@@ -164,9 +164,21 @@ export const apiBase = {
     return data;
   },
 
-  getLiabilityAmountByCollectorId: async (collectorId, date) => {
+  getLiabilityAmountByCollectorId: async (collectorId) => {
     const response = await fetch(
-      `${API_URL}/GetLiabilityAmountByCollectorId?userId=${collectorId}&all=${date}`
+      `${API_URL}/GetLiabilityAmountByCollectorId?userId=${collectorId}`
+    );
+    if (!response.ok) {
+      console.error(`Failed to fetch: ${response.statusText}`);
+    }
+    const data = await response.json();
+    console.log(data);
+    return data;
+  },
+
+  getLiabilityAmountByCashierId: async (cashierId) => {
+    const response = await fetch(
+      `${API_URL}/GetLiabilityAmountByCashierId?userId=${cashierId}`
     );
     if (!response.ok) {
       console.error(`Failed to fetch: ${response.statusText}`);
@@ -247,6 +259,18 @@ export const apiBase = {
     return data;
   },
 
+  GetLadgerInfoCreatedByCashierId: async (all = false, cashierId) => {
+    const response = await fetch(
+      `${API_URL}/GetLadgerInfoCreatedByCashierId?all=${all}&cashierId=${cashierId}`
+    );
+    if (!response.ok) {
+      console.error(`Failed to fetch: ${response.statusText}`);
+    }
+    const data = await response.json();
+    console.log(data);
+    return data;
+  },
+
   getLadgerInfoByRetaileridAndCollectorId: async (
     all = false,
     retailerId,
@@ -307,9 +331,31 @@ export const apiBase = {
     return data;
   },
 
-  getCollectorLiabilityDetails: async (collectorId) => {
+  getCashierLiabilities: async () => {
+    const response = await fetch(`${API_URL}/GetCashierLiabilities`);
+    if (!response.ok) {
+      console.error(`Failed to fetch: ${response.statusText}`);
+    }
+    const data = await response.json();
+    console.log(data);
+    return data;
+  },
+
+  getCollectorLiabilityDetails: async (cashierId) => {
     const response = await fetch(
-      `${API_URL}/GetCollectorLiabilityDetails?collectorId=${collectorId}`
+      `${API_URL}/GetCollectorLiabilityDetails?cashierId=${cashierId}`
+    );
+    if (!response.ok) {
+      console.error(`Failed to fetch: ${response.statusText}`);
+    }
+    const data = await response.json();
+    console.log(data);
+    return data;
+  },
+
+  getCashierLiabilityDetails: async (cashierId) => {
+    const response = await fetch(
+      `${API_URL}/GetCashierLiabilityDetails?cashierId=${cashierId}`
     );
     if (!response.ok) {
       console.error(`Failed to fetch: ${response.statusText}`);
@@ -331,8 +377,22 @@ export const apiBase = {
     return data;
   },
 
-  getPendingApprovals: async (all) => {
-    const response = await fetch(`${API_URL}/GetPendingApprovalLedgers?showAll=${all}`); // 'all' is a boolean
+  getCashierLedgerDetails: async (cashierId) => {
+    const response = await fetch(
+      `${API_URL}/GetCashierLedgerDetails?cashierId=${cashierId}`
+    );
+    if (!response.ok) {
+      console.error(`Failed to fetch: ${response.statusText}`);
+    }
+    const data = await response.json();
+    console.log(data);
+    return data;
+  },
+
+  getPendingApprovals: async (all, userType) => {
+    const response = await fetch(
+      `${API_URL}/GetPendingApprovalLedgers?showAll=${all}&userType=${userType}`
+    ); // 'all' is a boolean
     if (!response.ok) {
       console.error(`Failed to fetch: ${response.statusText}`);
     }
