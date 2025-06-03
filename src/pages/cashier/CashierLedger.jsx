@@ -181,10 +181,10 @@ export default function CashierLedger({ cashierUserId }) {
 
           <div className="bg-white shadow rounded-lg p-4">
             <dt className="text-sm font-medium text-gray-500">
-              Retailer Initiated Amount
+              Collector Initiated Amount
             </dt>
             <dd className="mt-1 text-2xl font-semibold text-gray-900">
-              ₹ {formatIndianNumber(liability.RetailerInitiatedAmount)}
+              ₹ {formatIndianNumber(liability.CollectorInitiatedAmount)}
             </dd>
           </div>
         </div>

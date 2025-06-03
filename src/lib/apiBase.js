@@ -389,9 +389,9 @@ export const apiBase = {
     return data;
   },
 
-  getPendingApprovals: async (all) => {
+  getPendingApprovals: async (all, userType) => {
     const response = await fetch(
-      `${API_URL}/GetPendingApprovalLedgers?showAll=${all}`
+      `${API_URL}/GetPendingApprovalLedgers?showAll=${all}&userType=${userType}`
     ); // 'all' is a boolean
     if (!response.ok) {
       console.error(`Failed to fetch: ${response.statusText}`);

@@ -40,7 +40,7 @@ export default function UserSpecificDashboard() {
       )}
       <Route path="/add-user" element={<AddUser />} />
       <Route path="/assign-retail" element={<AssignRetail />} />
-      <Route path="/pending-approvals" element={<PendingApprovals />} />
+      <Route path="/pending-approvals" element={<PendingApprovals userType={ UserType === "Cashier" ? 13 : 14 } />} />
       <Route path="/user-info" element={<UserInfo />} />
       <Route path="/" element={<AdminDashboard />} />
     </Routes>
