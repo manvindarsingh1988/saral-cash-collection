@@ -3,7 +3,9 @@ import { apiBase } from "../../lib/apiBase";
 import {
   formatIndianNumber,
   formatToCustomDateTime,
+  generateSafeGuid,
   getRowColor,
+  zipFileAndGetBase64,
 } from "../../lib/utils";
 import RetailerLedgerModal from "../../components/retailer/RetailerLedgerModal";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
@@ -101,6 +103,20 @@ export default function RetailDashboard({ retailUserId }) {
   };
 
   const handleLedgerSubmit = async (data) => {
+    const docId = generateSafeGuid();
+    let fileSaved = false;
+
+    if (data.File) {
+      try {
+        const byteArray = await zipFileAndGetBase64(data.File); // convert to byte array
+        await apiBase.uploadFile(byteArray, docId); // adjust API if needed to accept byte array
+        fileSaved = true;
+      } catch (err) {
+        console.error("File upload failed:", err);
+        fileSaved = false;
+      }
+    }
+
     try {
       data.RetailerId = retailUserId;
       const payload = {
@@ -112,6 +128,7 @@ export default function RetailDashboard({ retailUserId }) {
         GivenOn: new Date().toISOString(),
         CollectorId: data.TransactionType == "2" ? "" : data.CollectorId,
         CollectorName: data.TransactionType == "2" ? "" : data.CollectorName,
+        DocId: data.File && fileSaved ? docId : null,
       };
 
       if (editData?.Id) {
@@ -164,7 +181,7 @@ export default function RetailDashboard({ retailUserId }) {
                   <dt className="text-sm font-medium text-gray-500">
                     Opening Amount
                   </dt>
-                  <dd className="mt-1 text-3xl font-semibold text-gray-900">
+                  <dd className="mt-1 text-2xl font-semibold text-gray-900">
                     ₹ {formatIndianNumber(liability.ClosingAmount)}
                   </dd>
                 </div>
@@ -202,7 +219,7 @@ export default function RetailDashboard({ retailUserId }) {
                   <dd className="mt-1 text-2xl font-semibold text-gray-900">
                     ₹ {formatIndianNumber(liability.ProjectionAmount)}
                   </dd>
-                </div>                
+                </div>
                 <div className="bg-white shadow rounded-lg p-4">
                   <dt className="text-sm font-medium text-gray-500">
                     Current Amount

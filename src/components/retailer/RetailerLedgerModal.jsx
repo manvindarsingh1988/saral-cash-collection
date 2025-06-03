@@ -18,6 +18,7 @@ const allowedFields = [
   "Date",
   "Comment",
   "StuckInBank",
+  "File"
 ];
 
 export default function RetailerLedgerModal({
@@ -38,6 +39,7 @@ export default function RetailerLedgerModal({
     Date: new Date(),
     Comment: "",
     StuckInBank: false,
+    File: null,
   });
 
   console.log("Form Data:", formData);
@@ -80,6 +82,10 @@ export default function RetailerLedgerModal({
     onClose();
   };
 
+  const handleFileChange = (e) => {
+    setFormData((prev) => ({ ...prev, File: e.target.files[0] }));
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -96,7 +102,7 @@ export default function RetailerLedgerModal({
             (formData["TransactionType"] == "2" && key === "CollectorId") ||
             (formData["TransactionType"] == "3" && key === "CollectorId") ||
             (formData["TransactionType"] != "2" && key === "StuckInBank") ||
-            key == "Date"
+            key == "Date" || key === "File"
           ) {
             console.log(`Skipping field ${key} due to conditions`);
             return null;
@@ -221,6 +227,16 @@ export default function RetailerLedgerModal({
             </div>
           );
         })}
+
+        {/* File Upload */}
+        <div className="flex flex-col">
+          <label className="text-sm text-gray-600">Upload Slip</label>
+          <input
+            type="file"
+            onChange={handleFileChange}
+            className="border px-2 py-1 rounded"
+          />
+        </div>
 
         <div className="flex justify-end gap-2">
           <button onClick={onClose} className="px-4 py-1 rounded border">
