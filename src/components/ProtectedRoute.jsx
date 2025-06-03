@@ -15,6 +15,7 @@ const routesForRoles = {
   Cashier: [
     "/",
     "/collector-liabilities",
+    "/cashier-ledger",
     "/add-user",
     "/assign-retail",
     "/pending-approvals",

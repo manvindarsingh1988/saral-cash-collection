@@ -164,9 +164,21 @@ export const apiBase = {
     return data;
   },
 
-  getLiabilityAmountByCollectorId: async (collectorId, date) => {
+  getLiabilityAmountByCollectorId: async (collectorId) => {
     const response = await fetch(
-      `${API_URL}/GetLiabilityAmountByCollectorId?userId=${collectorId}&all=${date}`
+      `${API_URL}/GetLiabilityAmountByCollectorId?userId=${collectorId}`
+    );
+    if (!response.ok) {
+      console.error(`Failed to fetch: ${response.statusText}`);
+    }
+    const data = await response.json();
+    console.log(data);
+    return data;
+  },
+
+  getLiabilityAmountByCashierId: async (cashierId) => {
+    const response = await fetch(
+      `${API_URL}/GetLiabilityAmountByCashierId?userId=${cashierId}`
     );
     if (!response.ok) {
       console.error(`Failed to fetch: ${response.statusText}`);
@@ -247,6 +259,18 @@ export const apiBase = {
     return data;
   },
 
+  GetLadgerInfoCreatedByCashierId: async (all = false, cashierId) => {
+    const response = await fetch(
+      `${API_URL}/GetLadgerInfoCreatedByCashierId?all=${all}&cashierId=${cashierId}`
+    );
+    if (!response.ok) {
+      console.error(`Failed to fetch: ${response.statusText}`);
+    }
+    const data = await response.json();
+    console.log(data);
+    return data;
+  },
+
   getLadgerInfoByRetaileridAndCollectorId: async (
     all = false,
     retailerId,
@@ -307,7 +331,6 @@ export const apiBase = {
     return data;
   },
 
-  
   getCashierLiabilities: async () => {
     const response = await fetch(`${API_URL}/GetCashierLiabilities`);
     if (!response.ok) {
@@ -342,7 +365,6 @@ export const apiBase = {
     return data;
   },
 
-
   getCollectorLedgerDetails: async (collectorId) => {
     const response = await fetch(
       `${API_URL}/GetCollectorLedgerDetails?collectorId=${collectorId}`
@@ -368,7 +390,9 @@ export const apiBase = {
   },
 
   getPendingApprovals: async (all) => {
-    const response = await fetch(`${API_URL}/GetPendingApprovalLedgers?showAll=${all}`); // 'all' is a boolean
+    const response = await fetch(
+      `${API_URL}/GetPendingApprovalLedgers?showAll=${all}`
+    ); // 'all' is a boolean
     if (!response.ok) {
       console.error(`Failed to fetch: ${response.statusText}`);
     }

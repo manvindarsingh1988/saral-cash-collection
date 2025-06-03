@@ -1,6 +1,6 @@
 /* eslint-disable */
 import React, { useState, useEffect } from "react";
-import { apiBase } from "../../lib/apiBase"; // adjust path if needed
+import { apiBase } from "../lib/apiBase"; // adjust path if needed
 
 const allowedFields = [
   "TransactionType",
@@ -9,30 +9,30 @@ const allowedFields = [
   "Amount",
   "WorkFlow",
   "Date",
-  // "GivenOn",  ← we’ll still track it, but won’t render it
   "Comment",
-  "StuckInBank", // assuming this is needed
+  "StuckInBank",
 ];
 
-export default function CollectorLedgerModal({
-  collectorId,
+export default function LedgerModal({
+  userId,
   masterData,
   onClose,
   initialData,
   cashiers,
   modelFor,
 }) {
-  // Filter workflows based on modelFor
-  const workflows =
-    modelFor === "CollectorLedger"
-      ? masterData?.WorkFlows?.filter((_) => _?.Id === 4) // Type 4 for CollectorLedger
-      : masterData?.WorkFlows; // All workflows for other cases
+  const isCollectorLedger = modelFor === "CollectorLedger";
+  const isCashierLedger = modelFor === "CashierLedger";
 
-  // Set today's date
+  const workflows =
+    isCollectorLedger || isCashierLedger
+      ? masterData?.WorkFlows?.filter((_) => _?.Id === 4)
+      : masterData?.WorkFlows;
+
   const today = new Date().toISOString().split("T")[0];
 
   const [formData, setFormData] = useState({
-    CollectorId: collectorId,
+    CollectorId: userId,
     TransactionType: "1",
     CashierId: "",
     Amount: "",
@@ -40,27 +40,26 @@ export default function CollectorLedgerModal({
     Date: new Date(),
     GivenOn: today,
     Comment: "",
-    StuckInBank: false, // assuming this is needed
+    StuckInBank: false,
   });
 
   useEffect(() => {
     if (initialData) {
-      const fd = {
+      setFormData({
         Id: initialData?.Id ?? "",
         RetailerId: initialData?.RetailerId,
-        CollectorId: collectorId,
-        TransactionType: initialData.TransactionType ?? "",
+        CollectorId: userId,
+        TransactionType: initialData.TransactionType ?? "1",
         CashierId: initialData.CashierId ?? "",
         Amount: initialData.Amount ?? "",
         WorkFlow: initialData.WorkFlow ?? "1",
-        Date: initialData.Date ? initialData.Date.split("T")[0] : "",
-        GivenOn: today, // always keep today
+        Date: initialData.Date ? initialData.Date.split("T")[0] : today,
+        GivenOn: today,
         Comment: initialData.Comment ?? "",
-        StuckInBank: initialData.WorkFlow === 6, // assuming 6 is the StuckInBank workflow
-      };
-      setFormData(fd);
+        StuckInBank: initialData.WorkFlow === 6,
+      });
     }
-  }, [initialData, collectorId, today]);
+  }, [initialData, userId]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -77,8 +76,12 @@ export default function CollectorLedgerModal({
       const payload = {
         Id: data?.Id,
         RetailerId: data?.RetailerId,
-        CashierId: parseInt(data.WorkFlow) == 1 ? data?.CashierId : "",
-        CollectorId: collectorId,
+        CashierId: isCashierLedger
+          ? userId
+          : parseInt(data.WorkFlow) === 1
+          ? data?.CashierId
+          : "",
+        CollectorId: isCollectorLedger ? userId : "",
         Amount: parseFloat(data.Amount),
         TransactionType: parseInt(data.TransactionType),
         WorkFlow: data.StuckInBank ? 6 : parseInt(data.WorkFlow),
@@ -87,18 +90,8 @@ export default function CollectorLedgerModal({
         Comment: data.Comment,
       };
 
-      // If you're uploading the file to an API, use FormData
-      // const formPayload = new FormData();
-      // for (const key in payload) {
-      //   formPayload.append(key, payload[key]);
-      // }
-
-      // if (data.File) {
-      //   formPayload.append("File", data.File);
-      // }
-
       if (initialData?.Id) {
-        await apiBase.updateLedgerInfo(payload); // assumes backend accepts multipart/form-data
+        await apiBase.updateLedgerInfo(payload);
       } else {
         await apiBase.addLedgerInfo(payload);
       }
@@ -107,6 +100,16 @@ export default function CollectorLedgerModal({
     } catch (err) {
       console.error("Submission failed:", err);
     }
+  };
+
+  const shouldRenderField = (key) => {
+    if (key === "GivenOn" || key === "CollectorId") return false;
+    if (key === "CashierId" && formData.TransactionType !== "1") return false;
+    if (key === "WorkFlow" && (isCollectorLedger || isCashierLedger))
+      return false;
+    if (key === "StuckInBank" || key === "Date") return false;
+    if (isCashierLedger && key === "CashierId") return false;
+    return true;
   };
 
   const handleSubmit = () => {
@@ -122,23 +125,19 @@ export default function CollectorLedgerModal({
         </h2>
 
         {allowedFields.map((key) => {
-          // hide GivenOn entirely
-          if (key === "GivenOn" || key === "CollectorId") return null;
-
-          // only show CashierId when TransactionType === "1"
-          if (
-            (key === "CashierId" && formData.TransactionType !== "1") ||
-            (key === "WorkFlow" && modelFor === "CollectorLedger") ||
-            key === "StuckInBank" ||
-            key === "Date"
-          ) {
-            return null;
-          }
+          if (!shouldRenderField(key)) return null;
 
           const label = key.replace(/([A-Z])/g, " $1").trim();
           let inputElement;
 
           if (key === "TransactionType" || key === "WorkFlow") {
+            const options =
+              key === "TransactionType"
+                ? masterData?.TransactionTypes?.filter((opt) =>
+                    isCashierLedger ? opt.Id !== 1 : true
+                  )
+                : workflows?.filter((opt) => [1, 2, 3].includes(opt.Id));
+
             inputElement = (
               <>
                 <select
@@ -150,27 +149,14 @@ export default function CollectorLedgerModal({
                   <option value="" disabled>
                     Select {label}
                   </option>
-                  {key === "WorkFlow" &&
-                    workflows
-                      ?.filter((_) => {
-                        if (_.Id === 1 || _.Id === 2 || _.Id === 3) return true;
-                        else return false;
-                      })
-                      .map((opt) => (
-                        <option key={opt.Id} value={opt.Id}>
-                          {opt.Description}
-                        </option>
-                      ))}
-                  {key === "TransactionType" &&
-                    masterData?.TransactionTypes?.map((opt) => (
-                      <option key={opt.Id} value={opt.Id}>
-                        {opt.Description}
-                      </option>
-                    ))}
+                  {options?.map((opt) => (
+                    <option key={opt.Id} value={opt.Id}>
+                      {opt.Description}
+                    </option>
+                  ))}
                 </select>
                 {key === "TransactionType" &&
-                  (formData.TransactionType === "2" ||
-                    formData.TransactionType === "3") && (
+                  ["2", "3"].includes(formData.TransactionType) && (
                     <p className="text-xs text-gray-500 mt-1">
                       <strong>Note:</strong> Please mention transaction details
                       in comments to avoid rejection.
@@ -197,9 +183,7 @@ export default function CollectorLedgerModal({
               </select>
             );
           } else {
-            const type =
-              key === "Amount" ? "number" : key === "Date" ? "date" : "text";
-
+            const type = key === "Amount" ? "number" : "text";
             inputElement = (
               <input
                 name={key}
@@ -219,18 +203,18 @@ export default function CollectorLedgerModal({
           );
         })}
 
-        {formData.TransactionType == "2" && (
+        {formData.TransactionType === "2" && (
           <div className="flex flex-col">
             <label className="flex items-center gap-2">
               <input
                 name="StuckInBank"
                 type="checkbox"
-                checked={formData["StuckInBank"] ?? false}
+                checked={formData.StuckInBank ?? false}
                 onChange={(e) =>
                   handleChange({
                     target: {
                       name: "StuckInBank",
-                      value: e.target.checked ? true : false,
+                      value: e.target.checked,
                     },
                   })
                 }

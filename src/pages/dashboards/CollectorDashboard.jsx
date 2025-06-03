@@ -5,7 +5,7 @@ import {
   formatToCustomDateTime,
   getRowColor,
 } from "../../lib/utils";
-import CollectorLedgerModal from "../../components/collector/CollectorLedgerModal";
+import CollectorLedgerModal from "../../components/LedgerModal";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
 
 const columns = [
