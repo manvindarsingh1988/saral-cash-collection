@@ -147,7 +147,7 @@ export default function CollectorLedger({ collectorUserId }) {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 mb-6">
           <div className="bg-white shadow rounded-lg p-4">
             <dt className="text-sm font-medium text-gray-500">Liability</dt>
-            <dd className="mt-1 text-3xl font-semibold text-gray-900">
+            <dd className="mt-1 text-2xl font-semibold text-gray-900">
               ₹ {formatIndianNumber(liability.LaibilityAmount)}
             </dd>
           </div>
@@ -156,7 +156,7 @@ export default function CollectorLedger({ collectorUserId }) {
             <dt className="text-sm font-medium text-gray-500">
               Rejected Amount
             </dt>
-            <dd className="mt-1 text-3xl font-semibold text-gray-900">
+            <dd className="mt-1 text-2xl font-semibold text-gray-900">
               ₹ {formatIndianNumber(liability.RejectedAmount)}
             </dd>
           </div>
@@ -165,7 +165,7 @@ export default function CollectorLedger({ collectorUserId }) {
             <dt className="text-sm font-medium text-gray-500">
               Pending Approval Amount
             </dt>
-            <dd className="mt-1 text-3xl font-semibold text-gray-900">
+            <dd className="mt-1 text-2xl font-semibold text-gray-900">
               ₹ {formatIndianNumber(liability.PendingApprovalAmount)}
             </dd>
           </div>
@@ -174,7 +174,7 @@ export default function CollectorLedger({ collectorUserId }) {
             <dt className="text-sm font-medium text-gray-500">
               Projection Amount
             </dt>
-            <dd className="mt-1 text-3xl font-semibold text-gray-900">
+            <dd className="mt-1 text-2xl font-semibold text-gray-900">
               ₹ {formatIndianNumber(liability.ProjectionAmount)}
             </dd>
           </div>
@@ -183,7 +183,7 @@ export default function CollectorLedger({ collectorUserId }) {
             <dt className="text-sm font-medium text-gray-500">
               Retailer Initiated Amount
             </dt>
-            <dd className="mt-1 text-3xl font-semibold text-gray-900">
+            <dd className="mt-1 text-2xl font-semibold text-gray-900">
               ₹ {formatIndianNumber(liability.RetailerInitiatedAmount)}
             </dd>
           </div>
