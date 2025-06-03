@@ -1,3 +1,5 @@
+import JSZip from "jszip";
+
 export function formatIndianNumber(number: number): string {
   const numStr = (number || "0").toString();
   // If the number is less than 1000, return it as is
@@ -46,4 +48,28 @@ export function formatToCustom(isoString: string): string {
   return `${pad(date.getDate())}/${pad(
     date.getMonth() + 1
   )}/${date.getFullYear()}`;
+}
+
+export function generateSafeGuid(): string {
+  const template = "10000000-1000-4000-8000-100000000000";
+  return template.replace(/[018]/g, (c) => {
+    const rnd = crypto.getRandomValues(new Uint8Array(1))[0];
+    const value = Number(c) ^ (rnd & (15 >> (Number(c) / 4)));
+    return value.toString(16);
+  });
+}
+
+export async function zipFileAndGetBytes(file: File): Promise<Uint8Array> {
+  const zip = new JSZip();
+  const arrayBuffer = await file.arrayBuffer();
+  zip.file(file.name, arrayBuffer);
+  return await zip.generateAsync({ type: "uint8array" });
+}
+
+export async function zipFileAndGetBase64(file: File): Promise<string> {
+  const zip = new JSZip();
+  const arrayBuffer = await file.arrayBuffer();
+  zip.file(file.name, arrayBuffer);
+  const base64 = await zip.generateAsync({ type: "base64" });
+  return base64;
 }

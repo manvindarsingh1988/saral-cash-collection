@@ -1,5 +1,6 @@
 {
-    "api": {
-        "endpoint": "http://localhost:33203/api/CashFlow"
-    }
+  "api": {
+    "endpoint": "http://localhost:33203/api/CashFlow",
+    "docEndpoint": "http://localhost:5141/SaralKYCDoc"
+  }
 }

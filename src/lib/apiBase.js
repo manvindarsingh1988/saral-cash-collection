@@ -1,6 +1,7 @@
 import config from "./config.json";
 
 const API_URL = config.api.endpoint; // Default to localhost if not set
+const DOC_URL = config.api.docEndpoint; // Default to localhost if not set
 
 let currentUser = null;
 
@@ -540,5 +541,24 @@ export const apiBase = {
     const data = await response.json();
     console.log(data);
     return data;
+  },
+
+  uploadFile: async (file, fileName) => {
+    const response = await fetch(`${DOC_URL}/UploadCashFlowFile`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        content: file,
+        fileName: fileName,
+      }),
+    });
+
+    if (!response.ok) {
+      console.error(`Failed to upload file: ${response.statusText}`);
+      throw new Error("File upload failed");
+    }
+    return true; // Return true if upload is successful
   },
 };

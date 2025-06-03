@@ -1,6 +1,7 @@
 /* eslint-disable */
 import React, { useState, useEffect } from "react";
 import { apiBase } from "../lib/apiBase";
+import { generateSafeGuid, zipFileAndGetBase64, zipFileAndGetBytes } from "../lib/utils";
 
 export default function LedgerModal({
   userId,
@@ -66,6 +67,20 @@ export default function LedgerModal({
   };
 
   const handleSubmit = async () => {
+    const docId = generateSafeGuid();
+    let fileSaved = false;
+
+    if (formData.File) {
+      try {
+        const byteArray = await zipFileAndGetBase64(formData.File); // convert to byte array
+        await apiBase.uploadFile(byteArray, docId); // adjust API if needed to accept byte array
+        fileSaved = true;
+      } catch (err) {
+        console.error("File upload failed:", err);
+        fileSaved = false;
+      }
+    }
+
     const payload = {
       Id: formData.Id,
       RetailerId: formData.RetailerId,
@@ -81,6 +96,7 @@ export default function LedgerModal({
       Date: new Date(formData.Date),
       GivenOn: new Date(formData.GivenOn),
       Comment: formData.Comment,
+      DocId: formData?.File && fileSaved ? docId : null,
     };
 
     try {
