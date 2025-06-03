@@ -80,7 +80,7 @@ function NavLinks({ isActive, mobile = false, setMobileMenuOpen }) {
   const links = [
     { to: "/", label: "Retailer Liabilities" },
     { to: "/collector-liabilities", label: "Collector Liabilities" },
-    { to: "/cashier-ledger", label: "Ledgers" },
+    { to: "/cashier-ledgers", label: "Ledgers" },
     { to: "/cashier-liabilities", label: "Cashier Liabilities" },
     { to: "/pending-approvals", label: "Pending Approvals" },
     { to: "/add-user", label: "Add User" },
@@ -93,7 +93,7 @@ function NavLinks({ isActive, mobile = false, setMobileMenuOpen }) {
       if (user?.UserType === "Cashier") {
         return l.to != "/cashier-liabilities"; // Admin sees all links
       } else {
-        return l.to !== "/cashier-ledger"; // Cashier sees all except cashier ledger/liabilities
+        return l.to !== "/cashier-ledgers"; // Cashier sees all except cashier ledger/liabilities
       }
     })
     .map(({ to, label }) => (
