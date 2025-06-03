@@ -15,7 +15,7 @@ const routesForRoles = {
   Cashier: [
     "/",
     "/collector-liabilities",
-    "/cashier-ledger",
+    "/cashier-ledgers",
     "/add-user",
     "/assign-retail",
     "/pending-approvals",
@@ -30,7 +30,7 @@ const routesForRoles = {
     "/pending-approvals",
     "/user-info",
   ],
-  Collector: ["/", "/ledgers", "/pending-approvals"],
+  Collector: ["/", "/collector-ledgers", "/pending-approvals"],
   Retailer: ["/"],
 };
 

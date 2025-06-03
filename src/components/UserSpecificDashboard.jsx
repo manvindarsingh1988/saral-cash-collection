@@ -34,7 +34,7 @@ export default function UserSpecificDashboard() {
       )}
       {UserType === "Cashier" && (
         <Route
-          path="/cashier-ledger"
+          path="/cashier-ledgers"
           element={<CashierLedger cashierUserId={Id} />}
         />
       )}
@@ -49,7 +49,7 @@ export default function UserSpecificDashboard() {
   const renderCollectorRoutes = () => (
     <Routes>
       <Route
-        path="/ledgers"
+        path="/collector-ledgers"
         element={<CollectorLedger collectorUserId={Id} />}
       />
       <Route

@@ -172,7 +172,7 @@ export default function RetailDashboard({ retailUserId }) {
                   <dt className="text-sm font-medium text-gray-500">
                     Liability
                   </dt>
-                  <dd className="mt-1 text-3xl font-semibold text-gray-900">
+                  <dd className="mt-1 text-2xl font-semibold text-gray-900">
                     ₹ {formatIndianNumber(liability.LaibilityAmount)}
                   </dd>
                 </div>
@@ -199,7 +199,7 @@ export default function RetailDashboard({ retailUserId }) {
                   <dt className="text-sm font-medium text-gray-500">
                     Projection Amount
                   </dt>
-                  <dd className="mt-1 text-3xl font-semibold text-gray-900">
+                  <dd className="mt-1 text-2xl font-semibold text-gray-900">
                     ₹ {formatIndianNumber(liability.ProjectionAmount)}
                   </dd>
                 </div>                
@@ -207,7 +207,7 @@ export default function RetailDashboard({ retailUserId }) {
                   <dt className="text-sm font-medium text-gray-500">
                     Current Amount
                   </dt>
-                  <dd className="mt-1 text-3xl font-semibold text-gray-900">
+                  <dd className="mt-1 text-2xl font-semibold text-gray-900">
                     ₹ {formatIndianNumber(liability.CurrentAmount)}
                   </dd>
                 </div>
