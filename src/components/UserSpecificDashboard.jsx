@@ -20,13 +20,14 @@ export default function UserSpecificDashboard() {
   const user = apiBase.getCurrentUser();
 
   if (user.UserType === "Admin" || user.UserType === "Cashier" || user.UserType === "MasterCashier") {
+    let userType = user.UserType === "Cashier" ? 13 : 14;
     return (
       <AdminLayout>
         <Routes>
           <Route path="/collector-ledgers" element={<CollectorLiabilities />} />
           <Route path="/add-user" element={<AddUser />} />
           <Route path="/assign-retail" element={<AssignRetail />} />
-          <Route path="/pending-approvals" element={<PendingApprovals />} />
+          <Route path="/pending-approvals" element={<PendingApprovals userType={userType} />} />
           <Route path="/user-info" element={<UserInfo />} />
           <Route path="/" element={<AdminDashboard />} />
         </Routes>

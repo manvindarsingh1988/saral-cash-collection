@@ -17,7 +17,7 @@ const columns = [
   { heading: "Comment", accessor: "Comment" },
 ];
 
-export default function PendingApprovals() {
+export default function PendingApprovals({userType}) {
   useDocumentTitle("Pending Approvals");
 
   const [loading, setLoading] = useState(false);
@@ -38,7 +38,7 @@ export default function PendingApprovals() {
       setLoading(true);
       const [master, approvals] = await Promise.all([
         apiBase.getMasterData(),
-        apiBase.getPendingApprovals(showAll),
+        apiBase.getPendingApprovals(showAll, userType),
       ]);
       setMasterData(master || {});
       setPendingApprovals(approvals);
