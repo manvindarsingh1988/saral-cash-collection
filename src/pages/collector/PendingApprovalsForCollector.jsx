@@ -2,7 +2,12 @@ import React, { useState, useEffect } from "react";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
 import { apiBase } from "../../lib/apiBase";
 import ApprovalLedgerModal from "../../components/admin/ApprovalLedgerModal";
-import { formatToCustomDateTime, getRowColor } from "../../lib/utils";
+import {
+  base64ToByteArray,
+  formatToCustomDateTime,
+  getRowColor,
+} from "../../lib/utils";
+import { Download } from "lucide-react";
 
 const columns = [
   { heading: "ID", accessor: "Id" },
@@ -15,6 +20,7 @@ const columns = [
   { heading: "Date", accessor: "Date" },
   { heading: "Given On", accessor: "GivenOn" },
   { heading: "Comment", accessor: "Comment" },
+  { heading: "Actions", accessor: "Actions" },
 ];
 
 export default function PendingApprovalsForCollector({ collectorUserId }) {
@@ -101,6 +107,24 @@ export default function PendingApprovalsForCollector({ collectorUserId }) {
     }
   };
 
+  const handleDownloadFile = async (docId) => {
+    try {
+      const response = await apiBase.downloadFileUrl(docId);
+      if (!response || !response.content) {
+        alert("No file found for this entry.");
+        return;
+      }
+      const fileBytes = base64ToByteArray(response.content);
+      const blob = new Blob([fileBytes], {
+        type: "application/zip",
+      });
+      const url = URL.createObjectURL(blob);
+      window.open(url, "_blank");
+    } catch (err) {
+      console.error("File download failed:", err);
+    }
+  };
+
   return (
     <div className="space-y-6 p-4">
       <div className="bg-white shadow rounded-lg">
@@ -155,15 +179,17 @@ export default function PendingApprovalsForCollector({ collectorUserId }) {
                           ))}
                         </select>
                       ) : (
-                        <input
-                          type="text"
-                          placeholder="Filter..."
-                          className="w-full border border-gray-300 rounded px-2 py-1 text-xs"
-                          value={filters[col.accessor] || ""}
-                          onChange={(e) =>
-                            handleFilterChange(col.accessor, e.target.value)
-                          }
-                        />
+                        col.accessor !== "Actions" && (
+                          <input
+                            type="text"
+                            placeholder="Filter..."
+                            className="w-full border border-gray-300 rounded px-2 py-1 text-xs"
+                            value={filters[col.accessor] || ""}
+                            onChange={(e) =>
+                              handleFilterChange(col.accessor, e.target.value)
+                            }
+                          />
+                        )
                       )}
                     </th>
                   ))}
@@ -211,6 +237,22 @@ export default function PendingApprovalsForCollector({ collectorUserId }) {
                           return (
                             <td key={val} className="px-4 py-2">
                               {getMasterValue("WorkFlows", item.WorkFlow)}
+                            </td>
+                          );
+                        } else if (val === "Actions") {
+                          return (
+                            <td className="px-4 py-2">
+                              {item.DocId ? (
+                                <button
+                                  title="Download File"
+                                  onClick={() => handleDownloadFile(item.DocId)}
+                                  className="ml-2 text-blue-600 text-sm mb-1 hover:underline text-left"
+                                >
+                                  <Download className="w-4 h-4" />
+                                </button>
+                              ) : (
+                                ""
+                              )}
                             </td>
                           );
                         } else {
