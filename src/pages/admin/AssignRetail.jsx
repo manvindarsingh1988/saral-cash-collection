@@ -76,6 +76,7 @@ export default function AssignRetail() {
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
       fetchUsers();
+      handleCollectorSelect(selectedCollector.Id);
     } catch (error) {
       setError(error.message);
     }
@@ -91,10 +92,15 @@ export default function AssignRetail() {
       if (!result.Response) {
         alert(`Failed to unassign retailer`);
         return;
+      }      
+      if (result.Response === "Can not delete the mapping as Collectaor and Retailer have active ledger(s).") {
+        alert(result.Response);
+        return;
       }
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
       fetchUsers();
+      handleCollectorSelect(selectedCollector.Id);
     } catch (error) {
       setError(error.message);
     }
