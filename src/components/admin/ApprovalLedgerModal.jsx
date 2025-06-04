@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { apiBase } from "../../lib/apiBase";
+import { base64ToByteArray } from "../../lib/utils";
 
 const fieldLabels = {
   Id: "Id",
@@ -19,7 +21,8 @@ const allowedFields = [
   "Comment",
   "RetailerId",
   "CollectorName",
-  "RetailerName"
+  "RetailerName",
+  "DocId",
 ];
 
 export default function ApprovalLedgerModal({
@@ -37,6 +40,7 @@ export default function ApprovalLedgerModal({
     WorkFlow: "",
     Date: new Date().toISOString().split("T")[0],
     Comment: "",
+    DocId: null,
   });
 
   console.log("Form Data:", formData);
@@ -83,11 +87,12 @@ export default function ApprovalLedgerModal({
           console.log("Key:", key, "Value:", formData[key]);
 
           if (
-            (key === "CollectorId") ||
-            (key === "RetailerId") || 
-            (key === "Date") || 
+            key === "CollectorId" ||
+            key === "RetailerId" ||
+            key === "Date" ||
             (key === "CollectorName" && !formData["CollectorName"]) ||
-            (key === "RetailerName" && !formData["RetailerName"]) 
+            (key === "RetailerName" && !formData["RetailerName"]) ||
+            key === "DocId"
           ) {
             return null;
           }
@@ -164,6 +169,35 @@ export default function ApprovalLedgerModal({
             </div>
           );
         })}
+
+        <div className="flex flex-col">
+          {formData?.DocId && (
+            <button
+              onClick={async () => {
+                try {
+                  const response = await apiBase.downloadFileUrl(
+                    formData.DocId
+                  );
+                  if (!response || !response.content) {
+                    alert("No file found for this entry.");
+                    return;
+                  }
+                  const fileBytes = base64ToByteArray(response.content);
+                  const blob = new Blob([fileBytes], {
+                    type: "application/zip",
+                  });
+                  const url = URL.createObjectURL(blob);
+                  window.open(url, "_blank");
+                } catch (err) {
+                  console.error("File download failed:", err);
+                }
+              }}
+              className="text-blue-600 text-sm mb-1 hover:underline text-left"
+            >
+              Download Existing File
+            </button>
+          )}
+        </div>
 
         <div className="flex justify-end gap-2">
           <button onClick={onClose} className="px-4 py-1 rounded border">

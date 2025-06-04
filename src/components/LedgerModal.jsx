@@ -5,7 +5,6 @@ import {
   base64ToByteArray,
   generateSafeGuid,
   zipFileAndGetBase64,
-  zipFileAndGetBytes,
 } from "../lib/utils";
 
 export default function LedgerModal({
