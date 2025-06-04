@@ -194,7 +194,7 @@ export default function ApprovalLedgerModal({
               }}
               className="text-blue-600 text-sm mb-1 hover:underline text-left"
             >
-              Download Existing File
+              Download File
             </button>
           )}
         </div>
