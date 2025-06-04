@@ -1,8 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { apiBase } from "../../lib/apiBase"; // Adjust if needed
 import useDocumentTitle from "../../hooks/useDocumentTitle"; // Optional
-import { formatToCustomDateTime, getRowColor } from "../../lib/utils";
+import {
+  base64ToByteArray,
+  formatToCustomDateTime,
+  getRowColor,
+} from "../../lib/utils";
 import LedgerModal from "../../components/LedgerModal";
+import { Download } from "lucide-react";
 
 const columns = [
   { key: "Id", label: "ID", width: "50px" },
@@ -127,6 +132,24 @@ export default function CashierLedger({ cashierUserId }) {
     });
 
     setFilteredLedgers(filtered);
+  };
+
+  const handleDownloadFile = async (docId) => {
+    try {
+      const response = await apiBase.downloadFileUrl(docId);
+      if (!response || !response.content) {
+        alert("No file found for this entry.");
+        return;
+      }
+      const fileBytes = base64ToByteArray(response.content);
+      const blob = new Blob([fileBytes], {
+        type: "application/zip",
+      });
+      const url = URL.createObjectURL(blob);
+      window.open(url, "_blank");
+    } catch (err) {
+      console.error("File download failed:", err);
+    }
   };
 
   const handleDeleteLedger = async (id) => {
@@ -318,6 +341,17 @@ export default function CashierLedger({ cashierUserId }) {
                           >
                             Delete
                           </button>
+                        )}
+                        {item.DocId ? (
+                          <button
+                            title="Download File"
+                            onClick={() => handleDownloadFile(item.DocId)}
+                            className="ml-2 text-blue-600 text-sm mb-1 hover:underline text-left"
+                          >
+                            <Download className="w-4 h-4" />
+                          </button>
+                        ) : (
+                          ""
                         )}
                       </td>
                     </tr>

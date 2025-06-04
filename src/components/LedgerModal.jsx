@@ -265,8 +265,6 @@ export default function LedgerModal({
                   console.error("File download failed:", err);
                 }
               }}
-              target="_blank"
-              rel="noopener noreferrer"
               className="text-blue-600 text-sm mb-1 hover:underline text-left"
             >
               Download Existing File

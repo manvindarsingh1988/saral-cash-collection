@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { apiBase } from "../../lib/apiBase";
 import {
+  base64ToByteArray,
   formatIndianNumber,
   formatToCustomDateTime,
   generateSafeGuid,
@@ -9,6 +10,7 @@ import {
 } from "../../lib/utils";
 import RetailerLedgerModal from "../../components/retailer/RetailerLedgerModal";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
+import { Download } from "lucide-react";
 
 const columns = [
   { key: "Id", label: "ID", width: "40px" },
@@ -152,6 +154,24 @@ export default function RetailDashboard({ retailUserId }) {
       await fetchData();
     } catch (err) {
       console.error("Delete failed:", err);
+    }
+  };
+
+  const handleDownloadFile = async (docId) => {
+    try {
+      const response = await apiBase.downloadFileUrl(docId);
+      if (!response || !response.content) {
+        alert("No file found for this entry.");
+        return;
+      }
+      const fileBytes = base64ToByteArray(response.content);
+      const blob = new Blob([fileBytes], {
+        type: "application/zip",
+      });
+      const url = URL.createObjectURL(blob);
+      window.open(url, "_blank");
+    } catch (err) {
+      console.error("File download failed:", err);
     }
   };
 
@@ -369,6 +389,17 @@ export default function RetailDashboard({ retailUserId }) {
                                 >
                                   Delete
                                 </button>
+                              )}
+                              {item.DocId ? (
+                                <button
+                                  title="Download File"
+                                  onClick={() => handleDownloadFile(item.DocId)}
+                                  className="ml-2 text-blue-600 text-sm mb-1 hover:underline text-left"
+                                >
+                                  <Download className="w-4 h-4" />
+                                </button>
+                              ) : (
+                                ""
                               )}
                             </td>
                           </tr>
