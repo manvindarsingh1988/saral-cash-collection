@@ -561,4 +561,18 @@ export const apiBase = {
     }
     return true; // Return true if upload is successful
   },
+
+  downloadFileUrl: async (fileName) => {
+    const response = await fetch(
+      `${DOC_URL}/DownloadCashFlowFile?fileName=${fileName}`
+    );
+
+    if (!response.ok) {
+      console.error(`Failed to download file: ${response.statusText}`);
+      throw new Error("File download failed");
+    }
+
+    const data = await response.json();
+    return data;
+  },
 };

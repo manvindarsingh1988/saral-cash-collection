@@ -1,7 +1,12 @@
 /* eslint-disable */
 import React, { useState, useEffect } from "react";
 import { apiBase } from "../lib/apiBase";
-import { generateSafeGuid, zipFileAndGetBase64, zipFileAndGetBytes } from "../lib/utils";
+import {
+  base64ToByteArray,
+  generateSafeGuid,
+  zipFileAndGetBase64,
+  zipFileAndGetBytes,
+} from "../lib/utils";
 
 export default function LedgerModal({
   userId,
@@ -49,6 +54,7 @@ export default function LedgerModal({
         GivenOn: today,
         Comment: initialData?.Comment ?? "",
         StuckInBank: initialData?.WorkFlow === 6,
+        DocId: initialData?.DocId ?? null,
         File: null,
       });
     }
@@ -67,7 +73,7 @@ export default function LedgerModal({
   };
 
   const handleSubmit = async () => {
-    const docId = generateSafeGuid();
+    const docId = formData?.DocId || generateSafeGuid();
     let fileSaved = false;
 
     if (formData.File) {
@@ -238,6 +244,34 @@ export default function LedgerModal({
             onChange={handleFileChange}
             className="border px-2 py-1 rounded"
           />
+          {formData?.DocId && (
+            <button
+              onClick={async () => {
+                try {
+                  const response = await apiBase.downloadFileUrl(
+                    formData.DocId
+                  );
+                  if (!response || !response.content) {
+                    alert("No file found for this entry.");
+                    return;
+                  }
+                  const fileBytes = base64ToByteArray(response.content);
+                  const blob = new Blob([fileBytes], {
+                    type: "application/zip",
+                  });
+                  const url = URL.createObjectURL(blob);
+                  window.open(url, "_blank");
+                } catch (err) {
+                  console.error("File download failed:", err);
+                }
+              }}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 text-sm mb-1 hover:underline text-left"
+            >
+              Download Existing File
+            </button>
+          )}
         </div>
 
         {/* Buttons */}

@@ -103,7 +103,7 @@ export default function RetailDashboard({ retailUserId }) {
   };
 
   const handleLedgerSubmit = async (data) => {
-    const docId = generateSafeGuid();
+    const docId = data?.DocId || generateSafeGuid();
     let fileSaved = false;
 
     if (data.File) {

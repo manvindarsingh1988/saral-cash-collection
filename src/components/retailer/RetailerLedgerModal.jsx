@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { apiBase } from "../../lib/apiBase";
+import { base64ToByteArray } from "../../lib/utils";
 
 const fieldLabels = {
   Id: "Id",
@@ -18,7 +20,8 @@ const allowedFields = [
   "Date",
   "Comment",
   "StuckInBank",
-  "File"
+  "File",
+  "DocId",
 ];
 
 export default function RetailerLedgerModal({
@@ -40,6 +43,7 @@ export default function RetailerLedgerModal({
     Comment: "",
     StuckInBank: false,
     File: null,
+    DocId: null,
   });
 
   console.log("Form Data:", formData);
@@ -47,7 +51,8 @@ export default function RetailerLedgerModal({
   useEffect(() => {
     if (initialData) {
       const formattedData = {};
-
+      console.log("Formatting initial data:", initialData);
+      console.log("Allowed Fields:", allowedFields);
       allowedFields.forEach((field) => {
         if (initialData[field]) {
           if (["Date"].includes(field)) {
@@ -102,7 +107,8 @@ export default function RetailerLedgerModal({
             (formData["TransactionType"] == "2" && key === "CollectorId") ||
             (formData["TransactionType"] == "3" && key === "CollectorId") ||
             (formData["TransactionType"] != "2" && key === "StuckInBank") ||
-            key == "Date" || key === "File"
+            key == "Date" || key === "DocId" ||
+            key === "File"
           ) {
             console.log(`Skipping field ${key} due to conditions`);
             return null;
@@ -236,6 +242,34 @@ export default function RetailerLedgerModal({
             onChange={handleFileChange}
             className="border px-2 py-1 rounded"
           />
+          {formData?.DocId && (
+            <button
+              onClick={async () => {
+                try {
+                  const response = await apiBase.downloadFileUrl(
+                    formData.DocId
+                  );
+                  if (!response || !response.content) {
+                    alert("No file found for this entry.");
+                    return;
+                  }
+                  const fileBytes = base64ToByteArray(response.content);
+                  const blob = new Blob([fileBytes], {
+                    type: "application/zip",
+                  });
+                  const url = URL.createObjectURL(blob);
+                  window.open(url, "_blank");
+                } catch (err) {
+                  console.error("File download failed:", err);
+                }
+              }}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 text-sm mb-1 hover:underline text-left"
+            >
+              Download Existing File
+            </button>
+          )}
         </div>
 
         <div className="flex justify-end gap-2">
