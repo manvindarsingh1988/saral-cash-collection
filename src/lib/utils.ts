@@ -1,17 +1,24 @@
 import JSZip from "jszip";
 import { apiBase } from "./apiBase";
 
-export function formatIndianNumber(number: number): string {
-  const numStr = (number || "0").toString();
-  // If the number is less than 1000, return it as is
-  if (numStr.length <= 3) {
-    return numStr;
+export function formatIndianNumber(number) {
+  if (isNaN(number)) return "0";
+
+  const [integerPart, decimalPart] = number.toString().split(".");
+
+  // Handle the Indian number formatting for the integer part
+  if (integerPart.length <= 3) {
+    return decimalPart ? `${integerPart}.${decimalPart}` : integerPart;
   }
 
-  const lastThree = numStr.slice(-3);
-  const rest = numStr.slice(0, -3);
-  const formatted = rest.replace(/\B(?=(\d{2})+(?!\d))/g, ",");
-  return rest ? formatted + "," + lastThree : lastThree;
+  const lastThree = integerPart.slice(-3);
+  const rest = integerPart.slice(0, -3);
+  const formattedRest = rest.replace(/\B(?=(\d{2})+(?!\d))/g, ",");
+
+  const formattedNumber = formattedRest
+    ? `${formattedRest},${lastThree}`
+    : lastThree;
+  return decimalPart ? `${formattedNumber}.${decimalPart}` : formattedNumber;
 }
 
 export function getRowColor(workFlow: number): string {
