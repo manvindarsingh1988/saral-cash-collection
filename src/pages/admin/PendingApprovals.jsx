@@ -6,6 +6,7 @@ import {
   base64ToByteArray,
   formatToCustomDateTime,
   getRowColor,
+  handleDownloadFile,
 } from "../../lib/utils";
 import { Download } from "lucide-react";
 
@@ -104,24 +105,6 @@ export default function PendingApprovals({ userType }) {
       await fetchPendingApprovals();
     } catch (err) {
       console.error("Submission failed:", err);
-    }
-  };
-
-  const handleDownloadFile = async (docId) => {
-    try {
-      const response = await apiBase.downloadFileUrl(docId);
-      if (!response || !response.content) {
-        alert("No file found for this entry.");
-        return;
-      }
-      const fileBytes = base64ToByteArray(response.content);
-      const blob = new Blob([fileBytes], {
-        type: "application/zip",
-      });
-      const url = URL.createObjectURL(blob);
-      window.open(url, "_blank");
-    } catch (err) {
-      console.error("File download failed:", err);
     }
   };
 
@@ -245,7 +228,7 @@ export default function PendingApprovals({ userType }) {
                               {item.DocId ? (
                                 <button
                                   title="Download File"
-                                  onClick={() => handleDownloadFile(item.DocId)}
+                                  onClick={() => handleDownloadFile(item.DocId, item.Id)}
                                   className="ml-2 text-blue-600 text-sm mb-1 hover:underline text-left"
                                 >
                                   <Download className="w-4 h-4" />

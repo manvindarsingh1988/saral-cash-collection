@@ -1,4 +1,5 @@
 import JSZip from "jszip";
+import { apiBase } from "./apiBase";
 
 export function formatIndianNumber(number: number): string {
   const numStr = (number || "0").toString();
@@ -85,3 +86,30 @@ export function base64ToByteArray(base64: string): Uint8Array {
 
   return bytes;
 }
+
+export const handleDownloadFile = async (docId: string, ledgerId: string) => {
+  try {
+    const response = await apiBase.downloadFileUrl(docId);
+    if (!response || !response.content) {
+      alert("No file found for this entry.");
+      return;
+    }
+
+    const fileBytes = base64ToByteArray(response.content);
+    const blob = new Blob([fileBytes], {
+      type: "application/zip",
+    });
+    const url = URL.createObjectURL(blob);
+
+    // Create an anchor tag to trigger download with custom filename
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `Ledger_${ledgerId}.zip`; // Use transactionId as filename
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url); // Clean up
+  } catch (err) {
+    console.error("File download failed:", err);
+  }
+};

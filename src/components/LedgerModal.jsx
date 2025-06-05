@@ -4,6 +4,7 @@ import { apiBase } from "../lib/apiBase";
 import {
   base64ToByteArray,
   generateSafeGuid,
+  handleDownloadFile,
   zipFileAndGetBase64,
 } from "../lib/utils";
 
@@ -74,9 +75,13 @@ export default function LedgerModal({
   const handleSubmit = async () => {
     const docId = formData?.DocId || generateSafeGuid();
     let fileSaved = false;
-    if(!isCashierLedger && formData.TransactionType === "1" && !formData.CashierId){
-        alert('Select valid casheir');
-        return;
+    if (
+      !isCashierLedger &&
+      formData.TransactionType === "1" &&
+      !formData.CashierId
+    ) {
+      alert("Select valid casheir");
+      return;
     }
     if (formData.File) {
       try {
@@ -248,25 +253,7 @@ export default function LedgerModal({
           />
           {formData?.DocId && (
             <button
-              onClick={async () => {
-                try {
-                  const response = await apiBase.downloadFileUrl(
-                    formData.DocId
-                  );
-                  if (!response || !response.content) {
-                    alert("No file found for this entry.");
-                    return;
-                  }
-                  const fileBytes = base64ToByteArray(response.content);
-                  const blob = new Blob([fileBytes], {
-                    type: "application/zip",
-                  });
-                  const url = URL.createObjectURL(blob);
-                  window.open(url, "_blank");
-                } catch (err) {
-                  console.error("File download failed:", err);
-                }
-              }}
+              onClick={() => handleDownloadFile(formData.DocId, formData.Id)}
               className="text-blue-600 text-sm mb-1 hover:underline text-left"
             >
               Download Existing File

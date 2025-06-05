@@ -78,10 +78,10 @@ export default function RetailerLedgerModal({
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = () => {    
-    if(formData.TransactionType === "1" && !formData.CollectorId){
-        alert('Select valid collector');
-        return;
+  const handleSubmit = () => {
+    if (formData.TransactionType === "1" && !formData.CollectorId) {
+      alert("Select valid collector");
+      return;
     }
     const filteredData = allowedFields.reduce((obj, key) => {
       obj[key] = formData[key];
@@ -111,7 +111,8 @@ export default function RetailerLedgerModal({
             (formData["TransactionType"] == "2" && key === "CollectorId") ||
             (formData["TransactionType"] == "3" && key === "CollectorId") ||
             (formData["TransactionType"] != "2" && key === "StuckInBank") ||
-            key == "Date" || key === "DocId" ||
+            key == "Date" ||
+            key === "DocId" ||
             key === "File"
           ) {
             console.log(`Skipping field ${key} due to conditions`);
@@ -248,25 +249,7 @@ export default function RetailerLedgerModal({
           />
           {formData?.DocId && (
             <button
-              onClick={async () => {
-                try {
-                  const response = await apiBase.downloadFileUrl(
-                    formData.DocId
-                  );
-                  if (!response || !response.content) {
-                    alert("No file found for this entry.");
-                    return;
-                  }
-                  const fileBytes = base64ToByteArray(response.content);
-                  const blob = new Blob([fileBytes], {
-                    type: "application/zip",
-                  });
-                  const url = URL.createObjectURL(blob);
-                  window.open(url, "_blank");
-                } catch (err) {
-                  console.error("File download failed:", err);
-                }
-              }}
+              onClick={() => handleDownloadFile(formData.DocId, formData.Id)}
               className="text-blue-600 text-sm mb-1 hover:underline text-left"
             >
               Download Existing File
