@@ -109,7 +109,7 @@ export default function LedgerModal({
       Date: new Date(formData.Date),
       GivenOn: new Date(formData.GivenOn),
       Comment: formData.Comment,
-      DocId: formData?.File && fileSaved ? docId : null,
+      DocId: formData.File && fileSaved ? docId : formData?.Id ? formData.DocId : null,
     };
 
     try {

@@ -131,7 +131,8 @@ export default function RetailDashboard({ retailUserId }) {
         GivenOn: new Date().toISOString(),
         CollectorId: data.TransactionType == "2" ? "" : data.CollectorId,
         CollectorName: data.TransactionType == "2" ? "" : data.CollectorName,
-        DocId: data.File && fileSaved ? docId : null,
+        DocId:
+          data.File && fileSaved ? docId : editData?.Id ? editData.DocId : null,
       };
 
       if (editData?.Id) {
