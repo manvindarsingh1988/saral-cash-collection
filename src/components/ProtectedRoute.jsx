@@ -35,25 +35,24 @@ const routesForRoles = {
 };
 
 export default function ProtectedRoute({ children }) {
-  const [user, setUser] = useState(() => apiBase.getCurrentUser());
+  const [user, setUser] = useState(null);
   const navigate = useNavigate();
   const location = useLocation();
 
   useEffect(() => {
-    const user = apiBase.getCurrentUser();
-
-    if (!(user?.role || user?.UserType)) {
-      navigate("/signin");
+    const currentUser = apiBase.getCurrentUser();
+    if (!currentUser?.UserType || !routesForRoles[currentUser.UserType]) {
+      navigate("/signin", { replace: true });
     } else {
-      setUser(user);
+      setUser(currentUser);
     }
   }, [navigate, location.pathname]);
 
-  if (!user) return <Navigate to="/signin" replace />;
+  if (!user) return null; // Or a loading spinner
 
-  if (routesForRoles[user.UserType].includes(location.pathname)) {
-    return children;
-  } else {
-    return <Navigate to="/" replace />;
-  }
+  const allowedRoutes = routesForRoles[user.UserType] || [];
+
+  return allowedRoutes.includes(location.pathname)
+    ? children
+    : <Navigate to="/" replace />;
 }
