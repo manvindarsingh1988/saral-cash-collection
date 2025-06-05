@@ -1,0 +1,8 @@
+# Allow all crawlers access to everything
+User-agent: *
+Allow: /
+
+# Prevent search engines from indexing service workers and other internal files
+Disallow: /sw.js
+Disallow: /manifest.webmanifest
+Disallow: /assets/
