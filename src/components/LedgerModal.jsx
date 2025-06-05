@@ -74,7 +74,10 @@ export default function LedgerModal({
   const handleSubmit = async () => {
     const docId = formData?.DocId || generateSafeGuid();
     let fileSaved = false;
-
+    if(!isCashierLedger && formData.TransactionType === "1" && !formData.CashierId){
+        alert('Select valid casheir');
+        return;
+    }
     if (formData.File) {
       try {
         const byteArray = await zipFileAndGetBase64(formData.File); // convert to byte array

@@ -78,7 +78,11 @@ export default function RetailerLedgerModal({
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = () => {    
+    if(formData.TransactionType === "1" && !formData.CollectorId){
+        alert('Select valid collector');
+        return;
+    }
     const filteredData = allowedFields.reduce((obj, key) => {
       obj[key] = formData[key];
       return obj;
