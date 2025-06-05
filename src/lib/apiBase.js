@@ -17,12 +17,11 @@ async function refreshTokenIfNeeded() {
     const stored = JSON.parse(sessionStorage.getItem("currentUser"));
     if (stored?.refreshToken) {
       const response = await fetch(`${API_URL}/RefreshToken`, {
-        method: "POST",
+        method: "GET",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${accessToken}`,
-        },
-        body: JSON.stringify({ refreshToken: stored.refreshToken }),
+        }
       });
       if (response.ok) {
         const data = await response.json();
