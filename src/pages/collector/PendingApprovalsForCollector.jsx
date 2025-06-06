@@ -181,7 +181,7 @@ export default function PendingApprovalsForCollector({ collectorUserId }) {
                 {filteredData.length > 0 ? (
                   filteredData.map((item, idx) => (
                     <tr
-                      key={idx}
+                      key={item.Id}
                       className={`cursor-pointer hover:bg-gray-100 ${getRowColor(
                         item.WorkFlow
                       )}`}

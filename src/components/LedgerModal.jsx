@@ -1,12 +1,12 @@
 /* eslint-disable */
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { apiBase } from "../lib/apiBase";
 import {
-  base64ToByteArray,
   generateSafeGuid,
   handleDownloadFile,
   zipFileAndGetBase64,
 } from "../lib/utils";
+import { sanitiseLedgerPayload } from "../lib/ledgerRuleEngine";
 
 export default function LedgerModal({
   userId,
@@ -105,18 +105,27 @@ export default function LedgerModal({
       CollectorId: isCollectorLedger ? userId : "",
       Amount: parseFloat(formData.Amount),
       TransactionType: parseInt(formData.TransactionType),
-      WorkFlow: formData.StuckInBank ? 6 : parseInt(formData.WorkFlow),
+      WorkFlow: formData.StuckInBank ? 6 : 1,
       Date: new Date(formData.Date),
       GivenOn: new Date(formData.GivenOn),
       Comment: formData.Comment,
-      DocId: formData.File && fileSaved ? docId : formData?.Id ? formData.DocId : null,
+      DocId:
+        formData.File && fileSaved
+          ? docId
+          : formData?.Id
+          ? formData.DocId
+          : null,
     };
+
+    console.log("Payload before sanitization:", payload);
+    const sanitizedPayload = sanitiseLedgerPayload(payload);
+    console.log("Sanitized Payload:", sanitizedPayload);
 
     try {
       if (formData.Id) {
-        await apiBase.updateLedgerInfo(payload);
+        await apiBase.updateLedgerInfo(sanitizedPayload);
       } else {
-        await apiBase.addLedgerInfo(payload);
+        await apiBase.addLedgerInfo(sanitizedPayload);
       }
       onClose();
     } catch (err) {

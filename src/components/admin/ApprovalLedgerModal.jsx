@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { apiBase } from "../../lib/apiBase";
 import { base64ToByteArray } from "../../lib/utils";
+import { getWorkflows } from "../../lib/ledgerRuleEngine";
 
 const fieldLabels = {
   Id: "Id",
@@ -32,6 +33,9 @@ export default function ApprovalLedgerModal({
   initialData,
 }) {
   console.log("Initial Data:", initialData);
+
+  const userType = apiBase.getCurrentUser()?.UserType;
+  const workflows = getWorkflows(userType);
 
   const [formData, setFormData] = useState({
     CollectorId: "",
@@ -117,21 +121,20 @@ export default function ApprovalLedgerModal({
                   <option value="" disabled hidden>
                     Select {key} Type
                   </option>
-                  {masterData?.[key + "s"]?.map((type) => {
-                    if (
-                      key === "WorkFlow" &&
-                      type.Id !== 1 &&
-                      type.Id !== 4 &&
-                      type.Id !== 5
-                    )
-                      return null;
-
-                    return (
-                      <option key={type.Id} value={type.Id}>
-                        {type.Description}
-                      </option>
-                    );
-                  })}
+                  {masterData?.[key + "s"]
+                    ?.filter((t) => {
+                      if (key === "WorkFlow") {
+                        return workflows.includes(t.Id);
+                      }
+                      return true;
+                    })
+                    .map((type) => {
+                      return (
+                        <option key={type.Id} value={type.Id}>
+                          {type.Description}
+                        </option>
+                      );
+                    })}
                 </select>
                 {key === "TransactionType" &&
                   formData["TransactionType"] === "2" && (

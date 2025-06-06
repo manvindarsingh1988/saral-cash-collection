@@ -12,6 +12,7 @@ import {
 import RetailerLedgerModal from "../../components/retailer/RetailerLedgerModal";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
 import { Download } from "lucide-react";
+import { sanitiseLedgerPayload } from "../../lib/ledgerRuleEngine";
 
 const columns = [
   { key: "Id", label: "ID", width: "40px" },
@@ -135,10 +136,14 @@ export default function RetailDashboard({ retailUserId }) {
           data.File && fileSaved ? docId : editData?.Id ? editData.DocId : null,
       };
 
+      console.log("Payload before sanitization:", payload);
+      const sanitizedPayload = sanitiseLedgerPayload(payload);
+      console.log("Sanitized Payload:", sanitizedPayload);
+
       if (editData?.Id) {
-        await apiBase.updateLedgerInfo(payload);
+        await apiBase.updateLedgerInfo(sanitizedPayload);
       } else {
-        await apiBase.addLedgerInfo(payload);
+        await apiBase.addLedgerInfo(sanitizedPayload);
       }
 
       await fetchData();
