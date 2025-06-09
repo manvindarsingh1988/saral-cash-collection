@@ -10,6 +10,9 @@ const fieldLabels = {
   Amount: "Amount (₹)",
   Date: "Transaction Date",
   Comment: "Comment",
+  CollectorName: "Collector Name",
+  CashierName: "Cashier Name",
+  RetailerName: "Retailer Name",
 };
 
 const allowedFields = [
@@ -23,6 +26,8 @@ const allowedFields = [
   "RetailerId",
   "CollectorName",
   "RetailerName",
+  "CashierId",
+  "CashierName",
   "DocId",
   "GivenOn",
 ];
@@ -47,6 +52,7 @@ export default function ApprovalLedgerModal({
     GivenOn: new Date(),
     Comment: "",
     DocId: null,
+    CashierId: null,
   });
 
   console.log("Form Data:", formData);
@@ -94,11 +100,13 @@ export default function ApprovalLedgerModal({
             "Date",
             "DocId",
             "GivenOn",
+            "CashierId",
           ];
           const conditionalExcludeKeys = [
             "CollectorName",
             "RetailerName",
             "Id",
+            "CashierName"
           ];
 
           if (
