@@ -24,6 +24,7 @@ const allowedFields = [
   "CollectorName",
   "RetailerName",
   "DocId",
+  "GivenOn",
 ];
 
 export default function ApprovalLedgerModal({
@@ -42,7 +43,8 @@ export default function ApprovalLedgerModal({
     Amount: "",
     TransactionType: "1",
     WorkFlow: "",
-    Date: new Date().toISOString().split("T")[0],
+    Date: new Date(),
+    GivenOn: new Date(),
     Comment: "",
     DocId: null,
   });
@@ -54,11 +56,7 @@ export default function ApprovalLedgerModal({
       const formattedData = {};
       allowedFields.forEach((field) => {
         if (initialData[field]) {
-          if (["Date"].includes(field)) {
-            formattedData[field] = initialData[field].split("T")[0];
-          } else {
-            formattedData[field] = initialData[field];
-          }
+          formattedData[field] = initialData[field];
         }
       });
 
@@ -90,18 +88,23 @@ export default function ApprovalLedgerModal({
         {allowedFields.map((key) => {
           console.log("Key:", key, "Value:", formData[key]);
 
-          if (
-            key === "CollectorId" ||
-            key === "RetailerId" ||
-            key === "Date" ||
-            (key === "CollectorName" && !formData["CollectorName"]) ||
-            (key === "RetailerName" && !formData["RetailerName"]) ||
-            key === "DocId"
-          ) {
-            return null;
-          }
+          const alwaysExcludeKeys = [
+            "CollectorId",
+            "RetailerId",
+            "Date",
+            "DocId",
+            "GivenOn",
+          ];
+          const conditionalExcludeKeys = [
+            "CollectorName",
+            "RetailerName",
+            "Id",
+          ];
 
-          if (key === "Id" && !formData["Id"]) {
+          if (
+            alwaysExcludeKeys.includes(key) ||
+            (conditionalExcludeKeys.includes(key) && !formData[key])
+          ) {
             return null;
           }
 

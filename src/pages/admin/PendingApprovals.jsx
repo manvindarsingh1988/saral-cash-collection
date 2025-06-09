@@ -91,15 +91,7 @@ export default function PendingApprovals({ userType }) {
     try {
       const payload = {
         ...data,
-        Amount: parseFloat(data.Amount),
-        TransactionType: parseInt(data.TransactionType),
-        Date: new Date(data.Date).toISOString(),
-        GivenOn: new Date().toISOString(),
-        CollectorId: data.TransactionType === "2" ? "" : data.CollectorId,
-        CollectorName: data.TransactionType === "2" ? "" : data.CollectorName,
-        CashierId: apiBase.getCurrentUser()?.Id,
-        CashierName: apiBase.getCurrentUser()?.UserName,
-        RetailerId: data.RetailerId,
+        WorkFlow: parseInt(data.WorkFlow),
       };
       await apiBase.updateLedgerInfo(payload);
       await fetchPendingApprovals();

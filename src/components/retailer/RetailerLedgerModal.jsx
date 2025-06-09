@@ -65,7 +65,7 @@ export default function RetailerLedgerModal({
           formattedData[field] = initialData["WorkFlow"] === 6;
         }
         if (field === "CollectorId") {
-          formattedData[field] = initialData["Id"] || "";
+          formattedData[field] = initialData[field] || "";
         }
       });
 
