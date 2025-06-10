@@ -21,7 +21,7 @@ async function refreshTokenIfNeeded() {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${accessToken}`,
-        }
+        },
       });
       if (response.ok) {
         const data = await response.json();
@@ -93,6 +93,19 @@ export const apiBase = {
     tokenExpiry = null;
     currentUser = null;
     sessionStorage.removeItem("currentUser");
+  },
+
+  changePassword: async (oldPassword, newPassword) => {
+    await (
+      await authorizedFetch(`${API_URL}/ChangePassword`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          oldPassword,
+          newPassword,
+        }),
+      })
+    ).json();
   },
 
   getCurrentUser: () => {
