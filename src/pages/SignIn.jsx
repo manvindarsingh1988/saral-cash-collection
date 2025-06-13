@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { apiBase } from "../lib/apiBase";
+import { bufferDecode, transformAssertion, transformToAuthenticatorAttestationRawResponse } from "../lib/utils";
 
 export default function SignIn() {
   const navigate = useNavigate();
@@ -80,73 +81,7 @@ export default function SignIn() {
     }
   };
 
-  const transformAssertion = (credential) => ({
-    id: credential.id,
-    rawId: bufferEncode(credential.rawId),
-    type: credential.type,
-    response: {
-      authenticatorData: bufferEncode(credential.response.authenticatorData),
-      clientDataJSON: bufferEncode(credential.response.clientDataJSON),
-      signature: bufferEncode(credential.response.signature),
-      userHandle: credential.response.userHandle
-        ? bufferEncode(credential.response.userHandle)
-        : null,
-    },
-    extensions: credential.getClientExtensionResults(),
-  });
-
-  const transformAttestation = (credential) => ({
-    id: bufferEncode(credential.rawId),
-    rawId: bufferEncode(credential.rawId),
-    type: credential.type,
-    response: {
-      attestationObject: bufferEncode(credential.response.attestationObject),
-      clientDataJSON: bufferEncode(credential.response.clientDataJSON),
-    },
-    extensions: credential.getClientExtensionResults(),
-  });
-
-  function bufferDecode(value) {
-    // Convert from Base64URL to regular Base64
-    value = value.replace(/-/g, "+").replace(/_/g, "/");
-    // Pad with '=' if needed
-    const padLength = (4 - (value.length % 4)) % 4;
-    value += "=".repeat(padLength);
-
-    const binary = atob(value);
-    const buffer = new Uint8Array(binary.length);
-    for (let i = 0; i < binary.length; i++) {
-      buffer[i] = binary.charCodeAt(i);
-    }
-    return buffer;
-  }
-
-  function bufferEncode(value) {
-    return btoa(String.fromCharCode(...new Uint8Array(value)))
-      .replace(/\+/g, "-")
-      .replace(/\//g, "_")
-      .replace(/=+$/, "");
-  }
-
-  function bufferEncode(value) {
-    return btoa(String.fromCharCode(...new Uint8Array(value)))
-      .replace(/\+/g, "-")
-      .replace(/\//g, "_")
-      .replace(/=+$/, "");
-  }
-
-  function transformToAuthenticatorAttestationRawResponse(credential) {
-    return {
-      id: bufferEncode(credential.rawId), // maps to byte[] Id
-      rawId: bufferEncode(credential.rawId), // maps to byte[] RawId
-      type: credential.type, // maps to PublicKeyCredentialType
-      response: {
-        attestationObject: bufferEncode(credential.response.attestationObject), // byte[]
-        clientDataJSON: bufferEncode(credential.response.clientDataJSON), // byte[]
-      },
-      extensions: credential.getClientExtensionResults(), // maps to AuthenticationExtensionsClientOutputs
-    };
-  }
+  
 
   const handleBiometricRegistration = async () => {
     try {
