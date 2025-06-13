@@ -68,6 +68,39 @@ async function authorizedFetch(url, options = {}) {
 }
 
 export const apiBase = {
+  webauthnAuthenticateStart: async (email) => {
+    const res = await fetch("/api/webauthn/authenticate/start", {
+      method: "POST",
+      body: JSON.stringify({ email }),
+      headers: { "Content-Type": "application/json" },
+    });
+    if (!res.ok) throw new Error("WebAuthn authenticate start failed");
+    return await res.json();
+  },
+
+  webauthnRegisterStart: async (email) => {
+    const res = await fetch("/api/webauthn/register/start", {
+      method: "POST",
+      body: JSON.stringify({ email }),
+      headers: { "Content-Type": "application/json" },
+    });
+    if (!res.ok) throw new Error("WebAuthn register start failed");
+    return await res.json();
+  },
+
+  webauthnVerify: async (credential, email) => {
+    const res = await fetch("/api/webauthn/verify", {
+      method: "POST",
+      body: JSON.stringify({
+        credential: JSON.stringify(credential),
+        email,
+      }),
+      headers: { "Content-Type": "application/json" },
+    });
+    if (!res.ok) throw new Error("WebAuthn verification failed");
+    return await res.json();
+  },
+
   signIn: async (email, password) => {
     const response = await fetch(
       `${API_URL}/Login?userId=${email}&password=${password}`
