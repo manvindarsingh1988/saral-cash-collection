@@ -34,39 +34,77 @@ export default function SignIn() {
   };
 
   const handleBiometricLogin = async () => {
+    setLoading(true);
     try {
-      setLoading(true);
-      setError(null);
-
       const storedUser = localStorage.getItem("lastUserId");
       if (!storedUser) {
         setShowUsernamePromptModal(true);
         return;
       }
 
-      const options = await apiBase.webauthnAuthenticateStart(storedUser);
-      if (!options?.publicKey) {
-        setShowPostFailureOptions(true);
-        return;
-      }
+      const serverOptions = await apiBase.webauthnAuthenticateStart(storedUser);
 
-      const assertion = await navigator.credentials.get({
-        publicKey: options.publicKey,
+      const options = {
+        publicKey: {
+          ...serverOptions,
+          challenge: bufferDecode(serverOptions.challenge),
+          allowCredentials: (serverOptions.allowCredentials || []).map(
+            (cred) => ({
+              ...cred,
+              id: bufferDecode(cred.id),
+            })
+          ),
+        },
+      };
+
+      const assertion = await navigator.credentials.get(options);
+      const transformed = transformAssertion(assertion);
+
+      const result = await apiBase.webauthnAuthenticateVerify({
+        credential: transformed,
+        userName: storedUser,
       });
-      const result = await apiBase.webauthnVerify(assertion, storedUser);
 
       if (result?.success) {
+        localStorage.setItem("jwt", result.token);
         localStorage.setItem("lastUserId", storedUser);
         navigate("/");
       } else {
         setShowPostFailureOptions(true);
       }
     } catch (err) {
+      console.error("Biometric login failed", err);
       setShowPostFailureOptions(true);
     } finally {
       setLoading(false);
     }
   };
+
+  const transformAssertion = (credential) => ({
+    id: credential.id,
+    rawId: bufferEncode(credential.rawId),
+    type: credential.type,
+    response: {
+      authenticatorData: bufferEncode(credential.response.authenticatorData),
+      clientDataJSON: bufferEncode(credential.response.clientDataJSON),
+      signature: bufferEncode(credential.response.signature),
+      userHandle: credential.response.userHandle
+        ? bufferEncode(credential.response.userHandle)
+        : null,
+    },
+    extensions: credential.getClientExtensionResults(),
+  });
+
+  const transformAttestation = (credential) => ({
+    id: bufferEncode(credential.rawId),
+    rawId: bufferEncode(credential.rawId),
+    type: credential.type,
+    response: {
+      attestationObject: bufferEncode(credential.response.attestationObject),
+      clientDataJSON: bufferEncode(credential.response.clientDataJSON),
+    },
+    extensions: credential.getClientExtensionResults(),
+  });
 
   function bufferDecode(value) {
     // Convert from Base64URL to regular Base64
@@ -97,18 +135,18 @@ export default function SignIn() {
       .replace(/=+$/, "");
   }
 
- function transformToAuthenticatorAttestationRawResponse(credential) {
-  return {
-    id: bufferEncode(credential.rawId), // maps to byte[] Id
-    rawId: bufferEncode(credential.rawId), // maps to byte[] RawId
-    type: credential.type, // maps to PublicKeyCredentialType
-    response: {
-      attestationObject: bufferEncode(credential.response.attestationObject), // byte[]
-      clientDataJSON: bufferEncode(credential.response.clientDataJSON), // byte[]
-    },
-    extensions: credential.getClientExtensionResults() // maps to AuthenticationExtensionsClientOutputs
-  };
-}
+  function transformToAuthenticatorAttestationRawResponse(credential) {
+    return {
+      id: bufferEncode(credential.rawId), // maps to byte[] Id
+      rawId: bufferEncode(credential.rawId), // maps to byte[] RawId
+      type: credential.type, // maps to PublicKeyCredentialType
+      response: {
+        attestationObject: bufferEncode(credential.response.attestationObject), // byte[]
+        clientDataJSON: bufferEncode(credential.response.clientDataJSON), // byte[]
+      },
+      extensions: credential.getClientExtensionResults(), // maps to AuthenticationExtensionsClientOutputs
+    };
+  }
 
   const handleBiometricRegistration = async () => {
     try {
@@ -148,7 +186,8 @@ export default function SignIn() {
       const newCredential = await navigator.credentials.create({ publicKey });
 
       // Transform credential into JSON-ready data for your server
-      const credentialData = transformToAuthenticatorAttestationRawResponse(newCredential);
+      const credentialData =
+        transformToAuthenticatorAttestationRawResponse(newCredential);
 
       // Send it to server for verification
       const result = await apiBase.webauthnVerify({

@@ -89,7 +89,20 @@ export const apiBase = {
     return await res.json();
   },
 
-  webauthnVerify: async ({credential, userName}) => {
+  webauthnAuthenticateVerify: async ({ credential, userName }) => {
+    const res = await fetch(`${AUTH_URL}/authenticate/verify`, {
+      method: "POST",
+      body: JSON.stringify({
+        credential,
+        userName,
+      }),
+      headers: { "Content-Type": "application/json" },
+    });
+    if (!res.ok) throw new Error("WebAuthn verification failed");
+    return await res.json();
+  },
+
+  webauthnVerify: async ({ credential, userName }) => {
     const res = await fetch(`${AUTH_URL}/register/verify`, {
       method: "POST",
       body: JSON.stringify({
