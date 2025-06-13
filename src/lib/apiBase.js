@@ -89,11 +89,11 @@ export const apiBase = {
     return await res.json();
   },
 
-  webauthnVerify: async (credential, userName) => {
-    const res = await fetch(`${AUTH_URL}/verify`, {
+  webauthnVerify: async ({credential, userName}) => {
+    const res = await fetch(`${AUTH_URL}/register/verify`, {
       method: "POST",
       body: JSON.stringify({
-        credential: JSON.stringify(credential),
+        credential,
         userName,
       }),
       headers: { "Content-Type": "application/json" },

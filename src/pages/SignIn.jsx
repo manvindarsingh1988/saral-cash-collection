@@ -68,24 +68,94 @@ export default function SignIn() {
     }
   };
 
+  function bufferDecode(value) {
+    // Convert from Base64URL to regular Base64
+    value = value.replace(/-/g, "+").replace(/_/g, "/");
+    // Pad with '=' if needed
+    const padLength = (4 - (value.length % 4)) % 4;
+    value += "=".repeat(padLength);
+
+    const binary = atob(value);
+    const buffer = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) {
+      buffer[i] = binary.charCodeAt(i);
+    }
+    return buffer;
+  }
+
+  function bufferEncode(value) {
+    return btoa(String.fromCharCode(...new Uint8Array(value)))
+      .replace(/\+/g, "-")
+      .replace(/\//g, "_")
+      .replace(/=+$/, "");
+  }
+
+  function bufferEncode(value) {
+    return btoa(String.fromCharCode(...new Uint8Array(value)))
+      .replace(/\+/g, "-")
+      .replace(/\//g, "_")
+      .replace(/=+$/, "");
+  }
+
+ function transformToAuthenticatorAttestationRawResponse(credential) {
+  return {
+    id: bufferEncode(credential.rawId), // maps to byte[] Id
+    rawId: bufferEncode(credential.rawId), // maps to byte[] RawId
+    type: credential.type, // maps to PublicKeyCredentialType
+    response: {
+      attestationObject: bufferEncode(credential.response.attestationObject), // byte[]
+      clientDataJSON: bufferEncode(credential.response.clientDataJSON), // byte[]
+    },
+    extensions: credential.getClientExtensionResults() // maps to AuthenticationExtensionsClientOutputs
+  };
+}
+
   const handleBiometricRegistration = async () => {
     try {
       const uname = showManualRegisterModal ? registerUserName : userName;
+
       if (!uname) {
-        if (showManualRegisterModal) {
-          setDialogError("Please enter a username.");
-        } else {
-          setAutoDialogError("Username is missing.");
-        }
+        const errMsg = "Please enter a username.";
+        showManualRegisterModal
+          ? setDialogError(errMsg)
+          : setAutoDialogError(errMsg);
         return;
       }
 
       const registerOptions = await apiBase.webauthnRegisterStart(uname);
-      const newCredential = await navigator.credentials.create({
-        publicKey: registerOptions.publicKey,
+
+      if (!registerOptions?.challenge || !registerOptions?.user?.id) {
+        throw new Error("Invalid registration options from server");
+      }
+
+      // Convert base64-encoded properties to Uint8Array
+      const publicKey = {
+        ...registerOptions,
+        challenge: bufferDecode(registerOptions.challenge),
+        user: {
+          ...registerOptions.user,
+          id: bufferDecode(registerOptions.user.id),
+        },
+        excludeCredentials: (registerOptions.excludeCredentials || []).map(
+          (cred) => ({
+            ...cred,
+            id: bufferDecode(cred.id),
+          })
+        ),
+      };
+
+      // Prompt user for biometric registration
+      const newCredential = await navigator.credentials.create({ publicKey });
+
+      // Transform credential into JSON-ready data for your server
+      const credentialData = transformToAuthenticatorAttestationRawResponse(newCredential);
+
+      // Send it to server for verification
+      const result = await apiBase.webauthnVerify({
+        credential: credentialData,
+        userName: uname,
       });
 
-      const result = await apiBase.webauthnVerify(newCredential, uname);
       if (result?.success) {
         localStorage.setItem("lastUserId", uname);
         alert("Registration successful. You can now use fingerprint login.");
@@ -93,15 +163,17 @@ export default function SignIn() {
         setDialogError(null);
         setAutoDialogError(null);
       } else {
+        const errMsg = "Fingerprint registration failed.";
         showManualRegisterModal
-          ? setDialogError("Fingerprint registration failed.")
-          : setAutoDialogError("Fingerprint registration failed.");
+          ? setDialogError(errMsg)
+          : setAutoDialogError(errMsg);
       }
     } catch (err) {
-      console.error(err);
+      console.error("Registration error:", err);
+      const errMsg = "Registration failed due to a browser or server error.";
       showManualRegisterModal
-        ? setDialogError("Registration failed due to a browser error.")
-        : setAutoDialogError("Registration failed due to a browser error.");
+        ? setDialogError(errMsg)
+        : setAutoDialogError(errMsg);
     }
   };
 
