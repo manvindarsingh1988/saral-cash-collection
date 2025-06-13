@@ -37,7 +37,7 @@ export default function CollectorLayout({ children }) {
             {/* Logo and title */}
             <div className="flex items-center">
               <span className="text-white text-xl font-bold">
-                Saral Cash Collection
+                Saral Cash Flow
               </span>
             </div>
 
