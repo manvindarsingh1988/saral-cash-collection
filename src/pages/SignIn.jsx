@@ -1,7 +1,11 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { apiBase } from "../lib/apiBase";
-import { bufferDecode, transformAssertion, transformToAuthenticatorAttestationRawResponse } from "../lib/utils";
+import {
+  bufferDecode,
+  transformAssertion,
+  transformToAuthenticatorAttestationRawResponse,
+} from "../lib/utils";
 
 export default function SignIn() {
   const navigate = useNavigate();
@@ -61,18 +65,13 @@ export default function SignIn() {
       const assertion = await navigator.credentials.get(options);
       const transformed = transformAssertion(assertion);
 
-      const result = await apiBase.webauthnAuthenticateVerify({
+      await apiBase.webauthnAuthenticateVerify({
         credential: transformed,
         userName: storedUser,
       });
 
-      if (result?.success) {
-        localStorage.setItem("jwt", result.token);
-        localStorage.setItem("lastUserId", storedUser);
-        navigate("/");
-      } else {
-        setShowPostFailureOptions(true);
-      }
+      localStorage.setItem("lastUserId", storedUser);
+      navigate("/");
     } catch (err) {
       console.error("Biometric login failed", err);
       setShowPostFailureOptions(true);
@@ -80,8 +79,6 @@ export default function SignIn() {
       setLoading(false);
     }
   };
-
-  
 
   const handleBiometricRegistration = async () => {
     try {

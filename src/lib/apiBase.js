@@ -99,7 +99,16 @@ export const apiBase = {
       headers: { "Content-Type": "application/json" },
     });
     if (!res.ok) throw new Error("WebAuthn verification failed");
-    return await res.json();
+
+    if (res.ok) {
+      const data = await res.json();
+      accessToken = data.Token;
+      currentUser = data;
+      tokenExpiry = new Date(data.Expiry).getTime() * 1000;
+      sessionStorage.setItem("currentUser", JSON.stringify(data));
+    } else {
+      console.error("Token refresh failed");
+    }
   },
 
   webauthnVerify: async ({ credential, userName }) => {
