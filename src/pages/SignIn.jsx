@@ -8,14 +8,15 @@ export default function SignIn() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [showRegisterModal, setShowRegisterModal] = useState(false);
   const [showManualRegisterModal, setShowManualRegisterModal] = useState(false);
   const [registerUserName, setRegisterUserName] = useState("");
   // At the top in useState section
   const [dialogError, setDialogError] = useState(null);
   const [autoDialogError, setAutoDialogError] = useState(null);
 
-  
+  const [showUsernamePromptModal, setShowUsernamePromptModal] = useState(false);
+  const [biometricUserName, setBiometricUserName] = useState("");
+  const [showPostFailureOptions, setShowPostFailureOptions] = useState(false);
 
   const handleSignIn = async (e) => {
     e.preventDefault();
@@ -32,32 +33,36 @@ export default function SignIn() {
     }
   };
 
-  const handleBiometric = async () => {
+  const handleBiometricLogin = async () => {
     try {
       setLoading(true);
       setError(null);
 
-      const options = await apiBase.webauthnAuthenticateStart(userName);
+      const storedUser = localStorage.getItem("lastUserId");
+      if (!storedUser) {
+        setShowUsernamePromptModal(true);
+        return;
+      }
+
+      const options = await apiBase.webauthnAuthenticateStart(storedUser);
       if (!options?.publicKey) {
-        setShowRegisterModal(true);
+        setShowPostFailureOptions(true);
         return;
       }
 
       const assertion = await navigator.credentials.get({
         publicKey: options.publicKey,
       });
-      const result = await apiBase.webauthnVerify(assertion, userName);
+      const result = await apiBase.webauthnVerify(assertion, storedUser);
 
       if (result?.success) {
-        localStorage.setItem("lastUserId", userName);
+        localStorage.setItem("lastUserId", storedUser);
         navigate("/");
       } else {
-        setShowRegisterModal(true);
-        setError("Biometric authentication failed.");
+        setShowPostFailureOptions(true);
       }
     } catch (err) {
-      setError("Biometric authentication is not available or failed.");
-      setShowRegisterModal(true);
+      setShowPostFailureOptions(true);
     } finally {
       setLoading(false);
     }
@@ -85,7 +90,6 @@ export default function SignIn() {
         localStorage.setItem("lastUserId", uname);
         alert("Registration successful. You can now use fingerprint login.");
         setShowManualRegisterModal(false);
-        setShowRegisterModal(false);
         setDialogError(null);
         setAutoDialogError(null);
       } else {
@@ -158,7 +162,7 @@ export default function SignIn() {
             <>
               <button
                 type="button"
-                onClick={handleBiometric}
+                onClick={handleBiometricLogin}
                 className="mt-4 w-full rounded-md border border-indigo-600 py-2 text-indigo-600 hover:bg-indigo-50 md:hidden"
               >
                 Login with Fingerprint
@@ -179,29 +183,36 @@ export default function SignIn() {
         </form>
       </div>
 
-      {/* Auto-prompted registration modal */}
-      {showRegisterModal && (
+      {showUsernamePromptModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
           <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-lg">
             <h3 className="text-lg font-semibold text-gray-900">
-              Not Registered
+              Enter User ID for Biometric Login
             </h3>
-            <p className="mt-2 text-sm text-gray-700">
-              This username is not registered for biometric login. Do you want
-              to register your fingerprint now?
-            </p>
+            <input
+              type="text"
+              className="mt-3 w-full rounded-md border p-2"
+              value={biometricUserName}
+              onChange={(e) => setBiometricUserName(e.target.value)}
+              placeholder="User ID"
+            />
             <div className="mt-4 flex justify-end gap-2">
               <button
                 className="rounded-md bg-gray-100 px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
-                onClick={() => setShowRegisterModal(false)}
+                onClick={() => setShowUsernamePromptModal(false)}
               >
                 Cancel
               </button>
               <button
                 className="rounded-md bg-indigo-600 px-4 py-2 text-sm text-white hover:bg-indigo-500"
-                onClick={handleBiometricRegistration}
+                onClick={async () => {
+                  if (!biometricUserName) return;
+                  localStorage.setItem("lastUserId", biometricUserName);
+                  setShowUsernamePromptModal(false);
+                  await handleBiometricLogin();
+                }}
               >
-                Register Fingerprint
+                Proceed
               </button>
             </div>
           </div>

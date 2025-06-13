@@ -1,5 +1,6 @@
 const API_URL = import.meta.env.VITE_API_ENDPOINT;
 const DOC_URL = import.meta.env.VITE_DOC_ENDPOINT;
+const AUTH_URL = import.meta.env.VITE_AUTH_ENDPOINT;
 
 let currentUser = null;
 let accessToken = null;
@@ -68,32 +69,32 @@ async function authorizedFetch(url, options = {}) {
 }
 
 export const apiBase = {
-  webauthnAuthenticateStart: async (email) => {
-    const res = await fetch("/api/webauthn/authenticate/start", {
+  webauthnAuthenticateStart: async (userName) => {
+    const res = await fetch(`${AUTH_URL}/authenticate/start`, {
       method: "POST",
-      body: JSON.stringify({ email }),
+      body: JSON.stringify({ userName }),
       headers: { "Content-Type": "application/json" },
     });
     if (!res.ok) throw new Error("WebAuthn authenticate start failed");
     return await res.json();
   },
 
-  webauthnRegisterStart: async (email) => {
-    const res = await fetch("/api/webauthn/register/start", {
+  webauthnRegisterStart: async (userName) => {
+    const res = await fetch(`${AUTH_URL}/register/start`, {
       method: "POST",
-      body: JSON.stringify({ email }),
+      body: JSON.stringify({ userName }),
       headers: { "Content-Type": "application/json" },
     });
     if (!res.ok) throw new Error("WebAuthn register start failed");
     return await res.json();
   },
 
-  webauthnVerify: async (credential, email) => {
-    const res = await fetch("/api/webauthn/verify", {
+  webauthnVerify: async (credential, userName) => {
+    const res = await fetch(`${AUTH_URL}/verify`, {
       method: "POST",
       body: JSON.stringify({
         credential: JSON.stringify(credential),
-        email,
+        userName,
       }),
       headers: { "Content-Type": "application/json" },
     });
@@ -101,9 +102,9 @@ export const apiBase = {
     return await res.json();
   },
 
-  signIn: async (email, password) => {
+  signIn: async (userName, password) => {
     const response = await fetch(
-      `${API_URL}/Login?userId=${email}&password=${password}`
+      `${API_URL}/Login?userId=${userName}&password=${password}`
     );
 
     const user = await response.json();
