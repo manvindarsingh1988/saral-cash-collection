@@ -1,7 +1,5 @@
-import config from "./config.json";
-
-const API_URL = config.api.endpoint;
-const DOC_URL = config.api.docEndpoint;
+const API_URL = import.meta.env.VITE_API_ENDPOINT;
+const DOC_URL = import.meta.env.VITE_DOC_ENDPOINT;
 
 let currentUser = null;
 let accessToken = null;
