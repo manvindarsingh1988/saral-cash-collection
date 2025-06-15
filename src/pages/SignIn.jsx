@@ -49,6 +49,14 @@ export default function SignIn() {
 
       const serverOptions = await apiBase.webauthnAuthenticateStart(storedUser);
 
+      if (serverOptions?.error) {
+        console.error(serverOptions.error);
+        if (serverOptions.error === "NotRegistered") {
+          setError("mPIN not registered for this user.");
+          return;
+        }
+      }
+
       const options = {
         publicKey: {
           ...serverOptions,
