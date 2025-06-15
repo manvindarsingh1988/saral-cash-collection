@@ -124,6 +124,15 @@ export const apiBase = {
     return await res.json();
   },
 
+  ismPinExists: async (userName) => {
+    const response = await authorizedFetch(`${API_URL}/IsmPinExists?loginId=${userName}`);
+    if (!response.ok) {
+      console.error(`Failed to check PIN existence: ${response.statusText}`);
+      throw new Error("Failed to check PIN existence");
+    }
+    return await response.json();
+  },
+
   signIn: async (userName, password) => {
     const response = await fetch(
       `${API_URL}/Login?userId=${userName}&password=${password}`

@@ -1,7 +1,19 @@
 import JSZip from "jszip";
 import { apiBase } from "./apiBase";
 
-export function formatIndianNumber(number) {
+export const getLoginId = () => {
+  const user = apiBase.getCurrentUser()?.UserName;
+  if (user) {
+    const match = user.match(/\((\d{10})\)/);
+    const loginId = match ? match[1] : null;
+
+    return loginId;
+  }
+
+  return null;
+};
+
+export const formatIndianNumber = (number) => {
   if (isNaN(number)) return "0";
 
   const [integerPart, decimalPart] = number.toString().split(".");
@@ -19,7 +31,7 @@ export function formatIndianNumber(number) {
     ? `${formattedRest},${lastThree}`
     : lastThree;
   return decimalPart ? `${formattedNumber}.${decimalPart}` : formattedNumber;
-}
+};
 
 export function getRowColor(workFlow: number): string {
   let rowColor = "";

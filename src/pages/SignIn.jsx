@@ -208,10 +208,10 @@ export default function SignIn() {
                 onClick={handleBiometricLogin}
                 className="mt-4 w-full rounded-md border border-indigo-600 py-2 text-indigo-600 hover:bg-indigo-50 md:hidden"
               >
-                Login with Fingerprint
+                Login with mPIN
               </button>
 
-              <button
+              {/* <button
                 type="button"
                 onClick={() => {
                   setRegisterUserName(userName); // Pre-fill from main form
@@ -220,7 +220,7 @@ export default function SignIn() {
                 className="w-full rounded-md border border-gray-600 py-2 text-gray-600 hover:bg-gray-50 md:hidden"
               >
                 Register with Fingerprint
-              </button>
+              </button> */}
             </>
           )}
         </form>
