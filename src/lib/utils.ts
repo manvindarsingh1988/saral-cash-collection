@@ -16,11 +16,14 @@ export const getLoginId = () => {
 export const formatIndianNumber = (number) => {
   if (isNaN(number)) return "0";
 
-  const [integerPart, decimalPart] = number.toString().split(".");
+  // Round to 2 decimal places and split
+  const [integerPart, decimalPart] = Number(number)
+    .toFixed(2)
+    .split(".");
 
-  // Handle the Indian number formatting for the integer part
+  // Handle Indian number formatting for the integer part
   if (integerPart.length <= 3) {
-    return decimalPart ? `${integerPart}.${decimalPart}` : integerPart;
+    return `${integerPart}.${decimalPart}`;
   }
 
   const lastThree = integerPart.slice(-3);
@@ -30,7 +33,8 @@ export const formatIndianNumber = (number) => {
   const formattedNumber = formattedRest
     ? `${formattedRest},${lastThree}`
     : lastThree;
-  return decimalPart ? `${formattedNumber}.${decimalPart}` : formattedNumber;
+
+  return `${formattedNumber}.${decimalPart}`;
 };
 
 export function getRowColor(workFlow: number): string {
