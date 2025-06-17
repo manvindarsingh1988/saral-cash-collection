@@ -14,6 +14,7 @@ export default function UserProfileMenu({ user, onSignOut }) {
   const [showManualRegisterModal, setShowManualRegisterModal] = useState(false);
   const [dialogError, setDialogError] = useState(null);
   const [ismPinExists, setIsmPinExists] = useState(false);
+  const [notificationStatus, setNotificationStatus] = useState(null); // Optional: show status
 
   // Close menu when clicking outside
   useEffect(() => {
@@ -46,6 +47,18 @@ export default function UserProfileMenu({ user, onSignOut }) {
     };
     if (showManualRegisterModal) checkMpinExists();
   }, [showManualRegisterModal]);
+
+  const handleEnableNotifications = async () => {
+    try {
+      await apiBase.subscribeUser();
+      setNotificationStatus("Notifications enabled");
+    } catch (err) {
+      console.error("Failed to enable notifications", err);
+      setNotificationStatus("Failed to enable notifications");
+    } finally {
+      setShowMenu(false);
+    }
+  };
 
   const handleBiometricRegistration = async () => {
     try {
@@ -160,6 +173,13 @@ export default function UserProfileMenu({ user, onSignOut }) {
             </button>
 
             <button
+              onClick={handleEnableNotifications}
+              className="w-full text-left px-4 py-2 text-sm text-green-600 hover:bg-gray-100"
+            >
+              Enable Notifications
+            </button>
+
+            <button
               onClick={() => {
                 setShowMenu(false);
                 onSignOut();
@@ -171,6 +191,12 @@ export default function UserProfileMenu({ user, onSignOut }) {
           </div>
         )}
       </div>
+
+      {notificationStatus && (
+        <div className="absolute top-full mt-1 text-xs text-green-600">
+          {notificationStatus}
+        </div>
+      )}
 
       {/* Manual registration modal with input */}
       {showManualRegisterModal && (

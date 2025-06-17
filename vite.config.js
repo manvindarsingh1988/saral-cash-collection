@@ -3,6 +3,10 @@ import react from "@vitejs/plugin-react";
 import { VitePWA } from "vite-plugin-pwa";
 
 export default defineConfig({
+  server: {
+    port: 5173,
+    host: "0.0.0.0",
+  },
   base: "./", // replace with actual repo name
   plugins: [
     react(),
@@ -43,6 +47,7 @@ export default defineConfig({
             type: "image/png",
           },
         ],
+        gcm_sender_id: "103953800507",
       },
     }),
   ],

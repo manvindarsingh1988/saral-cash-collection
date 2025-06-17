@@ -17,9 +17,7 @@ export const formatIndianNumber = (number) => {
   if (isNaN(number)) return "0";
 
   // Round to 2 decimal places and split
-  const [integerPart, decimalPart] = Number(number)
-    .toFixed(2)
-    .split(".");
+  const [integerPart, decimalPart] = Number(number).toFixed(2).split(".");
 
   // Handle Indian number formatting for the integer part
   if (integerPart.length <= 3) {
@@ -198,4 +196,12 @@ export const transformToAuthenticatorAttestationRawResponse = (
     },
     extensions: credential.getClientExtensionResults(), // maps to AuthenticationExtensionsClientOutputs
   };
+};
+
+export const urlBase64ToUint8Array = (base64String) => {
+  const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
+  const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
+
+  const raw = atob(base64);
+  return new Uint8Array([...raw].map((char) => char.charCodeAt(0)));
 };

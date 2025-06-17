@@ -1,4 +1,7 @@
+import { urlBase64ToUint8Array } from "./utils";
+
 const API_URL = import.meta.env.VITE_API_ENDPOINT;
+const NOTIFICATION_URL = import.meta.env.VITE_NOTIFICATION_ENDPOINT;
 const DOC_URL = import.meta.env.VITE_DOC_ENDPOINT;
 const AUTH_URL = import.meta.env.VITE_AUTH_ENDPOINT;
 
@@ -125,12 +128,85 @@ export const apiBase = {
   },
 
   ismPinExists: async (userName) => {
-    const response = await authorizedFetch(`${API_URL}/IsmPinExists?loginId=${userName}`);
+    const response = await authorizedFetch(
+      `${API_URL}/IsmPinExists?loginId=${userName}`
+    );
     if (!response.ok) {
       console.error(`Failed to check PIN existence: ${response.statusText}`);
       throw new Error("Failed to check PIN existence");
     }
     return await response.json();
+  },
+
+  subscribeUser: async () => {
+    if (!("serviceWorker" in navigator)) return;
+
+    const registration = await navigator.serviceWorker.register(
+      "/service-worker.js"
+    );
+    const subscription = await registration.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: urlBase64ToUint8Array(
+        import.meta.env.VITE_VAPID_PUBLIC_KEY
+      ),
+    });
+
+    const response = await authorizedFetch(`${NOTIFICATION_URL}/Subscribe`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(subscription),
+    });
+
+    if (!response.ok) {
+      console.error("Failed to subscribe user for notifications");
+      throw new Error("Subscription failed");
+    }
+
+    return true;
+  },
+
+  sendNotification: async (senderId, title, body) => {
+    if (!accessToken) {
+      console.error("No access token available for sending notifications");
+      throw new Error("Unauthorized");
+    }
+
+    const response = await authorizedFetch(`${NOTIFICATION_URL}/Send/${senderId}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ title, body }),
+    });
+
+    if (!response.ok) {
+      console.error(`Failed to send notification: ${response.statusText}`);
+      throw new Error("Notification sending failed");
+    }
+
+    return true;
+  },
+
+  sendNotificationToAll: async (title, body) => {
+    if (!accessToken) {
+      console.error("No access token available for sending notifications");
+      throw new Error("Unauthorized");
+    }
+
+    const response = await authorizedFetch(`${NOTIFICATION_URL}/Send-all`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ title, body }),
+    });
+
+    if (!response.ok) {
+      console.error(`Failed to send notification: ${response.statusText}`);
+      throw new Error("Notification sending failed");
+    }
+
+    return true;
   },
 
   signIn: async (userName, password) => {
