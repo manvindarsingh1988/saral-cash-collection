@@ -21,6 +21,7 @@ export default function SignIn() {
       const user = await apiBase.signIn(email, password);
       setRequires2FA(true);
       setUserId(user.Id);
+      //navigate("/");
     } catch (error) {
       setError(error.message || "Login failed");
     } finally {
@@ -38,7 +39,7 @@ export default function SignIn() {
     try {
       const res = await apiBase.twoFactorValidateLogin(userId, code);
 
-      if (res.data.success) {
+      if (res.success) {
         navigate("/");
       } else {
         setError("Invalid 2FA code");

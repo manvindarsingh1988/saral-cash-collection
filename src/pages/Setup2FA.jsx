@@ -7,14 +7,14 @@ export default function Setup2FA() {
   const [code, setCode] = useState("");
   const [status, setStatus] = useState("");
   const [error, setError] = useState("");
-  const userId = JSON.parse(localStorage.getItem("user"))?.UserId; // or get from context/state
+  const userId = apiBase.getCurrentUser()?.Id; // or get from context/state
 
   useEffect(() => {
     const fetchQR = async () => {
       try {
         const res = await apiBase.twoFactorInitiate(userId);
-        setQrUrl(res.data.qrUrl);
-        setSecret(res.data.secret);
+        setQrUrl(res.qrUrl);
+        setSecret(res.secret);
       } catch (err) {
         setError("Failed to generate 2FA setup. Try again later.");
       }
@@ -26,7 +26,7 @@ export default function Setup2FA() {
   const handleVerify = async () => {
     try {
       const res = await apiBase.twoFactorVerify(userId, code);
-      if (res.data.success) {
+      if (res.success) {
         setStatus("✅ Two-Factor Authentication has been enabled.");
         setError("");
       } else {
