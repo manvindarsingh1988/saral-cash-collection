@@ -1,5 +1,6 @@
 const API_URL = import.meta.env.VITE_API_ENDPOINT;
 const DOC_URL = import.meta.env.VITE_DOC_ENDPOINT;
+const TWO_FACTOR_URL = import.meta.env.VITE_TWO_FACTOR_ENDPOINT;
 
 let currentUser = null;
 let accessToken = null;
@@ -68,6 +69,61 @@ async function authorizedFetch(url, options = {}) {
 }
 
 export const apiBase = {
+  twoFactorInitiate: async (userId) => {
+    const response = await authorizedFetch(
+      `${TWO_FACTOR_URL}/initiate?userId=${userId}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      }
+    );
+    const data = await response.json();
+    if (!response.ok || data?.IsFailed) {
+      console.error(`Failed to initiate 2FA: ${response.statusText}`);
+      throw new Error(data?.Message || "2FA initiation failed");
+    }
+    return {
+      qrUrl: data.QRUrl,
+      secret: data.Secret,
+    };
+  },
+  
+  twoFactorVerify: async (userId, code) => {
+    const response = await authorizedFetch(`${TWO_FACTOR_URL}/verify?userId=${userId}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId, code }),
+    });
+    const data = await response.json();
+    if (!response.ok || data?.IsFailed) {
+      console.error(`Failed to verify 2FA: ${response.statusText}`);
+      throw new Error(data?.Message || "2FA verification failed");
+    }
+    accessToken = data.Token;
+    tokenExpiry = new Date(data.Expiry).getTime() * 1000;
+    currentUser = data;
+    sessionStorage.setItem("currentUser", JSON.stringify(data));
+    return data;
+  },
+
+  twoFactorValidateLogin: async (userId, code) => {
+    const response = await fetch(`${TWO_FACTOR_URL}/validate-login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId, code }),
+    });
+    const data = await response.json();
+    if (!response.ok || data?.IsFailed) {
+      console.error(`Failed to validate 2FA: ${response.statusText}`);
+      throw new Error(data?.Message || "2FA validation failed");
+    }
+    accessToken = data.Token;
+    tokenExpiry = new Date(data.Expiry).getTime() * 1000;
+    currentUser = data;
+    sessionStorage.setItem("currentUser", JSON.stringify(data));
+    return data;
+  },
+
   signIn: async (email, password) => {
     const response = await fetch(
       `${API_URL}/Login?userId=${email}&password=${password}`
@@ -83,7 +139,7 @@ export const apiBase = {
     tokenExpiry = new Date(user.Expiry).getTime() * 1000;
     currentUser = user;
     sessionStorage.setItem("currentUser", JSON.stringify(user));
-    return { user };
+    return user;
   },
 
   signOut: async () => {

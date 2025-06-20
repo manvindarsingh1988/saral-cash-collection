@@ -57,6 +57,15 @@ export default function UserProfileMenu({ user, onSignOut, onForgotPassword }) {
           <button
             onClick={() => {
               setShowMenu(false);
+              navigate("/setup-2fa");
+            }}
+            className="w-full text-left px-4 py-2 text-sm text-green-600 hover:bg-gray-100"
+          >
+            Setup 2FA
+          </button>
+          <button
+            onClick={() => {
+              setShowMenu(false);
               onSignOut();
             }}
             className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
