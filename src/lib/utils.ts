@@ -1,11 +1,25 @@
 import JSZip from "jszip";
 import { apiBase } from "./apiBase";
 
+export const getLoginId = () => {
+  const user = apiBase.getCurrentUser()?.UserName;
+  if (user) {
+    const match = user.match(/\((\d{10})\)/);
+    const loginId = match ? match[1] : null;
+
+    return loginId;
+  }
+
+  return null;
+};
+
 export const formatIndianNumber = (number) => {
   if (isNaN(number)) return "0";
 
   // Round to 2 decimal places and split
-  const [integerPart, decimalPart] = Number(number).toFixed(2).split(".");
+  const [integerPart, decimalPart] = Number(number)
+    .toFixed(2)
+    .split(".");
 
   // Handle Indian number formatting for the integer part
   if (integerPart.length <= 3) {
@@ -121,4 +135,67 @@ export const handleDownloadFile = async (docId: string, ledgerId: string) => {
   } catch (err) {
     console.error("File download failed:", err);
   }
+};
+
+export const transformAssertion = (credential: any) => ({
+  id: credential.id,
+  rawId: bufferEncode(credential.rawId),
+  type: credential.type,
+  response: {
+    authenticatorData: bufferEncode(credential.response.authenticatorData),
+    clientDataJSON: bufferEncode(credential.response.clientDataJSON),
+    signature: bufferEncode(credential.response.signature),
+    userHandle: credential.response.userHandle
+      ? bufferEncode(credential.response.userHandle)
+      : null,
+  },
+  extensions: credential.getClientExtensionResults(),
+});
+
+export const transformAttestation = (credential: any) => ({
+  id: bufferEncode(credential.rawId),
+  rawId: bufferEncode(credential.rawId),
+  type: credential.type,
+  response: {
+    attestationObject: bufferEncode(credential.response.attestationObject),
+    clientDataJSON: bufferEncode(credential.response.clientDataJSON),
+  },
+  extensions: credential.getClientExtensionResults(),
+});
+
+export const bufferDecode = (value: string) => {
+  // Convert from Base64URL to regular Base64
+  value = value.replace(/-/g, "+").replace(/_/g, "/");
+  // Pad with '=' if needed
+  const padLength = (4 - (value.length % 4)) % 4;
+  value += "=".repeat(padLength);
+
+  const binary = atob(value);
+  const buffer = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) {
+    buffer[i] = binary.charCodeAt(i);
+  }
+  return buffer;
+};
+
+export const bufferEncode = (value: any) => {
+  return btoa(String.fromCharCode(...new Uint8Array(value)))
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/, "");
+};
+
+export const transformToAuthenticatorAttestationRawResponse = (
+  credential: any
+) => {
+  return {
+    id: bufferEncode(credential.rawId), // maps to byte[] Id
+    rawId: bufferEncode(credential.rawId), // maps to byte[] RawId
+    type: credential.type, // maps to PublicKeyCredentialType
+    response: {
+      attestationObject: bufferEncode(credential.response.attestationObject), // byte[]
+      clientDataJSON: bufferEncode(credential.response.clientDataJSON), // byte[]
+    },
+    extensions: credential.getClientExtensionResults(), // maps to AuthenticationExtensionsClientOutputs
+  };
 };
