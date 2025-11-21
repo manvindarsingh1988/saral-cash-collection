@@ -30,17 +30,55 @@ export default function RetailerLiabilityTable({ data }) {
     Status: "",
   });
 
+  const [sortConfig, setSortConfig] = useState({
+  key: null,
+  direction: "asc",
+});
+
+const onSort = (key) => {
+  setSortConfig((prev) => {
+    if (prev.key === key) {
+      // Toggle direction
+      return {
+        key,
+        direction: prev.direction === "asc" ? "desc" : "asc",
+      };
+    }
+    return { key, direction: "asc" };
+  });
+};
+
   const onFilterChange = (key, value) => {
     setFilters((prev) => ({ ...prev, [key]: value }));
   };
 
-  const filteredData = data.filter((item) => {
+  const filteredData = data
+  .filter((item) => {
     return Object.entries(filters).every(([key, value]) => {
       if (!value) return true;
       const itemValue = item[key];
       if (itemValue === null || itemValue === undefined) return false;
       return itemValue.toString().toLowerCase().includes(value.toLowerCase());
     });
+  })
+  .sort((a, b) => {
+    if (!sortConfig.key) return 0;
+
+    const { key, direction } = sortConfig;
+
+    let valA = a[key];
+    let valB = b[key];
+
+    // Convert numeric strings to numbers
+    const isNumeric = !isNaN(Number(valA)) && !isNaN(Number(valB));
+    if (isNumeric) {
+      valA = Number(valA);
+      valB = Number(valB);
+    }
+
+    if (valA < valB) return direction === "asc" ? -1 : 1;
+    if (valA > valB) return direction === "asc" ? 1 : -1;
+    return 0;
   });
 
   const onMoreDetails = (retailUserId) => {
@@ -64,7 +102,19 @@ export default function RetailerLiabilityTable({ data }) {
                       col.heading
                     ) : (
                       <div className="flex flex-col">
-                        <span>{col.heading}</span>
+                        <div
+                          className="flex items-center cursor-pointer select-none"
+                          onClick={() => onSort(col.key)}
+                          >
+                          <span>{col.heading}</span>
+
+                          {/* Sorting Indicator */}
+                          {sortConfig.key === col.key && (
+                            <span className="ml-1 text-gray-500">
+                              {sortConfig.direction === "asc" ? "▲" : "▼"}
+                            </span>
+                          )}
+                      </div>
                         <input
                           type="text"
                           placeholder="Filter"
