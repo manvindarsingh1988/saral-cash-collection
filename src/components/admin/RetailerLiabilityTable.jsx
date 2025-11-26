@@ -108,10 +108,12 @@ const onSort = (key) => {
                           <span>{col.heading}</span>
 
                           {/* Sorting Indicator */}
-                          {sortConfig.key === col.key && (
+                          {sortConfig.key === col.key ? (
                             <span className="ml-1 text-gray-500">
                               {sortConfig.direction === "asc" ? "▲" : "▼"}
                             </span>
+                          ) : (
+                            <span className="ml-1 text-gray-400">⇅</span>
                           )}
                       </div>
                         <input

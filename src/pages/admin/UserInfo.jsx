@@ -230,8 +230,10 @@ export default function UserInfo() {
   };
 
   const getUnlinkedMessage = (userType, linked) => {
-    const { LinkedCollectors, LinkedCashiers, LinkedMasterCashiers, IsSelfSubmitter } = linked;
-
+    const { LinkedCollectors, LinkedCashiers, LinkedMasterCashiers, IsSelfSubmitter, Active } = linked;
+    if(Active == 0) {
+      return '';
+    }
     let missing = [];
 
     if (userType === 5) {
