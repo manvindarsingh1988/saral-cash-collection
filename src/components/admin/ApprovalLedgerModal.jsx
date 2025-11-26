@@ -30,6 +30,7 @@ const allowedFields = [
   "CashierName",
   "DocId",
   "GivenOn",
+  "TransactionId"
 ];
 
 export default function ApprovalLedgerModal({
@@ -37,8 +38,7 @@ export default function ApprovalLedgerModal({
   onClose,
   onSubmit,
   initialData,
-}) {
-  console.log("Initial Data:", initialData);
+}) {  
 
   const userType = apiBase.getCurrentUser()?.UserType;
   const workflows = getWorkflows(userType);
@@ -53,9 +53,7 @@ export default function ApprovalLedgerModal({
     Comment: "",
     DocId: null,
     CashierId: null,
-  });
-
-  console.log("Form Data:", formData);
+  }); 
 
   useEffect(() => {
     if (initialData) {
@@ -75,13 +73,18 @@ export default function ApprovalLedgerModal({
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = () => {    
     const filteredData = allowedFields.reduce((obj, key) => {
       obj[key] = formData[key];
       return obj;
     }, {});
+    if(filteredData.WorkFlow === '5' && filteredData.TransactionType != '1' && filteredData.TransactionType != '5') {
+      if (filteredData.TransactionId === null || filteredData.TransactionId === undefined || filteredData.TransactionId === "") {
+        alert('TransactionId is mandatory');
+        return;
+      } 
+    }
     onSubmit(filteredData);
-    onClose();
   };
 
   return (
@@ -92,7 +95,6 @@ export default function ApprovalLedgerModal({
       <div className="bg-white p-6 rounded shadow-lg space-y-4 w-full max-w-md">
         <h2 className="text-lg font-semibold">Approve Ledger</h2>
         {allowedFields.map((key) => {
-          console.log("Key:", key, "Value:", formData[key]);
 
           const alwaysExcludeKeys = [
             "CollectorId",
@@ -115,7 +117,9 @@ export default function ApprovalLedgerModal({
           ) {
             return null;
           }
-
+          if(key === "TransactionId" && formData["TransactionType"] === 1) {
+            return null;
+          }
           const label = fieldLabels[key] || key;
           let inputElement;
 
@@ -165,8 +169,8 @@ export default function ApprovalLedgerModal({
 
             inputElement = (
               <input
-                readOnly={key !== "WorkFlow"}
-                disabled={key !== "WorkFlow"}
+                readOnly={key !== "WorkFlow" && key !== "TransactionId"}
+                disabled={key !== "WorkFlow" && key !== "TransactionId"}
                 name={key}
                 type={inputType}
                 value={formData[key]}

@@ -16,6 +16,7 @@ import AssignRetail from "../pages/admin/AssignRetail";
 import CollectorLiabilities from "../pages/admin/CollectorLiabilities";
 import CollectorLedger from "../pages/collector/CollectorLedger";
 import PendingApprovals from "../pages/admin/PendingApprovals";
+import CreateDashboard from "../pages/admin/CreateDashboard";
 import UserInfo from "../pages/admin/UserInfo";
 import RetailerLiabilitiesForCollector from "../pages/collector/RetailerLiabilitiesForCollector";
 import PendingApprovalsForCollector from "../pages/collector/PendingApprovalsForCollector";
@@ -28,9 +29,9 @@ export default function UserSpecificDashboard() {
 
   const renderAdminRoutes = () => (
     <Routes>
-      <Route path="/collector-liabilities" element={<CollectorLiabilities />} />
+      <Route path="/collector-liabilities" element={<CollectorLiabilities userType={ UserType === "Cashier" ? 13 :  UserType === "MasterCashier" ? 14 : 15}  id={Id}/>} />
       {(UserType === "Admin" || UserType === "MasterCashier") && (
-        <Route path="/cashier-liabilities" element={<CashierLiabilities />} />
+        <Route path="/cashier-liabilities" element={<CashierLiabilities userType={ UserType === "Cashier" ? 13 :  UserType === "MasterCashier" ? 14 : 15}  id={Id}/>} />
       )}
       {UserType === "Cashier" && (
         <Route
@@ -40,9 +41,10 @@ export default function UserSpecificDashboard() {
       )}
       <Route path="/add-user" element={<AddUser />} />
       <Route path="/assign-retail" element={<AssignRetail />} />
-      <Route path="/pending-approvals" element={<PendingApprovals userType={ UserType === "Cashier" ? 13 : 14 } />} />
+      <Route path="/pending-approvals" element={<PendingApprovals userType={ UserType === "Cashier" ? 13 :  UserType === "MasterCashier" ? 14 : 15}  id={Id}/>} />
       <Route path="/user-info" element={<UserInfo />} />
-      <Route path="/" element={<AdminDashboard />} />
+      <Route path="/" element={<AdminDashboard userType={ UserType === "Cashier" ? 13 :  UserType === "MasterCashier" ? 14 : 15}  id={Id}/>} />
+      <Route path="/create-dashboard" element={<CreateDashboard userType={ UserType === "Cashier" ? 13 :  UserType === "MasterCashier" ? 14 : 15} id={Id} />} />
     </Routes>
   );
 

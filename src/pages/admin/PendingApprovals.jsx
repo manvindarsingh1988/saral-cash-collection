@@ -24,7 +24,7 @@ const columns = [
   { heading: "Actions", accessor: "Actions" },
 ];
 
-export default function PendingApprovals({ userType }) {
+export default function PendingApprovals({ userType, id }) {
   useDocumentTitle("Pending Approvals");
 
   const [loading, setLoading] = useState(false);
@@ -34,18 +34,27 @@ export default function PendingApprovals({ userType }) {
   const [pendingApprovals, setPendingApprovals] = useState([]);
   const [filters, setFilters] = useState({});
   const [masterData, setMasterData] = useState({});
-  const [showAll, setShowAll] = useState(false);
+
+  const [showPendingOnly, setShowPendingOnly] = useState(true);
+  const [fromDate, setFromDate] = useState("");
+  const [toDate, setToDate] = useState("");
 
   useEffect(() => {
     fetchPendingApprovals();
-  }, [showAll]);
+  }, [showPendingOnly]);
 
   const fetchPendingApprovals = async () => {
     try {
+      if (!showPendingOnly && (!fromDate || !toDate)) {
+        setPendingApprovals([]);
+        setError("Please select both From and To dates.");
+        return;
+      }
+      setError("");
       setLoading(true);
       const [master, approvals] = await Promise.all([
         apiBase.getMasterData(),
-        apiBase.getPendingApprovals(showAll, userType),
+        apiBase.getPendingApprovals(!showPendingOnly, userType, fromDate, toDate, id),
       ]);
       setMasterData(master || {});
       setPendingApprovals(approvals);
@@ -55,6 +64,14 @@ export default function PendingApprovals({ userType }) {
       setLoading(false);
     }
   };
+
+  const handleSearch = async () => {
+  try {
+    fetchPendingApprovals();
+  } catch (err) {
+    console.error("Error fetching filtered records:", err);
+  }
+};
 
   const getMasterValue = (type, id) => {
     return masterData?.[type]?.find((x) => x.Id == id)?.Description || id;
@@ -93,7 +110,13 @@ export default function PendingApprovals({ userType }) {
         ...data,
         WorkFlow: parseInt(data.WorkFlow),
       };
-      await apiBase.updateLedgerInfo(payload);
+      var result = await apiBase.updateLedgerInfo(payload);  
+      if (result.Response?.startsWith("Errors:")) {
+          alert(result.Response); 
+          return;
+      }   
+      
+      setModalOpen(false)     
       await fetchPendingApprovals();
     } catch (err) {
       console.error("Submission failed:", err);
@@ -107,18 +130,59 @@ export default function PendingApprovals({ userType }) {
           {loading && <div>Loading...</div>}
           {error && <div className="text-red-600">{error}</div>}
 
-          <div className="flex justify-start mb-2">
-            <input
-              type="checkbox"
-              id="show-all"
-              checked={showAll}
-              onChange={() => {
-                setShowAll(!showAll);
-              }}
-            />
-            <label htmlFor="show-all" className="ml-2 text-md text-black-500">
-              Show All
-            </label>
+          <div className="flex flex-wrap gap-4 items-center mb-4">
+
+            {/* Pending Only checkbox */}
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                className="h-4 w-4"
+                checked={showPendingOnly}
+                onChange={(e) => setShowPendingOnly(e.target.checked)}
+              />
+              <label className="text-sm font-medium">
+                Show Pending Approvals Only
+              </label>
+            </div>
+
+            {/* From Date */}
+            <div className="flex flex-col">
+              <label className="text-sm font-medium">From Date</label>
+              <input
+                type="date"
+                className="px-3 py-2 border rounded text-black placeholder-gray-400"
+                value={fromDate}
+                onChange={(e) => setFromDate(e.target.value)}
+                disabled={showPendingOnly}
+              />
+            </div>
+
+            {/* To Date */}
+            <div className="flex flex-col">
+              <label className="text-sm font-medium">To Date</label>
+              <input
+                type="date"
+                className="px-3 py-2 border rounded text-black placeholder-gray-400"
+                value={toDate}
+                onChange={(e) => setToDate(e.target.value)}
+                disabled={showPendingOnly}
+              />
+            </div>
+
+            {/* Search Button */}
+            <div className="flex flex-col justify-end">
+              <label className="text-sm font-medium invisible">Apply</label>
+              <button
+                onClick={handleSearch}
+                disabled={showPendingOnly}
+                className={`px-4 py-2 rounded 
+                  ${showPendingOnly ? "opacity-50 cursor-not-allowed" : "bg-blue-600 text-white"}
+                `}
+              >
+                Apply Filters
+              </button>
+            </div>
+
           </div>
 
           <div className="overflow-x-auto">

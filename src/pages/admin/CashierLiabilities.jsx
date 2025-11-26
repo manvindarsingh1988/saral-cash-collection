@@ -4,7 +4,7 @@ import useDocumentTitle from "../../hooks/useDocumentTitle";
 import { formatIndianNumber } from "../../lib/utils";
 import LadgerDetailsDialog from "../../components/LedgerDetailsDialog";
 
-export default function CashierLiabilities() {
+export default function CashierLiabilities({ userType, id }) {
   useDocumentTitle("Cashier Liabilities");
 
   const [loading, setLoading] = useState(false);
@@ -43,7 +43,7 @@ export default function CashierLiabilities() {
   const fetchCashierLiabilities = async () => {
     try {
       setLoading(true);
-      const data = await apiBase.getCashierLiabilities();
+      const data = await apiBase.getCashierLiabilities(id, userType);
       setCashierLiabilities(data || []);
 
       setSummary({
@@ -109,7 +109,7 @@ export default function CashierLiabilities() {
       {!loading && cashierLiabilities.length > 0 && (
         <>
           {/* Summary Cards */}
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-6 mb-4">
             
             {[
               { label: "Opening Amount", value: summary.totalClosingAmount },

@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback, useMemo } from "react";
 import { apiBase } from "../../lib/apiBase";
 import UpdateOpeningBalanceModal from "../../components/admin/UpdateOpeningBalanceModal";
+import UpdateRemarkModal from "../../components/admin/UpdateRemarkModal";
 import ConnectedCollectorsModal from "../../components/admin/ConnectedCollectorsModal";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
 import { formatToCustom } from "../../lib/utils";
@@ -19,6 +20,7 @@ export default function UserInfo() {
   const [showModal, setShowModal] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState("");
   const [showOpeningBalanceModal, setShowOpeningBalanceModal] = useState(false);
+  const [showRemarkeModal, setShowRemarkModal] = useState(false);
   const [pendingModalType, setPendingModalType] = useState(null); // 'main' or 'openingBalance'
 
   console.log("selectedUserId in UserInfo:", selectedUserId);
@@ -30,6 +32,8 @@ export default function UserInfo() {
     userType: "",
     balance: "",
     balanceDate: "",
+    remark: "",
+    isUserLinked: ""
   });
 
   const userTypeOptions = useMemo(
@@ -83,15 +87,23 @@ export default function UserInfo() {
       if (pendingModalType === "main") {
         setShowOpeningBalanceModal(false);
         setShowPasswordDialog(false);
+        setShowRemarkModal(false);
         setShowModal(true);
       } else if (pendingModalType === "openingBalance") {
         setShowModal(false);
         setShowPasswordDialog(false);
+        setShowRemarkModal(false);
         setShowOpeningBalanceModal(true);
       } else if (pendingModalType === "password") {
         setShowModal(false);
         setShowOpeningBalanceModal(false);
+        setShowRemarkModal(false);
         setShowPasswordDialog(true);
+      } else if (pendingModalType === "addRemark") {
+        setShowModal(false);
+        setShowOpeningBalanceModal(false);
+        setShowPasswordDialog(false);
+        setShowRemarkModal(true);
       }
       setPendingModalType(null); // Clear pending state
     }
@@ -105,6 +117,11 @@ export default function UserInfo() {
   const handleOpeningBalance = (userId) => {
     setSelectedUserId(userId);
     setPendingModalType("openingBalance");
+  };
+
+  const handleAddRemark = (userId) => {
+    setSelectedUserId(userId);
+    setPendingModalType("addRemark");
   };
 
   const handleOpeningBalanceModalClose = (balance, date) => {
@@ -121,25 +138,59 @@ export default function UserInfo() {
     setSelectedUserId("");
   };
 
-  const applyFilters = useCallback(() => {
-    const filtered = userInfos.filter((user) => {
-      return (
-        String(user.Id).toLowerCase().includes(filters.id.toLowerCase()) &&
-        user.UserName?.toLowerCase().includes(filters.username.toLowerCase()) &&
-        (filters.active === "" ||
-          (filters.active === "yes" && user.Active) ||
-          (filters.active === "no" && !user.Active)) &&
-        (filters.userType === "" ||
-          user.UserType ===
-            userTypeOptions.find((opt) => opt.Name === filters.userType)?.Id) &&
-        (filters.balance === "" ||
-          String(user.OpeningBalance || "").includes(filters.balance)) &&
-        (filters.balanceDate === "" ||
-          formatDate(user.OpeningBalanceDate).includes(filters.balanceDate))
+  const handleRemarkeModalClose = (remark) => {
+    setUserInfos((prev) =>
+        prev.map((u) =>
+          u.Id === selectedUserId
+            ? { ...u, Remark: remark }
+            : u
+        )
       );
-    });
-    setFilteredUserInfos(filtered);
-  }, [filters, userInfos, userTypeOptions]);
+    setShowRemarkModal(false);
+    setSelectedUserId("");
+  };
+
+  const applyFilters = useCallback(() => {
+  const filtered = userInfos.filter((user) => {
+    
+    const remark = user.Remark?.toLowerCase() ?? "";
+    const mesg = getUnlinkedMessage(user.UserType, user).toLowerCase();
+    
+    const filterRemark = (filters.remark || "").toLowerCase();
+    const userLinked = (filters.isUserLinked || "").toLowerCase();
+    return (
+      // ID filter
+      String(user.Id).toLowerCase().includes(filters.id.toLowerCase()) &&
+
+      // Username filter
+      (user.UserName?.toLowerCase() ?? "").includes(filters.username.toLowerCase()) &&
+
+      // Remark filter
+      (filterRemark === "" || remark.includes(filterRemark)) &&
+
+      (userLinked === "" || mesg.includes(userLinked)) &&
+
+      // Active filter
+      (filters.active === "" ||
+        (filters.active === "yes" && user.Active) ||
+        (filters.active === "no" && !user.Active)) &&
+
+      // User type filter
+      (filters.userType === "" ||
+        user.UserType === userTypeOptions.find((opt) => opt.Name === filters.userType)?.Id) &&
+
+      // Balance filter
+      (filters.balance === "" ||
+        String(user.OpeningBalance || "").includes(filters.balance)) &&
+
+      // Balance date filter
+      (filters.balanceDate === "" ||
+        formatDate(user.OpeningBalanceDate).includes(filters.balanceDate))
+    );
+  });
+
+  setFilteredUserInfos(filtered);
+}, [filters, userInfos, userTypeOptions]);
 
   useEffect(() => {
     const timeout = setTimeout(() => applyFilters(), 300);
@@ -178,6 +229,32 @@ export default function UserInfo() {
     }
   };
 
+  const getUnlinkedMessage = (userType, linked) => {
+    const { LinkedCollectors, LinkedCashiers, LinkedMasterCashiers } = linked;
+
+    let missing = [];
+
+    if (userType === 5) {
+        if (LinkedCollectors === 0) missing.push("Collector");
+        if (LinkedCashiers === 0) missing.push("Cashier");
+        if (LinkedMasterCashiers === 0) missing.push("Master Cashier");
+    }
+
+    else if (userType === 12) {
+        if (LinkedCashiers === 0) missing.push("Cashier");
+        if (LinkedMasterCashiers === 0) missing.push("Master Cashier");
+    }
+
+    else if (userType === 13) {
+        if (LinkedMasterCashiers === 0) missing.push("Master Cashier");
+    }
+
+    // If nothing is missing → return empty string
+    if (missing.length === 0) return "";
+
+    return `User is not linked with any ${missing.join(", ")}`;
+}
+
   const handleShowUserPassword = async (userId) => {
     setPendingModalType("password");
     setSelectedUserId(userId);
@@ -203,6 +280,8 @@ export default function UserInfo() {
                   "Self Submitter",
                   "Actions",
                   "Password",
+                  "Remark",
+                  "Is User Linked"
                 ]
                   .filter(
                     (header) =>
@@ -223,6 +302,8 @@ export default function UserInfo() {
                         "User Type",
                         "Opening Balance",
                         "Balance Date",
+                        "Remark",
+                        "Is User Linked"
                       ].includes(header) && (
                         <div className="mt-1">
                           {header === "Active" || header === "User Type" ? (
@@ -266,7 +347,11 @@ export default function UserInfo() {
                                   ? "username"
                                   : header === "Opening Balance"
                                   ? "balance"
-                                  : "balanceDate"
+                                  : header === "Balance Date"
+                                  ? "balanceDate"
+                                  : header === "Remark"
+                                  ? "remark"
+                                  : "isUserLinked"
                               }
                               value={
                                 header === "Id"
@@ -275,7 +360,11 @@ export default function UserInfo() {
                                   ? filters.username
                                   : header === "Opening Balance"
                                   ? filters.balance
-                                  : filters.balanceDate
+                                  : header === "Balance Date"
+                                  ? filters.balanceDate
+                                  : header === "Remark"
+                                  ? filters.remark
+                                  : filters.isUserLinked
                               }
                               onChange={handleFilterChange}
                               placeholder="Filter"
@@ -343,16 +432,26 @@ export default function UserInfo() {
                   </td>
                   <td className="p-2">
                     {user.Active ? (
-                      <button
-                        className="text-indigo-600 underline text-xs"
-                        onClick={() => handleOpeningBalance(user.Id)}
-                      >
-                        Edit OB
-                      </button>
+                      <div className="flex flex-col space-y-1">
+                        <button
+                          className="text-indigo-600 underline text-xs"
+                          onClick={() => handleOpeningBalance(user.Id)}
+                        >
+                          Edit OB
+                        </button>
+
+                        <button
+                          className="text-indigo-600 underline text-xs"
+                          onClick={() => handleAddRemark(user.Id)}
+                        >
+                          Add Remark
+                        </button>
+                      </div>
                     ) : (
                       ""
                     )}
                   </td>
+
                   {currentUser?.UserType === "Admin" && (
                     <td className="p-2 relative">
                       <button
@@ -363,6 +462,12 @@ export default function UserInfo() {
                       </button>
                     </td>
                   )}
+                  <td className="p-2">{user.Remark}</td>
+                  <td className="p-2">
+                    <span className="text-red-600">
+                      {getUnlinkedMessage(user?.UserType, user)}
+                    </span>
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -387,6 +492,12 @@ export default function UserInfo() {
         <ShowPasswordModal
           userId={selectedUserId}
           setShowPasswordDialog={setShowPasswordDialog}
+        />
+      )}
+      {showRemarkeModal && selectedUserId && (
+        <UpdateRemarkModal
+          selectedUserId={selectedUserId}
+          handleRemarkModalClose={handleRemarkeModalClose}
         />
       )}
     </div>

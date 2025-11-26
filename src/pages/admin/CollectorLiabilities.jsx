@@ -4,7 +4,7 @@ import useDocumentTitle from "../../hooks/useDocumentTitle";
 import { formatIndianNumber } from "../../lib/utils";
 import LadgerDetailsDialog from "../../components/LedgerDetailsDialog";
 
-export default function CollectorLiabilities() {
+export default function CollectorLiabilities({ userType, id }) {
   useDocumentTitle("Collector Liabilities");
 
   const [loading, setLoading] = useState(false);
@@ -40,10 +40,10 @@ export default function CollectorLiabilities() {
     fetchCollectorLiabilities();
   }, []);
 
-  const fetchCollectorLiabilities = async () => {
+  const fetchCollectorLiabilities = async (user) => {
     try {
       setLoading(true);
-      const data = await apiBase.getCollectorLiabilities();
+      const data = await apiBase.getCollectorLiabilities(id, userType);
       setCollectorLiabilities(data || []);
 
       setSummary({
@@ -109,7 +109,7 @@ export default function CollectorLiabilities() {
       {!loading && collectorLiabilities.length > 0 && (
         <>
           {/* Summary Cards */}
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-6 mb-4">
             {[
               { label: "Opening Amount", value: summary.totalClosingAmount },
               {

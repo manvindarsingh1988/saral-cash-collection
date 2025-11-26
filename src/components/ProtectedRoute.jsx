@@ -11,6 +11,7 @@ const routesForRoles = {
     "/assign-retail",
     "/pending-approvals",
     "/user-info",
+    "/create-dashboard"
   ],
   Cashier: [
     "/",
@@ -20,6 +21,7 @@ const routesForRoles = {
     "/assign-retail",
     "/pending-approvals",
     "/user-info",
+    "/create-dashboard"
   ],
   MasterCashier: [
     "/",
@@ -29,6 +31,7 @@ const routesForRoles = {
     "/assign-retail",
     "/pending-approvals",
     "/user-info",
+    "/create-dashboard"
   ],
   Collector: ["/", "/collector-ledgers", "/pending-approvals"],
   Retailer: ["/"],

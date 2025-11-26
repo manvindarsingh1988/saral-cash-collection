@@ -4,7 +4,7 @@ import { formatIndianNumber } from "../../lib/utils";
 import RetailerLiabilityTable from "../../components/admin/RetailerLiabilityTable";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
 
-export default function AdminDashboard() {
+export default function AdminDashboard({ userType, id }) {
   useDocumentTitle("Retailer Liabilities");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -26,7 +26,7 @@ export default function AdminDashboard() {
   const fetchLiabilities = async () => {
     try {
       setLoading(true);
-      const retailerData = await apiBase.getLiabilityAmountOfAllRetailers();
+      const retailerData = await apiBase.getLiabilityAmountOfAllRetailers(id, userType);
 
       setLiabilities(retailerData);
 
@@ -54,6 +54,10 @@ export default function AdminDashboard() {
         (sum, item) => sum + (item.ClosingAmount || 0),
         0
       );
+      const totalReceivedAmount = retailerData.reduce(
+        (sum, item) => sum + (item.ReceivedAmount || 0),
+        0
+      );
 
       setSummary({
         totalLaibilityAmount,
@@ -61,7 +65,8 @@ export default function AdminDashboard() {
         totalProjectionAmount,
         totalRejectedAmount,
         totalCurrentAmount,
-        totalClosingAmount
+        totalClosingAmount,
+        totalReceivedAmount
       });
       setLoading(false);
     } catch (err) {
@@ -81,7 +86,7 @@ export default function AdminDashboard() {
       {liabilities.length > 0 && (
         <>
           <div className="rounded-lg py-2">
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-6 mb-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-6 mb-4">
               <div className="bg-white overflow-hidden shadow rounded-lg">
                 <div className="px-4 py-5 sm:p-3">
                   <dt className="text-sm font-medium text-gray-500 truncate">
@@ -89,6 +94,36 @@ export default function AdminDashboard() {
                   </dt>
                   <dd className="mt-1 text-2xl font-semibold text-gray-900">
                     ₹ {formatIndianNumber(summary.totalClosingAmount)}
+                  </dd>
+                </div>
+              </div>
+              <div className="bg-white overflow-hidden shadow rounded-lg">
+                <div className="px-4 py-5 sm:p-3">
+                  <dt className="text-sm font-medium text-gray-500 truncate">
+                    Current Received Amount
+                  </dt>
+                  <dd className="mt-1 text-2xl font-semibold text-gray-900">
+                    ₹ {formatIndianNumber(summary.totalReceivedAmount)}
+                  </dd>
+                </div>
+              </div> 
+              <div className="bg-white overflow-hidden shadow rounded-lg">
+                <div className="px-4 py-5 sm:p-3">
+                  <dt className="text-sm font-medium text-gray-500 truncate">
+                    Current Amount
+                  </dt>
+                  <dd className="mt-1 text-2xl font-semibold text-gray-900">
+                    ₹ {formatIndianNumber(summary.totalCurrentAmount)}
+                  </dd>
+                </div>
+              </div> 
+              <div className="bg-white overflow-hidden shadow rounded-lg">
+                <div className="px-4 py-5 sm:p-3">
+                  <dt className="text-sm font-medium text-gray-500 truncate">
+                    Projection Amount
+                  </dt>
+                  <dd className="mt-1 text-2xl font-semibold text-gray-900">
+                    ₹ {formatIndianNumber(summary.totalProjectionAmount)}
                   </dd>
                 </div>
               </div>
@@ -112,16 +147,7 @@ export default function AdminDashboard() {
                   </dd>
                 </div>
               </div>
-              <div className="bg-white overflow-hidden shadow rounded-lg">
-                <div className="px-4 py-5 sm:p-3">
-                  <dt className="text-sm font-medium text-gray-500 truncate">
-                    Projection Amount
-                  </dt>
-                  <dd className="mt-1 text-2xl font-semibold text-gray-900">
-                    ₹ {formatIndianNumber(summary.totalProjectionAmount)}
-                  </dd>
-                </div>
-              </div>
+              
               <div className="bg-white overflow-hidden shadow rounded-lg">
                 <div className="px-4 py-5 sm:p-3">
                   <dt className="text-sm font-medium text-gray-500 truncate">
@@ -132,17 +158,10 @@ export default function AdminDashboard() {
                   </dd>
                 </div>
               </div>
-              <div className="bg-white overflow-hidden shadow rounded-lg">
-                <div className="px-4 py-5 sm:p-3">
-                  <dt className="text-sm font-medium text-gray-500 truncate">
-                    Current Amount
-                  </dt>
-                  <dd className="mt-1 text-2xl font-semibold text-gray-900">
-                    ₹ {formatIndianNumber(summary.totalCurrentAmount)}
-                  </dd>
-                </div>
-              </div>              
+              
+              
             </div>
+            
           </div>
           <RetailerLiabilityTable data={liabilities} />
         </>

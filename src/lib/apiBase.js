@@ -132,17 +132,17 @@ export const apiBase = {
     await (await authorizedFetch(`${API_URL}/GetCollectorUsers`)).json(),
   getCashiers: async () =>
     await (await authorizedFetch(`${API_URL}/GetCashierUsers`)).json(),
-  getMappedUsers: async () =>
-    await (await authorizedFetch(`${API_URL}/GetMappedUsers`)).json(),
+  getMappedUsers: async (id) =>
+    await (await authorizedFetch(`${API_URL}/GetMappedUsers?userId=${id}`)).json(),
   getMappedCollectorsByRetailerId: async (id) =>
     await (
       await authorizedFetch(
         `${API_URL}/GetMappedCollectorsByRetailerId?userId=${id}`
       )
     ).json(),
-  getLiabilityAmountOfAllRetailers: async () =>
+  getLiabilityAmountOfAllRetailers: async (id, userType) =>
     await (
-      await authorizedFetch(`${API_URL}/GetLiabilityAmountOfAllRetailers`)
+      await authorizedFetch(`${API_URL}/GetLiabilityAmountOfAllRetailers?id=${id}&userType=${userType}`)
     ).json(),
   getLiabilityAmountOfAllRetailersByCollectorId: async (id) =>
     await (
@@ -236,10 +236,18 @@ export const apiBase = {
         body: JSON.stringify(data),
       })
     ).json(),
-  getCollectorLiabilities: async () =>
-    await (await authorizedFetch(`${API_URL}/GetCollectorLiabilities`)).json(),
-  getCashierLiabilities: async () =>
-    await (await authorizedFetch(`${API_URL}/GetCashierLiabilities`)).json(),
+  assignUser: async (data) =>
+    await (
+      await authorizedFetch(`${API_URL}/MapUser`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      })
+    ).json(),
+  getCollectorLiabilities: async (id, userType) =>
+    await (await authorizedFetch(`${API_URL}/GetCollectorLiabilities?id=${id}&userType=${userType}`)).json(),
+  getCashierLiabilities: async (id, userType) =>
+    await (await authorizedFetch(`${API_URL}/GetCashierLiabilities?id=${id}&userType=${userType}`)).json(),
   getCollectorLiabilityDetails: async (id) =>
     await (
       await authorizedFetch(
@@ -264,12 +272,17 @@ export const apiBase = {
         `${API_URL}/GetCashierLedgerDetails?cashierId=${id}`
       )
     ).json(),
-  getPendingApprovals: async (all, type) =>
-    await (
-      await authorizedFetch(
-        `${API_URL}/GetPendingApprovalLedgers?showAll=${all}&userType=${type}`
-      )
-    ).json(),
+  getPendingApprovals: async (all, type, fromDate, toDate, id) =>
+  {
+    let url = `${API_URL}/GetPendingApprovalLedgers?showAll=${all}&userType=${type}&id=${id}`;
+
+    if (fromDate) url += `&fromDate=${fromDate}`;
+    if (toDate)   url += `&toDate=${toDate}`
+    return await (
+      await authorizedFetch(url)
+    ).json()
+  },
+    
   getPendingApprovalsByCollectorId: async (id, all) =>
     await (
       await authorizedFetch(
@@ -310,6 +323,17 @@ export const apiBase = {
         }),
       })
     ).json(),
+  updateRemarkData: async (id, remark) =>
+    await (
+      await authorizedFetch(`${API_URL}/updateRemarkData`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId: id,
+          remark: remark
+        }),
+      })
+    ).json(),  
   getPassword: async (id) =>
     await (await authorizedFetch(`${API_URL}/GetPassword?userId=${id}`)).json(),
   linkAllRetailersToNewCollector: async (fromId, toId) =>
@@ -319,6 +343,17 @@ export const apiBase = {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ fromCollectorId: fromId, toCollectorId: toId }),
       })
+    ).json(),
+  unassignUser: async (parentId, childId) =>
+    await (
+      await authorizedFetch(
+        `${API_URL}/DeleteDashboardUserLinking`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ParentId: parentId, ChildId: childId }),
+        }
+      )
     ).json(),
   deleteLinking: async (cid, rid) =>
     await (
@@ -330,7 +365,7 @@ export const apiBase = {
           body: JSON.stringify({ collectorId: cid, retailerId: rid }),
         }
       )
-    ).json(),
+    ).json(),  
   uploadFile: async (file, name) => {
     const response = await authorizedFetch(`${DOC_URL}/UploadCashFlowFile`, {
       method: "POST",

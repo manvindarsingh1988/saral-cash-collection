@@ -86,6 +86,7 @@ function NavLinks({ isActive, mobile = false, setMobileMenuOpen }) {
     { to: "/add-user", label: "Add User" },
     { to: "/assign-retail", label: "Assign Retail Users" },
     { to: "/user-info", label: "User Info" },
+    { to: "/create-dashboard", label: "Create Dashboard" },
   ];
 
   return links
