@@ -73,6 +73,10 @@ export default function AssignRetail() {
         alert(`Failed to assign retailer`);
         return;
       }
+      if (result.Response?.startsWith("Errors:")) {
+          alert(result.Response); 
+          return;
+      } 
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
       fetchUsers();

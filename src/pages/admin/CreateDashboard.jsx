@@ -214,6 +214,7 @@ const [searchAllCashiers, setSearchAllCashiers] = useState("");
       </div>
    
       {/* RETAILERS */}
+      {userType !== 13 && (
       <section className="mt-8">
   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
     <div>
@@ -243,6 +244,7 @@ const [searchAllCashiers, setSearchAllCashiers] = useState("");
     </div>
   </div>
 </section>
+)}
 
 {/* COLLECTORS */}
 <section className="mt-8" >

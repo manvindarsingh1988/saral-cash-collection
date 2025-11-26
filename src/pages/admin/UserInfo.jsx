@@ -230,13 +230,13 @@ export default function UserInfo() {
   };
 
   const getUnlinkedMessage = (userType, linked) => {
-    const { LinkedCollectors, LinkedCashiers, LinkedMasterCashiers } = linked;
+    const { LinkedCollectors, LinkedCashiers, LinkedMasterCashiers, IsSelfSubmitter } = linked;
 
     let missing = [];
 
     if (userType === 5) {
-        if (LinkedCollectors === 0) missing.push("Collector");
-        if (LinkedCashiers === 0) missing.push("Cashier");
+        if (LinkedCollectors === 0 && IsSelfSubmitter != 1) missing.push("Collector");
+        if (LinkedCashiers === 0 && IsSelfSubmitter != 1) missing.push("Cashier");
         if (LinkedMasterCashiers === 0) missing.push("Master Cashier");
     }
 
