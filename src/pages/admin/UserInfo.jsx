@@ -230,8 +230,8 @@ export default function UserInfo() {
   };
 
   const getUnlinkedMessage = (userType, linked) => {
-    const { LinkedCollectors, LinkedCashiers, LinkedMasterCashiers, IsSelfSubmitter, Active } = linked;
-    if(Active == 0) {
+    const { LinkedCollectors, LinkedCashiers, LinkedMasterCashiers, IsSelfSubmitter, Active, IsThirdParty } = linked;
+    if(Active == 0 || IsThirdParty == 1) {
       return '';
     }
     let missing = [];
