@@ -225,6 +225,7 @@ const [searchAllCashiers, setSearchAllCashiers] = useState("");
         items={visibleRetailersAssigned}
         onRemove={(id) => unassign("retailer", id)}
         droppableType="retailer"
+        onDropAssign={onDropAssign}
       />
     </div>
 
@@ -237,6 +238,7 @@ const [searchAllCashiers, setSearchAllCashiers] = useState("");
         items={visibleRetailersAll}
         onAdd={(item) => assign("retailer", item)}
         droppableType="retailer"
+        onDropAssign={onDropAssign}
       />
     </div>
   </div>
@@ -254,6 +256,7 @@ const [searchAllCashiers, setSearchAllCashiers] = useState("");
         items={visibleCollectorsAssigned}
         onRemove={(id) => unassign("collector", id)}
         droppableType="collector"
+        onDropAssign={onDropAssign}
       />
     </div>
 
@@ -266,6 +269,7 @@ const [searchAllCashiers, setSearchAllCashiers] = useState("");
         items={visibleCollectorsAll}
         onAdd={(item) => assign("collector", item)}
         droppableType="collector"
+        onDropAssign={onDropAssign}
       />
     </div>
   </div>
@@ -284,6 +288,7 @@ const [searchAllCashiers, setSearchAllCashiers] = useState("");
           items={visibleCashiersAssigned}
           onRemove={(id) => unassign("cashier", id)}
           droppableType="cashier"
+          onDropAssign={onDropAssign}
         />
       </div>
 
@@ -296,6 +301,7 @@ const [searchAllCashiers, setSearchAllCashiers] = useState("");
           items={visibleCashiersAll}
           onAdd={(item) => assign("cashier", item)}
           droppableType="cashier"
+          onDropAssign={onDropAssign}
         />
       </div>
     </div>
