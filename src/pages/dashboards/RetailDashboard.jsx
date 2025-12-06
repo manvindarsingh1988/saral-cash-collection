@@ -141,13 +141,20 @@ export default function RetailDashboard({ retailUserId }) {
       console.log("Sanitized Payload:", sanitizedPayload);
 
       if (editData?.Id) {
-        await apiBase.updateLedgerInfo(sanitizedPayload);
+        var result = await apiBase.updateLedgerInfo(sanitizedPayload);
+        if(result?.Response) {
+          alert(result?.Response);
+        }
       } else {
-        await apiBase.addLedgerInfo(sanitizedPayload);
+        var result = await apiBase.addLedgerInfo(sanitizedPayload);
+        if(result?.Response) {
+          alert('Success: Ledger details added.');
+        }
       }
 
       await fetchData();
     } catch (err) {
+      alert('Submission failed:', err);
       console.error("Submission failed:", err);
     }
   };
