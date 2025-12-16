@@ -248,6 +248,8 @@ export const apiBase = {
     await (await authorizedFetch(`${API_URL}/GetCollectorLiabilities?id=${id}&userType=${userType}`)).json(),
   getCashierLiabilities: async (id, userType) =>
     await (await authorizedFetch(`${API_URL}/GetCashierLiabilities?id=${id}&userType=${userType}`)).json(),
+  getMasterCashierLiabilities: async () =>
+    await (await authorizedFetch(`${API_URL}/GetMasterCashierLiabilities`)).json(),
   getCollectorLiabilityDetails: async (id) =>
     await (
       await authorizedFetch(

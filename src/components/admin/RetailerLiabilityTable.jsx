@@ -4,8 +4,7 @@ import LadgerDetailsDialog from "../LedgerDetailsDialog";
 
 const columns = [
   { heading: "Retailer Id", key: "UserId", width: "60px" },
-  { heading: "Retailer Name", key: "UserName", width: "120px" },
-  { heading: "Counter Location", key: "CounterLocation", width: "80px" },
+  { heading: "Retailer Name", key: "UserName", width: "120px" },  
   { heading: "Remark", key: "Remark", width: "80px" },
   { heading: "Opening Amount", key: "ClosingAmount", width: "80px" },
   { heading: "Current Received Amount", key: "ReceivedAmount", width: "80px" },
@@ -15,6 +14,7 @@ const columns = [
   { heading: "Pending Approval Amount", key: "PendingApprovalAmount", width: "80px" },  
   { heading: "Rejection Amount", key: "RejectedAmount", width: "80px" },  
   { heading: "Action", key: "Action", width: "80px", isAction: true },
+  { heading: "Counter Location", key: "CounterLocation", width: "80px" }
 ];
 
 export default function RetailerLiabilityTable({ data }) {

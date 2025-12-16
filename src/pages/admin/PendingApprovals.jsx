@@ -12,6 +12,7 @@ import { Download } from "lucide-react";
 
 const columns = [
   { heading: "ID", accessor: "Id" },
+  { heading: "Linked", accessor: "IsNotLinked" },
   { heading: "Amount (₹)", accessor: "Amount" },
   { heading: "Cashier Name", accessor: "CashierName" },
   { heading: "Collector Name", accessor: "CollectorName" },
@@ -292,6 +293,18 @@ export default function PendingApprovals({ userType, id }) {
                               ) : (
                                 ""
                               )}
+                            </td>
+                          );
+                        } else if (val === "IsNotLinked") {
+                          return (
+                            <td className="px-4 py-2">
+                              <span className="text-red-600">
+                                {item.IsNotLinked ? (
+                                item.TransactionType === 1 ? "Ledger is not liked with any cashier" : "Ledger is not liked with any master cashier"
+                              ) : (
+                                ""
+                              )}
+                              </span>                              
                             </td>
                           );
                         } else {

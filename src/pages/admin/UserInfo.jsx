@@ -33,7 +33,8 @@ export default function UserInfo() {
     balance: "",
     balanceDate: "",
     remark: "",
-    isUserLinked: ""
+    isUserLinked: "",
+    parentname: ""
   });
 
   const userTypeOptions = useMemo(
@@ -164,7 +165,7 @@ export default function UserInfo() {
 
       // Username filter
       (user.UserName?.toLowerCase() ?? "").includes(filters.username.toLowerCase()) &&
-
+      (user.ParentName?.toLowerCase() ?? "").includes(filters.parentname.toLowerCase()) &&
       // Remark filter
       (filterRemark === "" || remark.includes(filterRemark)) &&
 
@@ -230,7 +231,7 @@ export default function UserInfo() {
   };
 
   const getUnlinkedMessage = (userType, linked) => {
-    const { LinkedCollectors, LinkedCashiers, LinkedMasterCashiers, IsSelfSubmitter, Active, IsThirdParty } = linked;
+    const { LinkedCollectors, LinkedCashiers, LinkedMasterCashiers, IsSelfSubmitter, Active, IsThirdParty, NoBalanceAdded, LedgerCount } = linked;
     if(Active == 0 || IsThirdParty == 1) {
       return '';
     }
@@ -250,11 +251,17 @@ export default function UserInfo() {
     else if (userType === 13) {
         if (LinkedMasterCashiers === 0) missing.push("Master Cashier");
     }
-
+    let mes = '';
+    if (NoBalanceAdded === 0 && (userType === 5 || userType === 12 || userType === 13)) {
+        mes += 'Opening balance is not yet added.'
+    }
+    if (LedgerCount === 0 && (userType === 5 || userType === 12)) {
+        mes += ' No ledger is yet created.'
+    }
     // If nothing is missing → return empty string
     if (missing.length === 0) return "";
 
-    return `User is not linked with any ${missing.join(", ")}`;
+    return `User is not linked with any ${missing.join(", ")}. ` + mes;
 }
 
   const handleShowUserPassword = async (userId) => {
@@ -274,6 +281,7 @@ export default function UserInfo() {
                 {[
                   "Id",
                   "Username",
+                  "Parent Name",
                   "Active",
                   "User Type",
                   "Opening Balance",
@@ -300,6 +308,7 @@ export default function UserInfo() {
                       {[
                         "Id",
                         "Username",
+                        "Parent Name",
                         "Active",
                         "User Type",
                         "Opening Balance",
@@ -347,6 +356,8 @@ export default function UserInfo() {
                                   ? "id"
                                   : header === "Username"
                                   ? "username"
+                                  : header === "Parent Name"
+                                  ? "parentname"
                                   : header === "Opening Balance"
                                   ? "balance"
                                   : header === "Balance Date"
@@ -360,6 +371,8 @@ export default function UserInfo() {
                                   ? filters.id
                                   : header === "Username"
                                   ? filters.username
+                                  : header === "Parent Name"
+                                  ? filters.parentname
                                   : header === "Opening Balance"
                                   ? filters.balance
                                   : header === "Balance Date"
@@ -397,6 +410,7 @@ export default function UserInfo() {
                     {user.Id}
                   </td>
                   <td className="p-2">{user.UserName}</td>
+                  <td className="p-2">{user.ParentName}</td>
                   <td className="p-2">{user.Active ? "Yes" : "No"}</td>
                   <td className="p-2">
                     {userTypeOptions.find((t) => t.Id === user.UserType)
