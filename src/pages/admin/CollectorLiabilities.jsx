@@ -25,6 +25,7 @@ export default function CollectorLiabilities({ userType, id }) {
   });
 
   const [filters, setFilters] = useState({
+    Warning: "",
     UserId: "",
     UserName: "",
     LaibilityAmount: "",
@@ -146,6 +147,7 @@ export default function CollectorLiabilities({ userType, id }) {
               <table className="min-w-full text-sm text-gray-700">
                 <thead className="bg-gray-50">
                   <tr>
+                    <th className="px-4 py-2 text-left">Warning</th>
                     <th className="px-4 py-2 text-left">ID</th>
                     <th className="px-4 py-2 text-left">Name</th>
                     <th className="px-4 py-2 text-left">Opening</th>
@@ -175,6 +177,7 @@ export default function CollectorLiabilities({ userType, id }) {
                 <tbody>
                   {filteredData.map((item) => (
                     <tr key={item.UserId} className="border-t text-xs">
+                      <td className="px-4 py-2 text-red-600">{item.Warning}</td>
                       <td className="px-4 py-2">{item.UserId}</td>
                       <td className="px-4 py-2">{item.UserName || "—"}</td>
                       <td className="px-4 py-2">

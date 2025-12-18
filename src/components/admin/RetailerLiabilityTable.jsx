@@ -3,7 +3,7 @@ import { formatIndianNumber } from "../../lib/utils";
 import LadgerDetailsDialog from "../LedgerDetailsDialog";
 
 const columns = [
-  { heading: "Retailer Id", key: "UserId", width: "60px" },
+  { heading: "Warning", key: "Warning", width: "100px" },
   { heading: "Retailer Name", key: "UserName", width: "120px" },  
   { heading: "Remark", key: "Remark", width: "80px" },
   { heading: "Opening Amount", key: "ClosingAmount", width: "80px" },
@@ -137,7 +137,7 @@ const onSort = (key) => {
                   {columns.map((col) => (
                     <td
                       key={col.key}
-                      className="px-4 py-2 whitespace-nowrap text-xs text-gray-900"
+                      className={`px-4 py-2 whitespace-nowrap text-xs ${col.key === 'Warning' ? 'text-red-600' : 'text-gray-900'}`}
                     >
                       {col.isAction ? (
                         <button
