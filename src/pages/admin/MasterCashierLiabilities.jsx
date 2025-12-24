@@ -154,6 +154,12 @@ export default function MasterCashierLiabilities({ userType, id }) {
                     <th className="px-4 py-2 text-left">Today Reject Amount (₹)</th>
                     <th className="px-4 py-2 text-left">Today Approved Amount (₹)</th>                    
                     <th className="px-4 py-2 text-left">Stuck In Bank Amount (₹)</th>
+                    <th className="px-4 py-2 text-left">Retailer Opening Amount</th>
+                    <th className="px-4 py-2 text-left">Retailer Current Sale</th>
+                    <th className="px-4 py-2 text-left">Collector Opening Balance (₹)</th>
+                    <th className="px-4 py-2 text-left">Collector Current Sale (₹)</th>
+                    <th className="px-4 py-2 text-left">Casheir Opening Balance (₹)</th>
+                    <th className="px-4 py-2 text-left">Cashier Current Sale (₹)</th>
                   </tr>
                   <tr className="bg-white">
                     {Object.entries(filters).map(([key, value]) => (
@@ -194,6 +200,24 @@ export default function MasterCashierLiabilities({ userType, id }) {
                       </td>                      
                       <td className="px-4 py-2">
                         ₹ {formatIndianNumber(item.StuckInBankAmount)}
+                      </td>
+                      <td className="px-4 py-2">
+                        ₹ {formatIndianNumber(item.RetailerOpeningAmount)}
+                      </td>
+                      <td className="px-4 py-2">
+                        ₹ {formatIndianNumber(item.RetailerCurrentSale)}
+                      </td>
+                      <td className="px-4 py-2">
+                        ₹ {formatIndianNumber(item.CollectorOpeningBalance)}
+                      </td>
+                      <td className="px-4 py-2">
+                        ₹ {formatIndianNumber(item.CollectorCurrentSale)}
+                      </td>
+                      <td className="px-4 py-2">
+                        ₹ {formatIndianNumber(item.CasheirOpeningBalance)}
+                      </td>
+                      <td className="px-4 py-2">
+                        ₹ {formatIndianNumber(item.CashierCurrentSale)}
                       </td>
                     </tr>
                   ))}
