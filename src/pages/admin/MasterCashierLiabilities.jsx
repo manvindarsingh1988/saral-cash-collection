@@ -127,7 +127,7 @@ export default function MasterCashierLiabilities({ userType, id }) {
                 value: summary.totalTodayApprovedAmount },
               
               {
-                label: "Stuck In Bank Amount",
+                label: "Stuck In Bank Amount/CDM",
                 value: summary.totalStuckInBankAmount,
               },
             ].map((item) => (

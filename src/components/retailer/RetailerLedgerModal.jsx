@@ -10,6 +10,7 @@ const fieldLabels = {
   Date: "Transaction Date",
   Comment: "Comment",
   StuckInBank: "Stuck In Bank",
+  StuckInCDM: "Stuck In CDM",
 };
 
 const allowedFields = [
@@ -20,6 +21,7 @@ const allowedFields = [
   "Date",
   "Comment",
   "StuckInBank",
+  "StuckInCDM",
   "File",
   "DocId",
 ];
@@ -42,7 +44,8 @@ export default function RetailerLedgerModal({
     Date: new Date(),
     Comment: "",
     StuckInBank: false,
-    File: null,
+    StuckInCDM: false,
+    File: [],
     DocId: null,
   });
 
@@ -63,6 +66,9 @@ export default function RetailerLedgerModal({
         }
         if (field === "StuckInBank") {
           formattedData[field] = initialData["WorkFlow"] === 6;
+        }
+        if (field === "StuckInCDM") {
+          formattedData[field] = initialData["WorkFlow"] === 8;
         }
         if (field === "CollectorId") {
           formattedData[field] = initialData[field] || "";
@@ -92,7 +98,7 @@ export default function RetailerLedgerModal({
   };
 
   const handleFileChange = (e) => {
-    setFormData((prev) => ({ ...prev, File: e.target.files[0] }));
+    setFormData((prev) => ({ ...prev, File: Array.from(e.target.files) }));
   };
 
   if (!isOpen) return null;
@@ -108,9 +114,9 @@ export default function RetailerLedgerModal({
 
           if (
             (formData["TransactionType"] == "" && key === "CollectorId") ||
-            (formData["TransactionType"] == "2" && key === "CollectorId") ||
-            (formData["TransactionType"] == "3" && key === "CollectorId") ||
+            (formData["TransactionType"] !== "1" && key === "CollectorId") ||
             (formData["TransactionType"] != "2" && key === "StuckInBank") ||
+            (formData["TransactionType"] != "6" && key === "StuckInCDM") ||
             key == "Date" ||
             key === "DocId" ||
             key === "File"
@@ -167,8 +173,7 @@ export default function RetailerLedgerModal({
                   ))}
                 </select>
                 {key === "TransactionType" &&
-                  (formData["TransactionType"] === "2" ||
-                    formData["TransactionType"] === "3") && (
+                  formData["TransactionType"] != "1"  && (
                     <p className="text-xs text-gray-500 mt-1">
                       <strong>Note:</strong> Please mention transaction details
                       in comment to avoid rejection.
@@ -181,6 +186,30 @@ export default function RetailerLedgerModal({
             formData["TransactionType"] == "2"
           ) {
             console.log("Rendering StuckInBank checkbox");
+            inputElement = (
+              <label className="flex items-center gap-2">
+                <input
+                  name={key}
+                  type="checkbox"
+                  checked={formData[key] ?? false}
+                  onChange={(e) =>
+                    handleChange({
+                      target: {
+                        name: key,
+                        value: e.target.checked ? true : false,
+                      },
+                    })
+                  }
+                  className="border rounded"
+                />
+                {fieldLabels[key]}
+              </label>
+            );
+          } else if (
+            key === "StuckInCDM" &&
+            formData["TransactionType"] == "6"
+          ) {
+            console.log("Rendering StuckInCDM checkbox");
             inputElement = (
               <label className="flex items-center gap-2">
                 <input
@@ -231,7 +260,7 @@ export default function RetailerLedgerModal({
 
           return (
             <div key={key} className="flex flex-col">
-              {key !== "StuckInBank" && (
+              {key !== "StuckInBank" && key !== "StuckInCDM" && (
                 <label className="text-sm text-gray-600">{label}</label>
               )}{" "}
               {inputElement}
@@ -244,6 +273,7 @@ export default function RetailerLedgerModal({
           <label className="text-sm text-gray-600">Upload Slip</label>
           <input
             type="file"
+            multiple
             onChange={handleFileChange}
             className="border px-2 py-1 rounded"
           />

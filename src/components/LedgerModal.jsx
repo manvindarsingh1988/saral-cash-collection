@@ -4,7 +4,7 @@ import { apiBase } from "../lib/apiBase";
 import {
   generateSafeGuid,
   handleDownloadFile,
-  zipFileAndGetBase64,
+  zipFilesAndGetBase64
 } from "../lib/utils";
 import { sanitiseLedgerPayload } from "../lib/ledgerRuleEngine";
 
@@ -37,7 +37,8 @@ export default function LedgerModal({
     GivenOn: today,
     Comment: "",
     StuckInBank: false,
-    File: null,
+    StuckInCDM: false,
+    File: [],
   });
 
   useEffect(() => {
@@ -54,6 +55,7 @@ export default function LedgerModal({
         GivenOn: today,
         Comment: initialData?.Comment ?? "",
         StuckInBank: initialData?.WorkFlow === 6,
+        StuckInCDM: initialData?.WorkFlow === 8,
         DocId: initialData?.DocId ?? null,
         File: null,
       });
@@ -69,7 +71,7 @@ export default function LedgerModal({
   };
 
   const handleFileChange = (e) => {
-    setFormData((prev) => ({ ...prev, File: e.target.files[0] }));
+    setFormData((prev) => ({ ...prev, File: Array.from(e.target.files) }));
   };
 
   const handleSubmit = async () => {
@@ -85,7 +87,7 @@ export default function LedgerModal({
     }
     if (formData.File) {
       try {
-        const byteArray = await zipFileAndGetBase64(formData.File); // convert to byte array
+        const byteArray = await zipFilesAndGetBase64(formData.File); // convert to byte array
         await apiBase.uploadFile(byteArray, docId); // adjust API if needed to accept byte array
         fileSaved = true;
       } catch (err) {
@@ -105,7 +107,7 @@ export default function LedgerModal({
       CollectorId: isCollectorLedger ? userId : "",
       Amount: parseFloat(formData.Amount),
       TransactionType: parseInt(formData.TransactionType),
-      WorkFlow: formData.StuckInBank ? 6 : 1,
+      WorkFlow: formData.StuckInBank ? 6 : formData.StuckInCDM ? 8 : 1,
       Date: new Date(formData.Date),
       GivenOn: new Date(formData.GivenOn),
       Comment: formData.Comment,
@@ -160,7 +162,7 @@ export default function LedgerModal({
               </option>
             ))}
           </select>
-          {["2", "3", "4"].includes(formData.TransactionType) && (
+          {["2", "3", "4", "5", "6"].includes(formData.TransactionType) && (
             <p className="text-xs text-gray-500 mt-1">
               <strong>Note:</strong> Please mention transaction details in
               comments to avoid rejection.
@@ -252,11 +254,26 @@ export default function LedgerModal({
           </div>
         )}
 
+        {/* StuckInCDM */}
+        {formData.TransactionType === "6" && (
+          <div className="flex items-center gap-2">
+            <input
+              name="StuckInCDM"
+              type="checkbox"
+              checked={formData.StuckInCDM}
+              onChange={handleChange}
+              className="border rounded"
+            />
+            <label className="text-sm text-gray-600">Stuck in CDM</label>
+          </div>
+        )}
+
         {/* File Upload */}
         <div className="flex flex-col">
           <label className="text-sm text-gray-600">Upload Slip</label>
           <input
             type="file"
+            multiple
             onChange={handleFileChange}
             className="border px-2 py-1 rounded"
           />

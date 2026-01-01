@@ -84,6 +84,18 @@ export async function zipFileAndGetBase64(file: File): Promise<string> {
   return base64;
 }
 
+export async function zipFilesAndGetBase64(files: File[]): Promise<string> {
+  const zip = new JSZip();
+
+  for (const file of files) {
+    const arrayBuffer = await file.arrayBuffer();
+    zip.file(file.name, arrayBuffer);
+  }
+
+  const base64 = await zip.generateAsync({ type: "base64" });
+  return base64;
+}
+
 export function base64ToByteArray(base64: string): Uint8Array {
   const binaryString = atob(base64); // Decode base64 to binary string
   const len = binaryString.length;

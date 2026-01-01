@@ -7,7 +7,7 @@ import {
   generateSafeGuid,
   getRowColor,
   handleDownloadFile,
-  zipFileAndGetBase64,
+  zipFilesAndGetBase64
 } from "../../lib/utils";
 import RetailerLedgerModal from "../../components/retailer/RetailerLedgerModal";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
@@ -112,7 +112,7 @@ export default function RetailDashboard({ retailUserId }) {
 
     if (data.File) {
       try {
-        const byteArray = await zipFileAndGetBase64(data.File); // convert to byte array
+        const byteArray = await zipFilesAndGetBase64(data.File); // convert to byte array
         await apiBase.uploadFile(byteArray, docId); // adjust API if needed to accept byte array
         fileSaved = true;
       } catch (err) {
@@ -127,7 +127,7 @@ export default function RetailDashboard({ retailUserId }) {
         ...data,
         Amount: parseFloat(data.Amount),
         TransactionType: parseInt(data.TransactionType),
-        WorkFlow: data?.StuckInBank ? 6 : 1,
+        WorkFlow: data?.StuckInBank ? 6 : data?.StuckInCDM ? 8 : 1,
         Date: new Date(data.Date).toISOString(),
         GivenOn: new Date().toISOString(),
         CollectorId: data.TransactionType == "2" ? "" : data.CollectorId,
