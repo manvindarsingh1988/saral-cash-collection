@@ -84,7 +84,7 @@ export async function zipFileAndGetBase64(file: File): Promise<string> {
   return base64;
 }
 
-export async function zipFilesAndGetBase64(files: File[]): Promise<string> {
+export async function zipFilesToBlob(files: File[]): Promise<Blob> {
   const zip = new JSZip();
 
   for (const file of files) {
@@ -92,8 +92,9 @@ export async function zipFilesAndGetBase64(files: File[]): Promise<string> {
     zip.file(file.name, arrayBuffer);
   }
 
-  const base64 = await zip.generateAsync({ type: "base64" });
-  return base64;
+  // Generate ZIP as Blob (not base64)
+  const zipBlob = await zip.generateAsync({ type: "blob" });
+  return zipBlob;
 }
 
 export function base64ToByteArray(base64: string): Uint8Array {
@@ -108,29 +109,29 @@ export function base64ToByteArray(base64: string): Uint8Array {
   return bytes;
 }
 
-export const handleDownloadFile = async (docId: string, ledgerId: string) => {
+export const handleDownloadFile = async (
+  docId: string,
+  ledgerId: string
+) => {
   try {
-    const response = await apiBase.downloadFileUrl(docId);
-    if (!response || !response.content) {
+    // API now returns a Blob (ZIP)
+    const blob = await apiBase.downloadFileUrl(docId);
+
+    if (!blob || blob.size === 0) {
       alert("No file found for this entry.");
       return;
     }
 
-    const fileBytes = base64ToByteArray(response.content);
-    const blob = new Blob([fileBytes], {
-      type: "application/zip",
-    });
     const url = URL.createObjectURL(blob);
 
-    // Create an anchor tag to trigger download with custom filename
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `Ledger_${ledgerId}.zip`; // Use transactionId as filename
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url); // Clean up
+    // Option 1: open ZIP in new tab
+    window.open(url, "_blank");
+
+    // Cleanup after a short delay (browser needs the URL)
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
   } catch (err) {
     console.error("File download failed:", err);
+    alert("Failed to download file.");
   }
 };
+

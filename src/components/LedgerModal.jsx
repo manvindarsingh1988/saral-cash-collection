@@ -4,7 +4,7 @@ import { apiBase } from "../lib/apiBase";
 import {
   generateSafeGuid,
   handleDownloadFile,
-  zipFilesAndGetBase64
+  zipFilesToBlob
 } from "../lib/utils";
 import { sanitiseLedgerPayload } from "../lib/ledgerRuleEngine";
 
@@ -87,8 +87,8 @@ export default function LedgerModal({
     }
     if (formData.File) {
       try {
-        const byteArray = await zipFilesAndGetBase64(formData.File); // convert to byte array
-        await apiBase.uploadFile(byteArray, docId); // adjust API if needed to accept byte array
+        const blob = await zipFilesToBlob(formData.File); // convert to byte array
+        await apiBase.uploadFile(blob, docId); // adjust API if needed to accept byte array
         fileSaved = true;
       } catch (err) {
         console.error("File upload failed:", err);

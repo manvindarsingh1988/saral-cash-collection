@@ -191,29 +191,31 @@ export default function ApprovalLedgerModal({
         <div className="flex flex-col">
           {formData?.DocId && (
             <button
-              onClick={async () => {
-                try {
-                  const response = await apiBase.downloadFileUrl(
-                    formData.DocId
-                  );
-                  if (!response || !response.content) {
-                    alert("No file found for this entry.");
-                    return;
-                  }
-                  const fileBytes = base64ToByteArray(response.content);
-                  const blob = new Blob([fileBytes], {
-                    type: "application/zip",
-                  });
-                  const url = URL.createObjectURL(blob);
-                  window.open(url, "_blank");
-                } catch (err) {
-                  console.error("File download failed:", err);
+            onClick={async () => {
+              try {
+                const blob = await apiBase.downloadFileUrl(formData.DocId);
+
+                if (!blob || blob.size === 0) {
+                  alert("No file found for this entry.");
+                  return;
                 }
-              }}
-              className="text-blue-600 text-sm mb-1 hover:underline text-left"
-            >
-              Download File
-            </button>
+
+                const url = URL.createObjectURL(blob);
+
+                // Option 1: open in new tab
+                window.open(url, "_blank");
+
+                URL.revokeObjectURL(url);
+              } catch (err) {
+                console.error("File download failed:", err);
+                alert("Failed to download file.");
+              }
+            }}
+            className="text-blue-600 text-sm mb-1 hover:underline text-left"
+          >
+            Download File
+          </button>
+
           )}
         </div>
 

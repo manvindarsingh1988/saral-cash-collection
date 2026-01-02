@@ -7,7 +7,7 @@ import {
   generateSafeGuid,
   getRowColor,
   handleDownloadFile,
-  zipFilesAndGetBase64
+  zipFilesToBlob
 } from "../../lib/utils";
 import RetailerLedgerModal from "../../components/retailer/RetailerLedgerModal";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
@@ -112,8 +112,8 @@ export default function RetailDashboard({ retailUserId }) {
 
     if (data.File) {
       try {
-        const byteArray = await zipFilesAndGetBase64(data.File); // convert to byte array
-        await apiBase.uploadFile(byteArray, docId); // adjust API if needed to accept byte array
+        const blob = await zipFilesToBlob(data.File); // convert to byte array
+        await apiBase.uploadFile(blob, docId); // adjust API if needed to accept byte array
         fileSaved = true;
       } catch (err) {
         console.error("File upload failed:", err);

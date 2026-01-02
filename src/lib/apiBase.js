@@ -369,16 +369,31 @@ export const apiBase = {
       )
     ).json(),  
   uploadFile: async (file, name) => {
-    const response = await authorizedFetch(`${DOC_URL}/UploadCashFlowFile`, {
+  const formData = new FormData();
+  formData.append("file", file, `${name}.zip`);
+
+  const response = await authorizedFetch(
+    `${DOC_URL}/upload?root=CashFlowFiles&folderName=${name}`,
+    {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ content: file, fileName: name }),
-    });
-    if (!response.ok) throw new Error("File upload failed");
-    return true;
-  },
-  downloadFileUrl: async (name) =>
-    await (
-      await authorizedFetch(`${DOC_URL}/DownloadCashFlowFile?fileName=${name}`)
-    ).json(),
-};
+      body: formData, // ⚠️ no Content-Type header
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error("File upload failed");
+  }
+
+  return true;
+},
+  downloadFileUrl: async (name) => {
+  const response = await authorizedFetch(
+    `${DOC_URL}/download?root=CashFlowFiles&folderName=${name}`
+  );
+
+  if (!response.ok) {
+    throw new Error("File download failed");
+  }
+  return await response.blob();
+}
+}
