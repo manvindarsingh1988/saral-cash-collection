@@ -118,6 +118,7 @@ export default function AddUser() {
               required
             >
               <option value="12">Collector</option>
+              <option value="20">ZoneManager</option>
               {user?.UserType === "Cashier" ? (
                 ""
               ) : (

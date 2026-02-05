@@ -36,13 +36,34 @@ const [searchAllCollectors, setSearchAllCollectors] = useState("");
 // CASHIERS
 const [searchAssignedCashiers, setSearchAssignedCashiers] = useState("");
 const [searchAllCashiers, setSearchAllCashiers] = useState("");
+const [zoneManagers, setZoneManagers] = useState([]);
+const [selectedZoneManager, setSelectedZoneManager] = useState("");
 
   // Generic fetcher
   useEffect(() => {
-    fetchAllData();
-  }, []);
+  if (userType === 15) {
+    fetchZoneManagers();
+  } else {
+    fetchAllData(id);
+  }
+}, [userType, id]);
 
-  const fetchAllData = async () => {
+useEffect(() => {
+  if (userType === 15 && selectedZoneManager) {
+    fetchAllData(selectedZoneManager);
+  }
+}, [userType, selectedZoneManager]);
+
+const fetchZoneManagers = async () => {
+  try {
+    const zm = await apiBase.getZoneManagers(); // 🔴 your API
+    setZoneManagers(zm || []);
+  } catch (err) {
+    console.error(err);
+  }
+};
+
+ const fetchAllData = async (parentId) => {
     try {
       setLoading(true);
       // adjust these apiBase methods to your real endpoints
@@ -50,7 +71,7 @@ const [searchAllCashiers, setSearchAllCashiers] = useState("");
         apiBase.getRetailUsers(),
         apiBase.getCollectors(),
         apiBase.getCashiers(),
-        apiBase.getMappedUsers(id),
+        apiBase.getMappedUsers(parentId),
       ]);
 
       setRetailers(retAll || []);
@@ -114,16 +135,17 @@ const [searchAllCashiers, setSearchAllCashiers] = useState("");
   const assign = async (type, item) => {
     // type: 'retailer' | 'collector' | 'cashier'
     try {
+      const parentId = userType === 15 ? selectedZoneManager : id;
       if (type === "retailer") {
         setAssignedRetailers((prev) => [item, ...prev]);
-        await apiBase.assignUser({ParentId: id, ChildId: item.Id, UserType: 5});
+        await apiBase.assignUser({ParentId: parentId, ChildId: item.Id, UserType: 5});
         // refetch or keep optimistic
       } else if (type === "collector") {
         setAssignedCollectors((prev) => [item, ...prev]);
-        await apiBase.assignUser({ParentId: id, ChildId: item.Id, UserType: 12});
+        await apiBase.assignUser({ParentId: parentId, ChildId: item.Id, UserType: 12});
       } else if (type === "cashier") {
         setAssignedCashiers((prev) => [item, ...prev]);
-        await apiBase.assignUser({ParentId: id, ChildId: item.Id, UserType: 13});
+        await apiBase.assignUser({ParentId: parentId, ChildId: item.Id, UserType: 13});
       }
     } catch (err) {
       console.error("assign failed", err);
@@ -134,6 +156,7 @@ const [searchAllCashiers, setSearchAllCashiers] = useState("");
 
   const unassign = async (type, itemId) => {
     try {
+      const parentId = userType === 15 ? selectedZoneManager : id;
       if (type === "retailer") {
         setAssignedRetailers((prev) => prev.filter((r) => r.Id !== itemId));
       } else if (type === "collector") {
@@ -141,7 +164,7 @@ const [searchAllCashiers, setSearchAllCashiers] = useState("");
       } else if (type === "cashier") {
         setAssignedCashiers((prev) => prev.filter((r) => r.Id !== itemId));        
       }
-      await apiBase.unassignUser(id, itemId);
+      await apiBase.unassignUser(parentId, itemId);
     } catch (err) {
       console.error("unassign failed", err);
       await fetchAllData();
@@ -212,6 +235,24 @@ const [searchAllCashiers, setSearchAllCashiers] = useState("");
         </div>
         
       </div>
+
+      {userType === 15 && (
+        <div className="mb-6">
+          <label className="block text-sm font-medium mb-1">Select Zone Manager</label>
+          <select
+            className="px-3 py-2 border rounded w-full md:w-1/3"
+            value={selectedZoneManager}
+            onChange={(e) => setSelectedZoneManager(e.target.value)}
+          >
+            <option value="">-- Select Zone Manager --</option>
+            {zoneManagers.map((zm) => (
+              <option key={zm.Id} value={zm.Id}>
+                {zm.UserName}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
    
       {/* RETAILERS */}
       {userType !== 13 && (

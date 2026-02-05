@@ -43,6 +43,7 @@ export default function UserInfo() {
       { Id: 12, Name: "Collector" },
       { Id: 13, Name: "Cashier" },
       { Id: 14, Name: "MasterCashier" },
+      { Id: 20, Name: "ZoneManager" },
     ],
     []
   );

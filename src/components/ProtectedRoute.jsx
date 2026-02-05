@@ -42,6 +42,11 @@ const routesForRoles = {
     "/users/add",
     "/users/info"
   ],
+  ZoneManager: [
+    "/",
+    "/liabilities/retailer",
+    "/liabilities/collector"
+  ],
   Collector: ["/", "/collector-ledgers", "/pending-approvals"],
   Retailer: ["/"],
 };

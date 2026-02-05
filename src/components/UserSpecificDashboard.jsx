@@ -27,16 +27,18 @@ export default function UserSpecificDashboard() {
   const user = apiBase.getCurrentUser();
   const { UserType, Id } = user || {};
   const resolvedUserType =
-    UserType === "Cashier" ? 13 : UserType === "MasterCashier" ? 14 : 15;
+    UserType === "Cashier" ? 13 : UserType === "MasterCashier" ? 14 : UserType === "ZoneManager" ? 20 : 15;
   if(UserType === "Admin" ||
         UserType === "Cashier" ||
-        UserType === "MasterCashier") {
+        UserType === "MasterCashier" || 
+        UserType === "ZoneManager") {
           return (
             <Routes>
               {/* ================= ADMIN / CASHIER ================= */}
               {(UserType === "Admin" ||
                 UserType === "Cashier" ||
-                UserType === "MasterCashier") && (
+                UserType === "MasterCashier" || 
+                UserType === "ZoneManager" ) && (
                 <Route element={<AdminLayout />}>   
                 <Route index element={<Navigate to="liabilities/retailer" replace />} />   
 

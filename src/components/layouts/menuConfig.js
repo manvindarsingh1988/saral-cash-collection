@@ -5,12 +5,12 @@ export const menuConfig = [
       { 
         to: "liabilities/retailer", 
         label: "Retailer Liabilities",
-        allow: ["Admin", "MasterCashier", "Cashier"]
+        allow: ["Admin", "MasterCashier", "Cashier", "ZoneManager"]
       },
       {
         to: "liabilities/collector",
         label: "Collector Liabilities",
-        allow: ["Admin", "MasterCashier", "Cashier"],
+        allow: ["Admin", "MasterCashier", "Cashier", "ZoneManager"],
       },
       {
         to: "liabilities/cashier",

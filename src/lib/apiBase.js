@@ -132,6 +132,8 @@ export const apiBase = {
     await (await authorizedFetch(`${API_URL}/GetCollectorUsers`)).json(),
   getCashiers: async () =>
     await (await authorizedFetch(`${API_URL}/GetCashierUsers`)).json(),
+  getZoneManagers: async () =>
+    await (await authorizedFetch(`${API_URL}/GetZMUsers`)).json(),
   getMappedUsers: async (id) =>
     await (await authorizedFetch(`${API_URL}/GetMappedUsers?userId=${id}`)).json(),
   getMappedCollectorsByRetailerId: async (id) =>
