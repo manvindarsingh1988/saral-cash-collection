@@ -14,7 +14,10 @@ const columns = [
   { heading: "Pending Approval Amount", key: "PendingApprovalAmount", width: "80px" },  
   { heading: "Rejection Amount", key: "RejectedAmount", width: "80px" },  
   { heading: "Action", key: "Action", width: "80px", isAction: true },
-  { heading: "Counter Location", key: "CounterLocation", width: "80px" }
+  { heading: "Counter Location", key: "CounterLocation", width: "80px" },
+  { heading: "Linked Collector", key: "LinkedCollector", width: "80px" },
+  { heading: "Linked Cashier", key: "LinkedCashier", width: "80px" },
+  { heading: "Linked Master Cashier", key: "LinkedMasterCashier", width: "80px" },
 ];
 
 export default function RetailerLiabilityTable({ data }) {

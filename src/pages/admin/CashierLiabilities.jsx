@@ -110,7 +110,7 @@ export default function CashierLiabilities({ userType, id }) {
       {!loading && cashierLiabilities.length > 0 && (
         <>
           {/* Summary Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-6 mb-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6 mb-4">
             
             {[
               { label: "Opening Amount", value: summary.totalClosingAmount },
@@ -126,7 +126,6 @@ export default function CashierLiabilities({ userType, id }) {
                 label: "Projection Amount",
                 value: summary.totalProjectionAmount,
               },
-              { label: "Rejected Amount", value: summary.totalRejectedAmount },
               { label: "Current Amount", value: summary.totalCurrentAmount },
               
               {
@@ -154,11 +153,13 @@ export default function CashierLiabilities({ userType, id }) {
                     <th className="px-4 py-2 text-left">Opening</th>
                     <th className="px-4 py-2 text-left">Liability (₹)</th>
                     <th className="px-4 py-2 text-left">Pending (₹)</th>
-                    <th className="px-4 py-2 text-left">Rejected (₹)</th>
                     <th className="px-4 py-2 text-left">Projection (₹)</th>
                     <th className="px-4 py-2 text-left">Current</th>                    
                     <th className="px-4 py-2 text-left">
                       Collectors Initiated Amount
+                    </th>
+                    <th className="px-4 py-2 text-left">
+                      Linked Master Cashier
                     </th>
                   </tr>
                   <tr className="bg-white">
@@ -205,9 +206,6 @@ export default function CashierLiabilities({ userType, id }) {
                         </button>
                       </td>
                       <td className="px-4 py-2">
-                        ₹ {formatIndianNumber(item.RejectedAmount)}
-                      </td>
-                      <td className="px-4 py-2">
                         ₹ {formatIndianNumber(item.ProjectionAmount)}
                       </td>
                       <td className="px-4 py-2">
@@ -216,6 +214,7 @@ export default function CashierLiabilities({ userType, id }) {
                       <td className="px-4 py-2">
                         ₹ {formatIndianNumber(item.RetailerInitiatedAmount)}
                       </td>
+                      <td className="px-4 py-2">{item.LinkedMasterCashier || "—"}</td>
                     </tr>
                   ))}
                 </tbody>
