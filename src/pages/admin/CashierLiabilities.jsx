@@ -28,13 +28,13 @@ export default function CashierLiabilities({ userType, id }) {
     Warning: "",
     UserId: "",
     UserName: "",
+    ClosingAmount: "",
     LaibilityAmount: "",
     PendingApprovalAmount: "",
     ProjectionAmount: "",
-    RejectedAmount: "",
     CurrentAmount: "",
-    ClosingAmount: "",
     RetailerInitiatedAmount: "",
+    LinkedMasterCashier: ""
   });
 
   useEffect(() => {

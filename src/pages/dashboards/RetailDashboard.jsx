@@ -221,7 +221,7 @@ export default function RetailDashboard({ retailUserId }) {
 
                 <div className="bg-white shadow rounded-lg p-4">
                   <dt className="text-sm font-medium text-gray-500">
-                    Total rejected amount
+                    Today Fix Fund Charges
                   </dt>
                   <dd className="mt-1 text-2xl font-semibold text-gray-900">
                     ₹ {formatIndianNumber(liability.RejectedAmount)}

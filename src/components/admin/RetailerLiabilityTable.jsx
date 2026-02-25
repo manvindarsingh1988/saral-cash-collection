@@ -12,7 +12,7 @@ const columns = [
   { heading: "Projection Amount", key: "ProjectionAmount", width: "80px" },
   { heading: "Laibility Amount", key: "LaibilityAmount", width: "80px" },
   { heading: "Pending Approval Amount", key: "PendingApprovalAmount", width: "80px" },  
-  { heading: "Rejection Amount", key: "RejectedAmount", width: "80px" },  
+  { heading: "FixedFund Charge", key: "RejectedAmount", width: "80px" },  
   { heading: "Action", key: "Action", width: "80px", isAction: true },
   { heading: "Counter Location", key: "CounterLocation", width: "80px" },
   { heading: "Linked Collector", key: "LinkedCollector", width: "80px" },

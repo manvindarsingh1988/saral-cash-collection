@@ -82,7 +82,7 @@ export default function RetailerLiabilitiesForCollector({ collectorUserId }) {
       {liabilities.length > 0 && (
         <>
           <div className="rounded-lg py-2">
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-6 mb-4">
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-5 mb-4">
               <div className="bg-white overflow-hidden shadow rounded-lg">
                 <div className="px-4 py-5 sm:p-3">
                   <dt className="text-sm font-medium text-gray-500 truncate">
@@ -120,16 +120,6 @@ export default function RetailerLiabilitiesForCollector({ collectorUserId }) {
                   </dt>
                   <dd className="mt-1 text-2xl font-semibold text-gray-900">
                     ₹ {formatIndianNumber(summary.totalProjectionAmount)}
-                  </dd>
-                </div>
-              </div>
-              <div className="bg-white overflow-hidden shadow rounded-lg">
-                <div className="px-4 py-5 sm:p-3">
-                  <dt className="text-sm font-medium text-gray-500 truncate">
-                    Rejection Amount
-                  </dt>
-                  <dd className="mt-1 text-2xl font-semibold text-gray-900">
-                    ₹ {formatIndianNumber(summary.totalRejectedAmount)}
                   </dd>
                 </div>
               </div>

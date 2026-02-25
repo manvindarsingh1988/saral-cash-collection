@@ -28,13 +28,14 @@ export default function CollectorLiabilities({ userType, id }) {
     Warning: "",
     UserId: "",
     UserName: "",
+    ClosingAmount: "",
     LaibilityAmount: "",
     PendingApprovalAmount: "",
     ProjectionAmount: "",
-    RejectedAmount: "",
-    CurrentAmount: "",
-    ClosingAmount: "",
+    CurrentAmount: "",    
     RetailerInitiatedAmount: "",
+    LinkedCashier: "",
+    LinkedMasterCashier: ""
   });
 
   useEffect(() => {
