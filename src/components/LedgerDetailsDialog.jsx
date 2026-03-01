@@ -14,9 +14,11 @@ const columns = [
   { heading: "Cashier", key: "CashierName", width: "200px" },
 ];
 
-// Mapping of model types to their corresponding data fetchers
+// fetchers
 const fetchMap = {
-  Retailer: (id) => apiBase.getLadgerInfoByRetailerid(false, id),
+  Retailer: (id, fromDate, toDate) =>
+    apiBase.getLadgerInfoByRetailerid(true, id, fromDate, toDate),
+
   Collector: (id) => apiBase.getCollectorLiabilityDetails(id),
   Cleared: (id) => apiBase.getCollectorLiabilityDetails(id),
   Handover: (id) => apiBase.getCollectorLedgerDetails(id),
@@ -29,28 +31,47 @@ export default function LadgerDetailsDialog({ userId, onClose, modelFor = "Retai
   const [loading, setLoading] = useState(true);
   const [masterData, setMasterData] = useState({});
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const fetchLadgerFn = fetchMap[modelFor];
-        if (fetchLadgerFn) {
-          const [ladger, master] = await Promise.all([
-            fetchLadgerFn(userId),
-            apiBase.getMasterData(),
-          ]);
-          setLadgerData(ladger || []);
-          setMasterData(master || {});
-        } else {
-          console.warn(`No fetcher configured for modelFor: ${modelFor}`);
-        }
-      } catch (err) {
-        console.error("Failed to fetch ladger info", err);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const today = new Date().toISOString().split("T")[0];
+  const [fromDate, setFromDate] = useState(today);
+  const [toDate, setToDate] = useState(today);
+  const [error, setError] = useState("");
 
-    fetchData();
+  const loadData = async () => {
+    try {
+      setError("");
+      setLoading(true);
+
+      if (modelFor === "Retailer" && fromDate > toDate) {
+        setError("From Date must be less than or equal to To Date");
+        setLoading(false);
+        return;
+      }
+
+      const fetchFn = fetchMap[modelFor];
+      if (!fetchFn) return;
+
+      const [ladger, master] =
+        modelFor === "Retailer"
+          ? await Promise.all([
+              fetchFn(userId, fromDate, toDate),
+              apiBase.getMasterData(),
+            ])
+          : await Promise.all([
+              fetchFn(userId),
+              apiBase.getMasterData(),
+            ]);
+
+      setLadgerData(ladger || []);
+      setMasterData(master || {});
+    } catch (err) {
+      console.error("Failed to fetch ladger info", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadData();
   }, [userId, modelFor]);
 
   const getMasterValue = (type, id) => {
@@ -76,12 +97,47 @@ export default function LadgerDetailsDialog({ userId, onClose, modelFor = "Retai
     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
       <div className="bg-white p-6 rounded shadow max-w-5xl w-full max-h-[80vh] overflow-y-auto relative">
         <h2 className="text-xl font-semibold mb-4">Ledger Info</h2>
+
         <button
           onClick={onClose}
           className="absolute top-4 right-4 text-gray-500 hover:text-gray-800"
         >
           ✕
         </button>
+
+        {/* Date filter only for Retailer */}
+        {modelFor === "Retailer" && (
+          <div className="flex gap-4 mb-4 items-end">
+            <div>
+              <label className="block text-sm">From Date</label>
+              <input
+                type="date"
+                value={fromDate}
+                onChange={(e) => setFromDate(e.target.value)}
+                className="border px-2 py-1 rounded"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm">To Date</label>
+              <input
+                type="date"
+                value={toDate}
+                onChange={(e) => setToDate(e.target.value)}
+                className="border px-2 py-1 rounded"
+              />
+            </div>
+
+            <button
+              onClick={loadData}
+              className="bg-blue-600 text-white px-4 py-2 rounded"
+            >
+              Search
+            </button>
+          </div>
+        )}
+
+        {error && <div className="text-red-600 mb-2">{error}</div>}
 
         {loading ? (
           <div>Loading...</div>

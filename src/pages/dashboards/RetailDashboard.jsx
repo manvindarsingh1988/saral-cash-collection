@@ -35,6 +35,9 @@ export default function RetailDashboard({ retailUserId }) {
   const [masterData, setMasterData] = useState(null);
   const [collectors, setCollectors] = useState([]);
   const [showAll, setShowAll] = useState(false);
+  const [fromDate, setFromDate] = useState(() => new Date().toISOString().split("T")[0]);
+  const [toDate, setToDate] = useState(() => new Date().toISOString().split("T")[0]);
+  const [enableDateFilter, setEnableDateFilter] = useState(false);
   const [filters, setFilters] = useState({
     CollectorId: "",
     Amount: "",
@@ -68,22 +71,27 @@ export default function RetailDashboard({ retailUserId }) {
   }, [showAll]);
 
   const fetchData = async () => {
-    if (!retailUserId) return;
+  if (!retailUserId) return;
 
-    try {
-      const [ledgerData, liabilityData] = await Promise.all([
-        apiBase.getLadgerInfoByRetailerid(showAll, retailUserId),
-        apiBase.getLiabilityAmountByRetailerId(retailUserId),
-      ]);
+  try {
+    const [ledgerData, liabilityData] = await Promise.all([
+      apiBase.getLadgerInfoByRetailerid(
+        showAll,
+        retailUserId,
+        fromDate,
+        toDate
+      ),
+      apiBase.getLiabilityAmountByRetailerId(retailUserId),
+    ]);
 
-      setLiability(liabilityData);
-      setLedger(ledgerData);
-    } catch (err) {
-      console.error("Error:", err);
-      setLiability(null);
-      setLedger(null);
-    }
-  };
+    setLiability(liabilityData);
+    setLedger(ledgerData);
+  } catch (err) {
+    console.error("Error:", err);
+    setLiability(null);
+    setLedger(null);
+  }
+};
 
   const getMasterValue = (type, id) => {
     const list = masterData?.[type] || [];
@@ -256,22 +264,50 @@ export default function RetailDashboard({ retailUserId }) {
                 </button>
               </div>
 
-              <div className="flex justify-start mb-2">
+              <div className="flex items-center gap-4 mb-3">
                 <input
                   type="checkbox"
                   id="show-all"
-                  checked={showAll}
-                  onChange={() => {
-                    setShowAll(!showAll);
+                  checked={enableDateFilter}
+                  onChange={(e) => {
+                    const checked = e.target.checked;
+                    setEnableDateFilter(checked);
+                    setShowAll(checked);
+
+                    const today = new Date().toISOString().split("T")[0];
+                    setFromDate(today);
+                    setToDate(today);
                   }}
                 />
-                <label
-                  htmlFor="show-all"
-                  className="ml-2 text-md text-black-500"
-                >
-                  Show All
+                <label htmlFor="show-all" className="text-md text-black-500">
+                  Search By Date Range
                 </label>
+
+                <input
+                  type="date"
+                  disabled={!enableDateFilter}
+                  value={fromDate}
+                  onChange={(e) => setFromDate(e.target.value)}
+                  className="border px-2 py-1 rounded"
+                />
+
+                <input
+                  type="date"
+                  disabled={!enableDateFilter}
+                  value={toDate}
+                  onChange={(e) => setToDate(e.target.value)}
+                  className="border px-2 py-1 rounded"
+                />
+
+                <button
+                  disabled={!enableDateFilter}
+                  onClick={fetchData}
+                  className="bg-blue-600 text-white px-4 py-1.5 rounded hover:bg-blue-700 disabled:bg-gray-400"
+                >
+                  Search
+                </button>
               </div>
+
 
               {ledger?.length > 0 && (
                 <div className="overflow-y-auto border border-gray-200 rounded h-[400px]">

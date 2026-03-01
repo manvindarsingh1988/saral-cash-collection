@@ -31,6 +31,12 @@ export default function MasterCashierLiabilities({ userType, id }) {
     TodayRejectAmount: "",
     TodayApprovedAmount: "",
     StuckInBankAmount: "",
+    RetailerOpeningAmount: "",
+    RetailerCurrentSale: "",
+    CollectorOpeningBalance: "",
+    CollectorCurrentSale: "",
+    CasheirOpeningBalance: "",
+    CashierCurrentSale: "",
   });
 
   useEffect(() => {

@@ -198,10 +198,10 @@ export const apiBase = {
         method: "DELETE",
       })
     ).json(),
-  getLadgerInfoByRetailerid: async (all, id) =>
+  getLadgerInfoByRetailerid: async (all, id, fromDate, toDate) =>
     await (
       await authorizedFetch(
-        `${API_URL}/GetLadgerInfoByRetailerid?all=${all}&retailerId=${id}`
+        `${API_URL}/GetLadgerInfoByRetailerid?all=${all}&retailerId=${id}&fromDate=${fromDate}&toDate=${toDate}`
       )
     ).json(),
   getLedgerInfoByCollectorId: async (all, id) =>
