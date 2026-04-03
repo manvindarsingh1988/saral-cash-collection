@@ -166,7 +166,7 @@ export default function RetailerLedgerModal({
                   <option value="" disabled hidden>
                     Select {key} Type
                   </option>
-                  {masterData?.[key + "s"]?.map((type) => (
+                  {masterData?.[key + "s"]?.filter(type => type.Description?.toLowerCase() !== "upi")?.map((type) => (
                     <option key={type.Id} value={type.Id}>
                       {type.Description}
                     </option>

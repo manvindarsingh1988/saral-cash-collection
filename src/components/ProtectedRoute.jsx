@@ -14,7 +14,8 @@ const routesForRoles = {
     "/approvals/pending",
     "/dashboard/create",
     "/users/add",
-    "/users/info"
+    "/users/info",
+    "/users/qr-mapping"
   ],
   Cashier: [
     "/",

@@ -19,6 +19,7 @@ import CollectorLiabilities from "../pages/admin/CollectorLiabilities";
 import PendingApprovals from "../pages/admin/PendingApprovals";
 import CreateDashboard from "../pages/admin/CreateDashboard";
 import UserInfo from "../pages/admin/UserInfo";
+import UserQRMapping from "../pages/admin/UserQRMapping";
 import CashierLiabilities from "../pages/admin/CashierLiabilities";
 import MasterCashierLiabilities from "../pages/admin/MasterCashierLiabilities";
 import CashierLedger from "../pages/cashier/CashierLedger";
@@ -73,6 +74,9 @@ export default function UserSpecificDashboard() {
                   <Route path="users/add" element={<AddUser />} />
                   <Route path="users/assign-retail" element={<AssignRetail />} />
                   <Route path="users/info" element={<UserInfo />} />
+                  {UserType === "Admin" && (
+                    <Route path="users/qr-mapping" element={<UserQRMapping />} />
+                  )}
 
                   <Route
                     path="approvals/pending"

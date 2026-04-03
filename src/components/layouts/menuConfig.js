@@ -44,6 +44,7 @@ export const menuConfig = [
         allow: ["Admin", "MasterCashier"],
       },
       { to: "users/info", label: "User Info", allow: ["Admin", "MasterCashier"] },
+      { to: "users/qr-mapping", label: "QR and User Mapping", allow: ["Admin"] },
     ],
   },
   {

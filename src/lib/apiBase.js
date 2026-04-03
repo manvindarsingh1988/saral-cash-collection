@@ -359,6 +359,24 @@ export const apiBase = {
         }
       )
     ).json(),
+  getUserQRMappings: async () =>
+    await (await authorizedFetch(`${API_URL}/GetUserQRMappings`)).json(),
+  insertUserQRMapping: async (qrId, userId) =>
+    await (
+      await authorizedFetch(`${API_URL}/InsertUserQRMapping`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ qrId, userId }),
+      })
+    ).json(),
+  deleteUserQRMapping: async (qrId) =>
+    await (
+      await authorizedFetch(`${API_URL}/DeleteUserQRMapping`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ qrId }),
+      })
+    ).json(),
   deleteLinking: async (cid, rid) =>
     await (
       await authorizedFetch(
