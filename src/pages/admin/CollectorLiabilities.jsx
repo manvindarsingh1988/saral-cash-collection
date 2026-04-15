@@ -22,6 +22,7 @@ export default function CollectorLiabilities({ userType, id }) {
     totalCurrentAmount: 0,
     totalClosingAmount: 0,
     totalRetailerInitiatedAmount: 0,
+    totalCollectorInitiatedAmount: 0,
   });
 
   const [filters, setFilters] = useState({
@@ -34,6 +35,7 @@ export default function CollectorLiabilities({ userType, id }) {
     ProjectionAmount: "",
     CurrentAmount: "",    
     RetailerInitiatedAmount: "",
+    CollectorInitiatedAmount: "",
     LinkedCashier: "",
     LinkedMasterCashier: ""
   });
@@ -77,6 +79,10 @@ export default function CollectorLiabilities({ userType, id }) {
           (acc, x) => acc + (x.RetailerInitiatedAmount || 0),
           0
         ),
+        totalCollectorInitiatedAmount: data.reduce(
+          (acc, x) => acc + (x.CollectorInitiatedAmount || 0),
+          0
+        ),
       });
     } catch (err) {
       console.error(err);
@@ -111,7 +117,7 @@ export default function CollectorLiabilities({ userType, id }) {
       {!loading && collectorLiabilities.length > 0 && (
         <>
           {/* Summary Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6 mb-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-6 mb-4">
             {[
               { label: "Opening Amount", value: summary.totalClosingAmount },
               {
@@ -131,6 +137,10 @@ export default function CollectorLiabilities({ userType, id }) {
               {
                 label: "Retailers Initiated Amount",
                 value: summary.totalRetailerInitiatedAmount,
+              },
+              {
+                label: "Collectors Initiated Amount",
+                value: summary.totalCollectorInitiatedAmount,
               },
             ].map((item) => (
               <div key={item.label} className="bg-white rounded-lg shadow p-4">
@@ -157,6 +167,9 @@ export default function CollectorLiabilities({ userType, id }) {
                     <th className="px-4 py-2 text-left">Current</th>                    
                     <th className="px-4 py-2 text-left">
                       Retailers Initiated Amount
+                    </th>
+                    <th className="px-4 py-2 text-left">
+                      Collectors Initiated Amount
                     </th>
                     <th className="px-4 py-2 text-left">
                       Linked Cashier
@@ -216,6 +229,9 @@ export default function CollectorLiabilities({ userType, id }) {
                       </td>                      
                       <td className="px-4 py-2">
                         ₹ {formatIndianNumber(item.RetailerInitiatedAmount)}
+                      </td>
+                      <td className="px-4 py-2">
+                        ₹ {formatIndianNumber(item.CollectorInitiatedAmount)}
                       </td>
                       <td className="px-4 py-2">{item.LinkedCashier || "—"}</td>
                       <td className="px-4 py-2">{item.LinkedMasterCashier || "—"}</td>

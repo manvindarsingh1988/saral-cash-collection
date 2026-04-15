@@ -249,7 +249,7 @@ export default function PendingApprovals({ userType, id }) {
                         if (val === "Id") {
                           return (
                             <td key={val} className="px-4 py-2">
-                              {[1, 6].includes(item.WorkFlow) ? (
+                              {[1, 6, 8].includes(item.WorkFlow) ? (
                                 <button
                                   onClick={(e) => {
                                     e.preventDefault();

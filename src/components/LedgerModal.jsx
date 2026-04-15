@@ -14,6 +14,7 @@ export default function LedgerModal({
   onClose,
   initialData,
   cashiers,
+  collectors,
   modelFor,
 }) {
   const isCollectorLedger = modelFor === "CollectorLedger";
@@ -31,6 +32,8 @@ export default function LedgerModal({
     CollectorId: userId,
     TransactionType: isCashierLedger ? "2" : "1",
     CashierId: "",
+    ToCollector: "",
+    HandoverTo: "cashier",
     Amount: "",
     WorkFlow: "1",
     Date: today,
@@ -49,6 +52,12 @@ export default function LedgerModal({
         CollectorId: userId,
         TransactionType: initialData?.TransactionType?.toString() ?? "1",
         CashierId: initialData?.CashierId?.toString() ?? "",
+        ToCollector: initialData?.ToCollector?.toString() ?? "",
+        HandoverTo:
+          initialData?.TransactionType?.toString() === "1" &&
+          initialData?.ToCollector
+            ? "collector"
+            : "cashier",
         Amount: initialData?.Amount ?? "",
         WorkFlow: initialData?.WorkFlow?.toString() ?? "1",
         Date: initialData?.Date?.split("T")[0] ?? today,
@@ -66,6 +75,15 @@ export default function LedgerModal({
     const { name, value, type, checked } = e.target;
     setFormData((prev) => ({
       ...prev,
+      ...(name === "TransactionType" && value !== "1"
+        ? { CashierId: "", ToCollector: "", HandoverTo: "cashier" }
+        : {}),
+      ...(name === "HandoverTo"
+        ? {
+            CashierId: value === "cashier" ? prev.CashierId : "",
+            ToCollector: value === "collector" ? prev.ToCollector : "",
+          }
+        : {}),
       [name]: type === "checkbox" ? checked : value,
     }));
   };
@@ -77,12 +95,22 @@ export default function LedgerModal({
   const handleSubmit = async () => {
     const docId = formData?.DocId || generateSafeGuid();
     let fileSaved = false;
+    const isCollectorToCollectorHandover =
+      isCollectorLedger &&
+      formData.TransactionType === "1" &&
+      formData.HandoverTo === "collector";
+
     if (
       !isCashierLedger &&
       formData.TransactionType === "1" &&
+      !isCollectorToCollectorHandover &&
       !formData.CashierId
     ) {
       alert("Select valid casheir");
+      return;
+    }
+    if (isCollectorToCollectorHandover && !formData.ToCollector) {
+      alert("Select valid collector");
       return;
     }
     if (formData.File) {
@@ -101,10 +129,15 @@ export default function LedgerModal({
       RetailerId: formData.RetailerId,
       CashierId: isCashierLedger
         ? userId
-        : parseInt(formData.WorkFlow) === 1
+        : parseInt(formData.WorkFlow) === 1 && !isCollectorToCollectorHandover
         ? formData.CashierId
         : "",
       CollectorId: isCollectorLedger ? userId : "",
+      ToCollector: isCollectorToCollectorHandover ? formData.ToCollector : "",
+      ToCollectorName: isCollectorToCollectorHandover
+        ? collectors?.find((collector) => `${collector.Id}` === `${formData.ToCollector}`)
+            ?.UserName || ""
+        : "",
       Amount: parseFloat(formData.Amount),
       TransactionType: parseInt(formData.TransactionType),
       WorkFlow: formData.StuckInBank ? 6 : formData.StuckInCDM ? 8 : 1,
@@ -170,8 +203,38 @@ export default function LedgerModal({
           )}
         </div>
 
+        {isCollectorLedger && formData.TransactionType === "1" && (
+          <div className="flex flex-col gap-2">
+            <label className="text-sm text-gray-600">Handover To</label>
+            <div className="flex items-center gap-4">
+              <label className="flex items-center gap-2 text-sm text-gray-700">
+                <input
+                  type="radio"
+                  name="HandoverTo"
+                  value="cashier"
+                  checked={formData.HandoverTo === "cashier"}
+                  onChange={handleChange}
+                />
+                Cashier
+              </label>
+              <label className="flex items-center gap-2 text-sm text-gray-700">
+                <input
+                  type="radio"
+                  name="HandoverTo"
+                  value="collector"
+                  checked={formData.HandoverTo === "collector"}
+                  onChange={handleChange}
+                />
+                Collector
+              </label>
+            </div>
+          </div>
+        )}
+
         {/* Cashier */}
-        {!isCashierLedger && formData.TransactionType === "1" && (
+        {!isCashierLedger &&
+          formData.TransactionType === "1" &&
+          formData.HandoverTo === "cashier" && (
           <div className="flex flex-col">
             <label className="text-sm text-gray-600">Cashier</label>
             <select
@@ -190,7 +253,32 @@ export default function LedgerModal({
               ))}
             </select>
           </div>
-        )}
+          )}
+
+        {isCollectorLedger &&
+          formData.TransactionType === "1" &&
+          formData.HandoverTo === "collector" && (
+            <div className="flex flex-col">
+              <label className="text-sm text-gray-600">To Collector</label>
+              <select
+                name="ToCollector"
+                value={formData.ToCollector}
+                onChange={handleChange}
+                className="border px-2 py-1 rounded"
+              >
+                <option value="" disabled>
+                  Select Collector
+                </option>
+                {collectors
+                  ?.filter((collector) => `${collector.Id}` !== `${userId}`)
+                  .map((collector) => (
+                    <option key={collector.Id} value={collector.Id}>
+                      {collector.UserName}
+                    </option>
+                  ))}
+              </select>
+            </div>
+          )}
 
         {/* Amount */}
         <div className="flex flex-col">

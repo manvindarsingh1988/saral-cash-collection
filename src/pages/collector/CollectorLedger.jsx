@@ -13,6 +13,7 @@ import { Download } from "lucide-react";
 const columns = [
   { key: "Id", label: "ID", width: "50px" },
   { key: "Cashier", label: "Cashier", width: "150px" },
+  { key: "ToCollector", label: "To Collector", width: "150px" },
   { key: "Amount", label: "Amount", width: "100px" },
   { key: "TransactionType", label: "Transaction Type", width: "150px" },
   { key: "WorkFlow", label: "Workflow", width: "120px" },
@@ -33,6 +34,7 @@ export default function CollectorLedger({ collectorUserId }) {
   const [isModalOpen, setModalOpen] = useState(false);
   const [masterData, setMasterData] = useState(null);
   const [cashiers, setCashiers] = useState([]);
+  const [collectors, setCollectors] = useState([]);
   const [selectedLedger, setSelectedLedger] = useState(null);
   const [liability, setLiability] = useState({});
   const [showAll, setShowAll] = useState(false);
@@ -40,12 +42,14 @@ export default function CollectorLedger({ collectorUserId }) {
   useEffect(() => {
     const loadMasterData = async () => {
       try {
-        const [master, cashiers] = await Promise.all([
+        const [master, cashiers, collectors] = await Promise.all([
           apiBase.getMasterData(),
           apiBase.getCashiers(),
+          apiBase.getCollectors(),
         ]);
         setMasterData(master);
         setCashiers(cashiers);
+        setCollectors(collectors);
       } catch (err) {
         console.error("Failed to load master data:", err);
       }
@@ -81,7 +85,6 @@ export default function CollectorLedger({ collectorUserId }) {
 
   const updateData = async () => {
     setModalOpen(false);
-    await fetchCollectorLedgers();
   };
 
   const openAddLedger = () => {
@@ -117,6 +120,16 @@ export default function CollectorLedger({ collectorUserId }) {
             cashiers.find((c) => c.Id === item.CashierId)?.Name || "";
           return cashierName.toLowerCase().includes(filterValue.toLowerCase());
         }
+        if (filterKey === "ToCollector") {
+          const toCollectorName =
+            item.ToCollectorName ||
+            collectors.find((collector) => `${collector.Id}` === `${item.ToCollector}`)
+              ?.UserName ||
+            "";
+          return toCollectorName
+            .toLowerCase()
+            .includes(filterValue.toLowerCase());
+        }
         if (filterKey === "TransactionType" || filterKey === "WorkFlow") {
           return item[filterKey]?.toString() === filterValue;
         }
@@ -150,7 +163,7 @@ export default function CollectorLedger({ collectorUserId }) {
   return (
     <div className="spacer-6">
       {liability && (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-6">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-7 mb-6">
           <div className="bg-white shadow rounded-lg p-4">
             <dt className="text-sm font-medium text-gray-500">
               Opening Amount
@@ -163,15 +176,6 @@ export default function CollectorLedger({ collectorUserId }) {
             <dt className="text-sm font-medium text-gray-500">Liability</dt>
             <dd className="mt-1 text-2xl font-semibold text-gray-900">
               ₹ {formatIndianNumber(liability.LaibilityAmount)}
-            </dd>
-          </div>
-
-          <div className="bg-white shadow rounded-lg p-4">
-            <dt className="text-sm font-medium text-gray-500">
-              Rejected Amount
-            </dt>
-            <dd className="mt-1 text-2xl font-semibold text-gray-900">
-              ₹ {formatIndianNumber(liability.RejectedAmount)}
             </dd>
           </div>
 
@@ -209,17 +213,18 @@ export default function CollectorLedger({ collectorUserId }) {
               ₹ {formatIndianNumber(liability.CurrentAmount)}
             </dd>
           </div>
+          <div className="bg-white shadow rounded-lg p-4">
+            <dt className="text-sm font-medium text-gray-500">
+              Collector Initiated Amount
+            </dt>
+            <dd className="mt-1 text-2xl font-semibold text-gray-900">
+              ₹ {formatIndianNumber(liability.CollectorInitiatedAmount)}
+            </dd>
+          </div>
+          
         </div>
       )}
-
-      <div className="flex justify-end mb-2">
-        <button
-          onClick={openAddLedger}
-          className="bg-green-600 text-white px-4 py-1.5 rounded hover:bg-green-700"
-        >
-          Add Ledger Entry
-        </button>
-      </div>
+      
 
       {/* Grid Section */}
       <div className="bg-white rounded-lg shadow p-6">
@@ -228,19 +233,30 @@ export default function CollectorLedger({ collectorUserId }) {
 
         {!loading && filteredLedgers.length >= 0 && (
           <>
-            <div className="flex justify-start mb-2">
-              <input
-                type="checkbox"
-                id="show-all"
-                checked={showAll}
-                onChange={() => {
-                  setShowAll(!showAll);
-                }}
-              />
-              <label htmlFor="show-all" className="ml-2 text-md text-black-500">
-                Show All
-              </label>
+            <div className="mb-2 flex items-center justify-between gap-4">
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  id="show-all"
+                  checked={showAll}
+                  onChange={() => {
+                    setShowAll(!showAll);
+                  }}
+                />
+                <label htmlFor="show-all" className="ml-2 text-md text-black-500">
+                  Show All
+                </label>
+              </div>
+              <div className="shrink-0">
+                <button
+                  onClick={openAddLedger}
+                  className="bg-green-600 text-white px-4 py-1.5 rounded hover:bg-green-700"
+                >
+                  Add Ledger Entry
+                </button>
+              </div>
             </div>
+            
             <div className="overflow-y-auto border border-gray-200 rounded h-[400px]">
               <table className="w-full table-auto divide-y divide-gray-200 text-sm">
                 <thead className="bg-gray-50 sticky top-0 z-10 border-b border-gray-200">
@@ -297,17 +313,28 @@ export default function CollectorLedger({ collectorUserId }) {
                       )}`}
                     >
                       <td className="px-2 py-2">
-                        <button
-                          className="text-indigo-600 hover:underline"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            openEditLedger(item);
-                          }}
-                        >
-                          {item.Id}
-                        </button>
+                        
+                          {(item.WorkFlow == "5" || item.WorkFlow == "3") ? (
+                                <span className="text-green-600">
+                                  {item.Id}
+                                </span>
+                              ) : (
+                                <a
+                                  title="Click to edit"
+                                  className="text-blue-600 underline hover:text-blue-800"
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    openEditLedger(item);
+                                  }}
+                                >
+                                  {item.Id}
+                                </a>
+                          )}
                       </td>
                       <td className="px-2 py-2">{item.CashierName}</td>
+                      <td className="px-2 py-2">
+                        {item.ToCollectorName || item.ToCollector || "-"}
+                      </td>
                       <td className="px-2 py-2">
                         ₹{formatIndianNumber(item.Amount)}
                       </td>
@@ -367,6 +394,7 @@ export default function CollectorLedger({ collectorUserId }) {
           userId={collectorUserId}
           masterData={masterData}
           cashiers={cashiers}
+          collectors={collectors}
           onClose={updateData}
           modelFor="CollectorLedger"
           initialData={selectedLedger}

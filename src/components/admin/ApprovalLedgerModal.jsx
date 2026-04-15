@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { apiBase } from "../../lib/apiBase";
-import { base64ToByteArray } from "../../lib/utils";
 import { getWorkflows } from "../../lib/ledgerRuleEngine";
 
 const fieldLabels = {
   Id: "Id",
   TransactionType: "Transaction Type",
   CollectorId: "Collector",
-  Amount: "Amount (₹)",
+  ToCollector: "To Collector Id",
+  ToCollectorName: "To Collector",
+  Amount: "Amount (Rs)",
   Date: "Transaction Date",
   Comment: "Comment",
   CollectorName: "Collector Name",
@@ -25,12 +26,14 @@ const allowedFields = [
   "Comment",
   "RetailerId",
   "CollectorName",
+  "ToCollector",
+  "ToCollectorName",
   "RetailerName",
   "CashierId",
   "CashierName",
   "DocId",
   "GivenOn",
-  "TransactionId"
+  "TransactionId",
 ];
 
 export default function ApprovalLedgerModal({
@@ -38,13 +41,14 @@ export default function ApprovalLedgerModal({
   onClose,
   onSubmit,
   initialData,
-}) {  
-
+}) {
   const userType = apiBase.getCurrentUser()?.UserType;
   const workflows = getWorkflows(userType);
 
   const [formData, setFormData] = useState({
     CollectorId: "",
+    ToCollector: "",
+    ToCollectorName: "",
     Amount: "",
     TransactionType: "1",
     WorkFlow: "",
@@ -53,13 +57,13 @@ export default function ApprovalLedgerModal({
     Comment: "",
     DocId: null,
     CashierId: null,
-  }); 
+  });
 
   useEffect(() => {
     if (initialData) {
       const formattedData = {};
       allowedFields.forEach((field) => {
-        if (initialData[field]) {
+        if (initialData[field] !== undefined && initialData[field] !== null) {
           formattedData[field] = initialData[field];
         }
       });
@@ -73,17 +77,27 @@ export default function ApprovalLedgerModal({
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = () => {    
+  const handleSubmit = () => {
     const filteredData = allowedFields.reduce((obj, key) => {
       obj[key] = formData[key];
       return obj;
     }, {});
-    if(filteredData.WorkFlow === '5' && filteredData.TransactionType != '1' && filteredData.TransactionType != '5') {
-      if (filteredData.TransactionId === null || filteredData.TransactionId === undefined || filteredData.TransactionId === "") {
-        alert('TransactionId is mandatory');
+
+    if (
+      filteredData.WorkFlow === "5" &&
+      filteredData.TransactionType != "1" &&
+      filteredData.TransactionType != "5"
+    ) {
+      if (
+        filteredData.TransactionId === null ||
+        filteredData.TransactionId === undefined ||
+        filteredData.TransactionId === ""
+      ) {
+        alert("TransactionId is mandatory");
         return;
-      } 
+      }
     }
+
     onSubmit(filteredData);
   };
 
@@ -95,7 +109,6 @@ export default function ApprovalLedgerModal({
       <div className="bg-white p-6 rounded shadow-lg space-y-4 w-full max-w-md">
         <h2 className="text-lg font-semibold">Approve Ledger</h2>
         {allowedFields.map((key) => {
-
           const alwaysExcludeKeys = [
             "CollectorId",
             "RetailerId",
@@ -103,12 +116,14 @@ export default function ApprovalLedgerModal({
             "DocId",
             "GivenOn",
             "CashierId",
+            "ToCollector",
           ];
           const conditionalExcludeKeys = [
             "CollectorName",
+            "ToCollectorName",
             "RetailerName",
             "Id",
-            "CashierName"
+            "CashierName",
           ];
 
           if (
@@ -117,9 +132,10 @@ export default function ApprovalLedgerModal({
           ) {
             return null;
           }
-          if(key === "TransactionId" && formData["TransactionType"] === 1) {
+          if (key === "TransactionId" && formData.TransactionType === 1) {
             return null;
           }
+
           const label = fieldLabels[key] || key;
           let inputElement;
 
@@ -143,16 +159,14 @@ export default function ApprovalLedgerModal({
                       }
                       return true;
                     })
-                    .map((type) => {
-                      return (
-                        <option key={type.Id} value={type.Id}>
-                          {type.Description}
-                        </option>
-                      );
-                    })}
+                    .map((type) => (
+                      <option key={type.Id} value={type.Id}>
+                        {type.Description}
+                      </option>
+                    ))}
                 </select>
                 {key === "TransactionType" &&
-                  formData["TransactionType"] === "2" && (
+                  formData.TransactionType === "2" && (
                     <p className="text-xs text-gray-500 mt-1">
                       <strong>Note:</strong> Please mention transaction details
                       in comment to avoid rejection.
@@ -173,7 +187,7 @@ export default function ApprovalLedgerModal({
                 disabled={key !== "WorkFlow" && key !== "TransactionId"}
                 name={key}
                 type={inputType}
-                value={formData[key]}
+                value={formData[key] ?? ""}
                 onChange={handleChange}
                 className="border px-2 py-1 rounded"
               />
@@ -191,31 +205,27 @@ export default function ApprovalLedgerModal({
         <div className="flex flex-col">
           {formData?.DocId && (
             <button
-            onClick={async () => {
-              try {
-                const blob = await apiBase.downloadFileUrl(formData.DocId);
+              onClick={async () => {
+                try {
+                  const blob = await apiBase.downloadFileUrl(formData.DocId);
 
-                if (!blob || blob.size === 0) {
-                  alert("No file found for this entry.");
-                  return;
+                  if (!blob || blob.size === 0) {
+                    alert("No file found for this entry.");
+                    return;
+                  }
+
+                  const url = URL.createObjectURL(blob);
+                  window.open(url, "_blank");
+                  URL.revokeObjectURL(url);
+                } catch (err) {
+                  console.error("File download failed:", err);
+                  alert("Failed to download file.");
                 }
-
-                const url = URL.createObjectURL(blob);
-
-                // Option 1: open in new tab
-                window.open(url, "_blank");
-
-                URL.revokeObjectURL(url);
-              } catch (err) {
-                console.error("File download failed:", err);
-                alert("Failed to download file.");
-              }
-            }}
-            className="text-blue-600 text-sm mb-1 hover:underline text-left"
-          >
-            Download File
-          </button>
-
+              }}
+              className="text-blue-600 text-sm mb-1 hover:underline text-left"
+            >
+              Download File
+            </button>
           )}
         </div>
 

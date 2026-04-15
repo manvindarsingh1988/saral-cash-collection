@@ -14,6 +14,7 @@ const columns = [
   { heading: "Amount (₹)", accessor: "Amount" },
   { heading: "Cashier Name", accessor: "CashierName" },
   { heading: "Collector Name", accessor: "CollectorName" },
+  { heading: "To Collector", accessor: "ToCollectorName" },
   { heading: "Retailer Name", accessor: "RetailerName" },
   { heading: "Transaction Type", accessor: "TransactionType" },
   { heading: "Workflow", accessor: "WorkFlow" },
@@ -96,12 +97,13 @@ export default function PendingApprovalsForCollector({ collectorUserId }) {
         GivenOn: new Date().toISOString(),
         CollectorId: data.TransactionType === "2" ? "" : data.CollectorId,
         CollectorName: data.TransactionType === "2" ? "" : data.CollectorName,
-        CashierId: apiBase.getCurrentUser()?.Id,
-        CashierName: apiBase.getCurrentUser()?.UserName,
+        ToCollector: data.ToCollector || "",
+        ToCollectorName: data.ToCollectorName || "",
         RetailerId: data.RetailerId,
       };
       await apiBase.updateLedgerInfo(payload);
       await fetchPendingApprovals();
+      setModalOpen(false);
     } catch (err) {
       console.error("Submission failed:", err);
     }

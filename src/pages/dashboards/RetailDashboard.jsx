@@ -371,7 +371,7 @@ export default function RetailDashboard({ retailUserId }) {
                             )}`}
                           >
                             <td className="px-4 py-2">
-                              {item.WorkFlow == "5" ? (
+                              {(item.WorkFlow == "5" || item.WorkFlow == "3") ? (
                                 <span className="text-green-600">
                                   {item.Id}
                                 </span>
