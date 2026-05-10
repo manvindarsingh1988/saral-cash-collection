@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import { Eye, TrendingUp } from "lucide-react";
+import { apiBase } from "../../lib/apiBase";
 import { formatIndianNumber } from "../../lib/utils";
 import LadgerDetailsDialog from "../LedgerDetailsDialog";
 
@@ -23,6 +25,7 @@ const columns = [
 export default function RetailerLiabilityTable({ data }) {
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedRetailer, setSelectedRetailer] = useState(null);
+  const [projectionRetailer, setProjectionRetailer] = useState(null);
 
   const [filters, setFilters] = useState({
     UserName: "",
@@ -88,6 +91,10 @@ const onSort = (key) => {
     setOpenDialog(true);
   };
 
+  const onProjectionAmount = (retailer) => {
+    setProjectionRetailer(retailer);
+  };
+
   return (
     <div className="bg-white rounded-lg shadow p-4 sm:p-6">
       <div className="overflow-x-auto">
@@ -143,12 +150,22 @@ const onSort = (key) => {
                       className={`px-4 py-2 whitespace-nowrap text-xs ${col.key === 'Warning' ? 'text-red-600' : 'text-gray-900'}`}
                     >
                       {col.isAction ? (
-                        <button
-                          onClick={() => onMoreDetails(item.UserId)}
-                          className="text-blue-600 underline"
-                        >
-                          More Details
-                        </button>
+                        <div className="flex items-center gap-2 whitespace-nowrap">
+                          <ActionIconButton
+                            label="More Details"
+                            onClick={() => onMoreDetails(item.UserId)}
+                            className="border-blue-200 text-blue-700 hover:bg-blue-50"
+                          >
+                            <Eye size={16} />
+                          </ActionIconButton>
+                          <ActionIconButton
+                            label="Get Projection"
+                            onClick={() => onProjectionAmount(item)}
+                            className="border-emerald-200 text-emerald-700 hover:bg-emerald-50"
+                          >
+                            <TrendingUp size={16} />
+                          </ActionIconButton>
+                        </div>
                       ) : col.key === "LaibilityAmount" ||
                         col.key === "PendingApprovalAmount" ||
                         col.key === "ProjectionAmount" ||
@@ -179,6 +196,139 @@ const onSort = (key) => {
           }}
         />
       )}
+
+      {projectionRetailer && (
+        <ProjectionAmountDialog
+          retailer={projectionRetailer}
+          onClose={() => setProjectionRetailer(null)}
+        />
+      )}
+    </div>
+  );
+}
+
+function ActionIconButton({ label, onClick, className = "", children }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      title={label}
+      aria-label={label}
+      className={`group relative inline-flex h-7 w-7 flex-none items-center justify-center rounded border bg-white ${className}`}
+    >
+      {children}
+      <span className="pointer-events-none absolute left-1/2 top-full z-30 mt-1 hidden -translate-x-1/2 whitespace-nowrap rounded bg-gray-900 px-2 py-1 text-[11px] normal-case tracking-normal text-white shadow group-hover:block">
+        {label}
+      </span>
+    </button>
+  );
+}
+
+function ProjectionAmountDialog({ retailer, onClose }) {
+  const now = new Date();
+  now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+
+  const [selectedDate, setSelectedDate] = useState(
+    now.toISOString().slice(0, 16)
+  );
+  const [amount, setAmount] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const fetchProjectionAmount = async () => {
+    try {
+      setLoading(true);
+      setError("");
+      const result = await apiBase.getProjectAmountByDate(
+        retailer.UserId,
+        selectedDate
+      );
+      setAmount(formatIndianNumber(result?.amount ?? result?.Amount ?? 0));
+    } catch (err) {
+      setError(err.message || "Failed to fetch projection amount.");
+      setAmount("");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
+      <div className="relative w-full max-w-md rounded bg-white p-6 shadow">
+        <button
+          onClick={onClose}
+          className="absolute right-4 top-4 text-gray-500 hover:text-gray-800"
+        >
+          x
+        </button>
+
+        <h2 className="mb-4 text-lg font-semibold text-gray-900">
+          Projection Amount
+        </h2>
+
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div>
+              <label className="block text-sm text-gray-600">Retailer ID</label>
+              <input
+                value={retailer.UserId || ""}
+                readOnly
+                className="mt-1 w-full rounded border bg-gray-100 px-3 py-2 text-sm"
+              />
+            </div>
+            <div>
+              <label className="block text-sm text-gray-600">
+                Retailer Name
+              </label>
+              <input
+                value={retailer.UserName || ""}
+                readOnly
+                className="mt-1 w-full rounded border bg-gray-100 px-3 py-2 text-sm"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm text-gray-600">Date Time</label>
+            <input
+              type="datetime-local"
+              value={selectedDate}
+              onChange={(e) => {
+                setSelectedDate(e.target.value);
+                setAmount("");
+                setError("");
+              }}
+              className="mt-1 w-full rounded border px-3 py-2 text-sm"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm text-gray-600">
+              Projection Amount
+            </label>
+            <input
+              value={amount ? `Rs ${amount}` : ""}
+              readOnly
+              className="mt-1 w-full rounded border bg-gray-100 px-3 py-2 text-sm"
+            />
+          </div>
+
+          {error && <div className="text-sm text-red-600">{error}</div>}
+
+          <div className="flex justify-end gap-2">
+            <button onClick={onClose} className="rounded border px-4 py-2">
+              Cancel
+            </button>
+            <button
+              onClick={fetchProjectionAmount}
+              disabled={loading || !selectedDate}
+              className="rounded bg-blue-600 px-4 py-2 text-white disabled:opacity-50"
+            >
+              {loading ? "Fetching..." : "Get Projection Amount"}
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

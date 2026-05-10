@@ -176,6 +176,14 @@ export const apiBase = {
         `${API_URL}/GetLiabilityAmountByCashierId?userId=${id}`
       )
     ).json(),
+  getProjectAmountByDate: async (userId, date) =>
+    await (
+      await authorizedFetch(
+        `${API_URL}/GetProjectAmountByDate?userId=${encodeURIComponent(
+          userId
+        )}&date=${encodeURIComponent(date)}`
+      )
+    ).json(),
   addLedgerInfo: async (data) =>
     await (
       await authorizedFetch(`${API_URL}/AddLadgerInfo`, {
@@ -195,7 +203,7 @@ export const apiBase = {
   deleteLedgerInfo: async (id) =>
     await (
       await authorizedFetch(`${API_URL}/DeleteLadgerInfo?id=${id}`, {
-        method: "DELETE",
+        method: "POST",
       })
     ).json(),
   getLadgerInfoByRetailerid: async (all, id, fromDate, toDate) =>

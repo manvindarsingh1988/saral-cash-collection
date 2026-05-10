@@ -3,12 +3,11 @@ import useDocumentTitle from "../../hooks/useDocumentTitle";
 import { apiBase } from "../../lib/apiBase";
 import ApprovalLedgerModal from "../../components/admin/ApprovalLedgerModal";
 import {
-  base64ToByteArray,
   formatToCustomDateTime,
   getRowColor,
   handleDownloadFile,
 } from "../../lib/utils";
-import { Download } from "lucide-react";
+import { Download, Trash2 } from "lucide-react";
 
 const columns = [
   { heading: "ID", accessor: "Id" },
@@ -35,10 +34,12 @@ export default function PendingApprovals({ userType, id }) {
   const [pendingApprovals, setPendingApprovals] = useState([]);
   const [filters, setFilters] = useState({});
   const [masterData, setMasterData] = useState({});
+  const [deletingLedgerId, setDeletingLedgerId] = useState(null);
 
   const [showPendingOnly, setShowPendingOnly] = useState(true);
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
+  const isAdmin = apiBase.getCurrentUser()?.UserType === "Admin";
 
   useEffect(() => {
     fetchPendingApprovals();
@@ -121,6 +122,25 @@ export default function PendingApprovals({ userType, id }) {
       await fetchPendingApprovals();
     } catch (err) {
       console.error("Submission failed:", err);
+    }
+  };
+
+  const handleDeleteLedger = async (ledgerId) => {
+    if (!ledgerId) return;
+
+    const confirmed = window.confirm(`Delete ledger ${ledgerId}?`);
+    if (!confirmed) return;
+
+    try {
+      setDeletingLedgerId(ledgerId);
+      const result = await apiBase.deleteLedgerInfo(ledgerId);
+      alert(result?.response || result?.Response || "Ledger deleted.");
+      await fetchPendingApprovals();
+    } catch (err) {
+      console.error("Delete failed:", err);
+      alert(err.message || "Failed to delete ledger.");
+    } finally {
+      setDeletingLedgerId(null);
     }
   };
 
@@ -281,18 +301,34 @@ export default function PendingApprovals({ userType, id }) {
                           );
                         } else if (val === "Actions") {
                           return (
-                            <td className="px-4 py-2">
-                              {item.DocId ? (
-                                <button
-                                  title="Download File"
-                                  onClick={() => handleDownloadFile(item.DocId, item.Id)}
-                                  className="ml-2 text-blue-600 text-sm mb-1 hover:underline text-left"
-                                >
-                                  <Download className="w-4 h-4" />
-                                </button>
-                              ) : (
-                                ""
-                              )}
+                            <td key={val} className="px-4 py-2">
+                              <div className="flex items-center gap-2">
+                                {item.DocId ? (
+                                  <button
+                                    type="button"
+                                    title="Download File"
+                                    aria-label={`Download file for ledger ${item.Id}`}
+                                    onClick={() => handleDownloadFile(item.DocId, item.Id)}
+                                    className="text-blue-600 text-sm hover:text-blue-800"
+                                  >
+                                    <Download className="w-4 h-4" />
+                                  </button>
+                                ) : (
+                                  ""
+                                )}
+                                {isAdmin && (
+                                  <button
+                                    type="button"
+                                    title="Delete Ledger"
+                                    aria-label={`Delete ledger ${item.Id}`}
+                                    onClick={() => handleDeleteLedger(item.Id)}
+                                    disabled={deletingLedgerId === item.Id}
+                                    className="text-red-600 text-sm hover:text-red-800 disabled:opacity-50"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </button>
+                                )}
+                              </div>
                             </td>
                           );
                         } else if (val === "IsNotLinked") {
