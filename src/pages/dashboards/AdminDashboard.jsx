@@ -9,6 +9,8 @@ export default function AdminDashboard({ userType, id }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [liabilities, setLiabilities] = useState([]);
+  const [includeProjectionAmountBeforeXMinutes, setIncludeProjectionAmountBeforeXMinutes] = useState(false);
+  const [showProjectionAmountBeforeXMinutes, setShowProjectionAmountBeforeXMinutes] = useState(false);
 
   const [summary, setSummary] = useState({
     totalLaibilityAmount: 0,
@@ -20,41 +22,48 @@ export default function AdminDashboard({ userType, id }) {
   });
 
   useEffect(() => {
-    fetchLiabilities();
+    fetchLiabilities(false);
   }, []);
 
-  const fetchLiabilities = async () => {
+  const fetchLiabilities = async (
+    includeBeforeXMinutes = includeProjectionAmountBeforeXMinutes
+  ) => {
     try {
       setLoading(true);
-      const retailerData = await apiBase.getLiabilityAmountOfAllRetailers(id, userType);
+      const retailerData = await apiBase.getLiabilityAmountOfAllRetailers(
+        id,
+        userType,
+        includeBeforeXMinutes
+      );
 
-      setLiabilities(retailerData);
+      setLiabilities(retailerData || []);
+      setShowProjectionAmountBeforeXMinutes(includeBeforeXMinutes);
 
-      const totalLaibilityAmount = retailerData.reduce(
+      const totalLaibilityAmount = (retailerData || []).reduce(
         (sum, item) => sum + (item.LaibilityAmount || 0),
         0
       );
-      const totalPendingApprovalAmount = retailerData.reduce(
+      const totalPendingApprovalAmount = (retailerData || []).reduce(
         (sum, item) => sum + (item.PendingApprovalAmount || 0),
         0
       );
-      const totalProjectionAmount = retailerData.reduce(
+      const totalProjectionAmount = (retailerData || []).reduce(
         (sum, item) => sum + (item.ProjectionAmount || 0),
         0
       );
-      const totalRejectedAmount = retailerData.reduce(
+      const totalRejectedAmount = (retailerData || []).reduce(
         (sum, item) => sum + (item.RejectedAmount || 0),
         0
       );
-      const totalCurrentAmount = retailerData.reduce(
+      const totalCurrentAmount = (retailerData || []).reduce(
         (sum, item) => sum + (item.CurrentAmount || 0),
         0
       );
-      const totalClosingAmount = retailerData.reduce(
+      const totalClosingAmount = (retailerData || []).reduce(
         (sum, item) => sum + (item.ClosingAmount || 0),
         0
       );
-      const totalReceivedAmount = retailerData.reduce(
+      const totalReceivedAmount = (retailerData || []).reduce(
         (sum, item) => sum + (item.ReceivedAmount || 0),
         0
       );
@@ -66,7 +75,7 @@ export default function AdminDashboard({ userType, id }) {
         totalRejectedAmount,
         totalCurrentAmount,
         totalClosingAmount,
-        totalReceivedAmount
+        totalReceivedAmount,
       });
       setLoading(false);
     } catch (err) {
@@ -78,6 +87,27 @@ export default function AdminDashboard({ userType, id }) {
 
   return (
     <div className="">
+      <div className="mb-4 flex flex-col gap-3 rounded-lg bg-white p-4 shadow sm:flex-row sm:items-center sm:justify-between">
+        <label className="flex items-center gap-2 text-sm text-gray-700">
+          <input
+            type="checkbox"
+            checked={includeProjectionAmountBeforeXMinutes}
+            onChange={(e) =>
+              setIncludeProjectionAmountBeforeXMinutes(e.target.checked)
+            }
+          />
+          Include Projection Amount Before X Minutes
+        </label>
+        <button
+          type="button"
+          onClick={() => fetchLiabilities()}
+          disabled={loading}
+          className="rounded bg-blue-600 px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
+        >
+          {loading ? "Loading..." : "Load Liabilities"}
+        </button>
+      </div>
+
       {loading && (
         <div className="bg-white rounded-lg shadow p-6 mt-2">Loading...</div>
       )}
@@ -93,7 +123,7 @@ export default function AdminDashboard({ userType, id }) {
                     Opening Amount
                   </dt>
                   <dd className="mt-1 text-2xl font-semibold text-gray-900">
-                    ₹ {formatIndianNumber(summary.totalClosingAmount)}
+                    Rs {formatIndianNumber(summary.totalClosingAmount)}
                   </dd>
                 </div>
               </div>
@@ -103,27 +133,27 @@ export default function AdminDashboard({ userType, id }) {
                     Current Received Amount
                   </dt>
                   <dd className="mt-1 text-2xl font-semibold text-gray-900">
-                    ₹ {formatIndianNumber(summary.totalReceivedAmount)}
+                    Rs {formatIndianNumber(summary.totalReceivedAmount)}
                   </dd>
                 </div>
-              </div> 
+              </div>
               <div className="bg-white overflow-hidden shadow rounded-lg">
                 <div className="px-4 py-5 sm:p-3">
                   <dt className="text-sm font-medium text-gray-500 truncate">
                     Current Amount
                   </dt>
                   <dd className="mt-1 text-2xl font-semibold text-gray-900">
-                    ₹ {formatIndianNumber(summary.totalCurrentAmount)}
+                    Rs {formatIndianNumber(summary.totalCurrentAmount)}
                   </dd>
                 </div>
-              </div> 
+              </div>
               <div className="bg-white overflow-hidden shadow rounded-lg">
                 <div className="px-4 py-5 sm:p-3">
                   <dt className="text-sm font-medium text-gray-500 truncate">
                     Projection Amount
                   </dt>
                   <dd className="mt-1 text-2xl font-semibold text-gray-900">
-                    ₹ {formatIndianNumber(summary.totalProjectionAmount)}
+                    Rs {formatIndianNumber(summary.totalProjectionAmount)}
                   </dd>
                 </div>
               </div>
@@ -133,7 +163,7 @@ export default function AdminDashboard({ userType, id }) {
                     Liability Amount
                   </dt>
                   <dd className="mt-1 text-2xl font-semibold text-gray-900">
-                    ₹ {formatIndianNumber(summary.totalLaibilityAmount)}
+                    Rs {formatIndianNumber(summary.totalLaibilityAmount)}
                   </dd>
                 </div>
               </div>
@@ -143,18 +173,19 @@ export default function AdminDashboard({ userType, id }) {
                     Pending Approval Amount
                   </dt>
                   <dd className="mt-1 text-2xl font-semibold text-gray-900">
-                    ₹ {formatIndianNumber(summary.totalPendingApprovalAmount)}
+                    Rs {formatIndianNumber(summary.totalPendingApprovalAmount)}
                   </dd>
                 </div>
-              </div>          
-              
-              
+              </div>
             </div>
-            
           </div>
-          <RetailerLiabilityTable data={liabilities} />
+          <RetailerLiabilityTable
+            data={liabilities}
+            showProjectionAmountBeforeXMinutes={showProjectionAmountBeforeXMinutes}
+          />
         </>
       )}
     </div>
   );
 }
+

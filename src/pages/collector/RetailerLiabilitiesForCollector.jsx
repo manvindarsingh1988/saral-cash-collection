@@ -26,32 +26,33 @@ export default function RetailerLiabilitiesForCollector({ collectorUserId }) {
   const fetchLiabilities = async () => {
     try {
       setLoading(true);
-      const retailerData =
-        await apiBase.getLiabilityAmountOfAllRetailersByCollectorId(collectorUserId);
+      const retailerData = await apiBase.getLiabilityAmountOfAllRetailersByCollectorId(
+        collectorUserId
+      );
 
-      setLiabilities(retailerData);
+      setLiabilities(retailerData || []);
 
-      const totalLaibilityAmount = retailerData.reduce(
+      const totalLaibilityAmount = (retailerData || []).reduce(
         (sum, item) => sum + (item.LaibilityAmount || 0),
         0
       );
-      const totalPendingApprovalAmount = retailerData.reduce(
+      const totalPendingApprovalAmount = (retailerData || []).reduce(
         (sum, item) => sum + (item.PendingApprovalAmount || 0),
         0
       );
-      const totalProjectionAmount = retailerData.reduce(
+      const totalProjectionAmount = (retailerData || []).reduce(
         (sum, item) => sum + (item.ProjectionAmount || 0),
         0
       );
-      const totalRejectedAmount = retailerData.reduce(
+      const totalRejectedAmount = (retailerData || []).reduce(
         (sum, item) => sum + (item.RejectedAmount || 0),
         0
       );
-      const totalCurrentAmount = retailerData.reduce(
+      const totalCurrentAmount = (retailerData || []).reduce(
         (sum, item) => sum + (item.CurrentAmount || 0),
         0
       );
-      const totalClosingAmount = retailerData.reduce(
+      const totalClosingAmount = (retailerData || []).reduce(
         (sum, item) => sum + (item.ClosingAmount || 0),
         0
       );
@@ -62,7 +63,7 @@ export default function RetailerLiabilitiesForCollector({ collectorUserId }) {
         totalProjectionAmount,
         totalRejectedAmount,
         totalCurrentAmount,
-        totalClosingAmount
+        totalClosingAmount,
       });
       setLoading(false);
     } catch (err) {
@@ -89,7 +90,7 @@ export default function RetailerLiabilitiesForCollector({ collectorUserId }) {
                     Opening Amount
                   </dt>
                   <dd className="mt-1 text-2xl font-semibold text-gray-900">
-                    ₹ {formatIndianNumber(summary.totalClosingAmount)}
+                    Rs {formatIndianNumber(summary.totalClosingAmount)}
                   </dd>
                 </div>
               </div>
@@ -99,7 +100,7 @@ export default function RetailerLiabilitiesForCollector({ collectorUserId }) {
                     Liability Amount
                   </dt>
                   <dd className="mt-1 text-2xl font-semibold text-gray-900">
-                    ₹ {formatIndianNumber(summary.totalLaibilityAmount)}
+                    Rs {formatIndianNumber(summary.totalLaibilityAmount)}
                   </dd>
                 </div>
               </div>
@@ -109,7 +110,7 @@ export default function RetailerLiabilitiesForCollector({ collectorUserId }) {
                     Pending Approval Amount
                   </dt>
                   <dd className="mt-1 text-2xl font-semibold text-gray-900">
-                    ₹ {formatIndianNumber(summary.totalPendingApprovalAmount)}
+                    Rs {formatIndianNumber(summary.totalPendingApprovalAmount)}
                   </dd>
                 </div>
               </div>
@@ -119,7 +120,7 @@ export default function RetailerLiabilitiesForCollector({ collectorUserId }) {
                     Projection Amount
                   </dt>
                   <dd className="mt-1 text-2xl font-semibold text-gray-900">
-                    ₹ {formatIndianNumber(summary.totalProjectionAmount)}
+                    Rs {formatIndianNumber(summary.totalProjectionAmount)}
                   </dd>
                 </div>
               </div>
@@ -129,10 +130,10 @@ export default function RetailerLiabilitiesForCollector({ collectorUserId }) {
                     Current Amount
                   </dt>
                   <dd className="mt-1 text-2xl font-semibold text-gray-900">
-                    ₹ {formatIndianNumber(summary.totalCurrentAmount)}
+                    Rs {formatIndianNumber(summary.totalCurrentAmount)}
                   </dd>
                 </div>
-              </div>              
+              </div>
             </div>
           </div>
           <RetailerLiabilityTable data={liabilities} />

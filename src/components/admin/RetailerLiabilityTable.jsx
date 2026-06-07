@@ -4,25 +4,43 @@ import { apiBase } from "../../lib/apiBase";
 import { formatIndianNumber } from "../../lib/utils";
 import LadgerDetailsDialog from "../LedgerDetailsDialog";
 
-const columns = [
-  { heading: "Warning", key: "Warning", width: "100px" },
-  { heading: "Retailer Name", key: "UserName", width: "120px" },  
-  { heading: "Remark", key: "Remark", width: "80px" },
-  { heading: "Opening Amount", key: "ClosingAmount", width: "80px" },
-  { heading: "Current Received Amount", key: "ReceivedAmount", width: "80px" },
-  { heading: "Current Amount", key: "CurrentAmount", width: "80px" },
-  { heading: "Projection Amount", key: "ProjectionAmount", width: "80px" },
-  { heading: "Laibility Amount", key: "LaibilityAmount", width: "80px" },
-  { heading: "Pending Approval Amount", key: "PendingApprovalAmount", width: "80px" },  
-  { heading: "FixedFund Charge", key: "RejectedAmount", width: "80px" },  
-  { heading: "Action", key: "Action", width: "80px", isAction: true },
-  { heading: "Counter Location", key: "CounterLocation", width: "80px" },
-  { heading: "Linked Collector", key: "LinkedCollector", width: "80px" },
-  { heading: "Linked Cashier", key: "LinkedCashier", width: "80px" },
-  { heading: "Linked Master Cashier", key: "LinkedMasterCashier", width: "80px" },
-];
+function getColumns(showProjectionAmountBeforeXMinutes, showProjectionAmountWithoutCurrentSale) {
+  const columns = [
+    { heading: "Warning", key: "Warning", width: "100px" },
+    { heading: "Retailer Name", key: "UserName", width: "120px" },
+    { heading: "Remark", key: "Remark", width: "80px" },
+    { heading: "Opening Amount", key: "ClosingAmount", width: "80px" },
+    { heading: "Current Received Amount", key: "ReceivedAmount", width: "80px" },
+    { heading: "Current Amount", key: "CurrentAmount", width: "80px" },
+    { heading: "Projection Amount", key: "ProjectionAmount", width: "80px" },
+    { heading: "Projection Without Current Sale", key: "ProjectionAmountWithoutCurrentSale", width: "100px" },
+    { heading: "Laibility Amount", key: "LaibilityAmount", width: "80px" },
+    { heading: "Pending Approval Amount", key: "PendingApprovalAmount", width: "80px" },
+    { heading: "FixedFund Charge", key: "RejectedAmount", width: "80px" },
+    { heading: "Action", key: "Action", width: "80px", isAction: true },
+    { heading: "Counter Location", key: "CounterLocation", width: "80px" },
+    { heading: "Linked Collector", key: "LinkedCollector", width: "80px" },
+    { heading: "Linked Cashier", key: "LinkedCashier", width: "80px" },
+    { heading: "Linked Master Cashier", key: "LinkedMasterCashier", width: "80px" },
+  ];
 
-export default function RetailerLiabilityTable({ data }) {
+  if (showProjectionAmountBeforeXMinutes) {
+    columns.splice(7, 0, {
+      heading: "Projection Amount Before X Minutes",
+      key: "ProjectionAmountBeforeXMinutes",
+      width: "100px",
+    });
+  }
+
+  return columns;
+}
+
+export default function RetailerLiabilityTable({
+  data,
+  showProjectionAmountBeforeXMinutes = false,
+  showProjectionAmountWithoutCurrentSale = false,
+}) {
+  const columns = getColumns(showProjectionAmountBeforeXMinutes, showProjectionAmountWithoutCurrentSale);
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedRetailer, setSelectedRetailer] = useState(null);
   const [projectionRetailer, setProjectionRetailer] = useState(null);
@@ -36,55 +54,52 @@ export default function RetailerLiabilityTable({ data }) {
   });
 
   const [sortConfig, setSortConfig] = useState({
-  key: null,
-  direction: "asc",
-});
-
-const onSort = (key) => {
-  setSortConfig((prev) => {
-    if (prev.key === key) {
-      // Toggle direction
-      return {
-        key,
-        direction: prev.direction === "asc" ? "desc" : "asc",
-      };
-    }
-    return { key, direction: "asc" };
+    key: null,
+    direction: "asc",
   });
-};
+
+  const onSort = (key) => {
+    setSortConfig((prev) => {
+      if (prev.key === key) {
+        return {
+          key,
+          direction: prev.direction === "asc" ? "desc" : "asc",
+        };
+      }
+      return { key, direction: "asc" };
+    });
+  };
 
   const onFilterChange = (key, value) => {
     setFilters((prev) => ({ ...prev, [key]: value }));
   };
 
   const filteredData = data
-  .filter((item) => {
-    return Object.entries(filters).every(([key, value]) => {
-      if (!value) return true;
-      const itemValue = item[key];
-      if (itemValue === null || itemValue === undefined) return false;
-      return itemValue.toString().toLowerCase().includes(value.toLowerCase());
+    .filter((item) => {
+      return Object.entries(filters).every(([key, value]) => {
+        if (!value) return true;
+        const itemValue = item[key];
+        if (itemValue === null || itemValue === undefined) return false;
+        return itemValue.toString().toLowerCase().includes(value.toLowerCase());
+      });
+    })
+    .sort((a, b) => {
+      if (!sortConfig.key) return 0;
+
+      const { key, direction } = sortConfig;
+      let valA = a[key];
+      let valB = b[key];
+
+      const isNumeric = !isNaN(Number(valA)) && !isNaN(Number(valB));
+      if (isNumeric) {
+        valA = Number(valA);
+        valB = Number(valB);
+      }
+
+      if (valA < valB) return direction === "asc" ? -1 : 1;
+      if (valA > valB) return direction === "asc" ? 1 : -1;
+      return 0;
     });
-  })
-  .sort((a, b) => {
-    if (!sortConfig.key) return 0;
-
-    const { key, direction } = sortConfig;
-
-    let valA = a[key];
-    let valB = b[key];
-
-    // Convert numeric strings to numbers
-    const isNumeric = !isNaN(Number(valA)) && !isNaN(Number(valB));
-    if (isNumeric) {
-      valA = Number(valA);
-      valB = Number(valB);
-    }
-
-    if (valA < valB) return direction === "asc" ? -1 : 1;
-    if (valA > valB) return direction === "asc" ? 1 : -1;
-    return 0;
-  });
 
   const onMoreDetails = (retailUserId) => {
     setSelectedRetailer(retailUserId);
@@ -93,6 +108,30 @@ const onSort = (key) => {
 
   const onProjectionAmount = (retailer) => {
     setProjectionRetailer(retailer);
+  };
+
+  const renderCellValue = (item, key) => {
+    const numericKeys = [
+      "LaibilityAmount",
+      "PendingApprovalAmount",
+      "ProjectionAmount",
+      "ProjectionAmountBeforeXMinutes",
+      "RejectedAmount",
+      "ClosingAmount",
+      "CurrentAmount",
+      "ReceivedAmount",
+    ];
+
+    const value = item[key];
+    if (value === null || value === undefined || value === "") {
+      return "";
+    }
+
+    if (numericKeys.includes(key)) {
+      return `Rs ${formatIndianNumber(value)}`;
+    }
+
+    return value;
   };
 
   return (
@@ -114,25 +153,21 @@ const onSort = (key) => {
                         <div
                           className="flex items-center cursor-pointer select-none"
                           onClick={() => onSort(col.key)}
-                          >
+                        >
                           <span>{col.heading}</span>
-
-                          {/* Sorting Indicator */}
                           {sortConfig.key === col.key ? (
                             <span className="ml-1 text-gray-500">
-                              {sortConfig.direction === "asc" ? "▲" : "▼"}
+                              {sortConfig.direction === "asc" ? "^" : "v"}
                             </span>
                           ) : (
-                            <span className="ml-1 text-gray-400">⇅</span>
+                            <span className="ml-1 text-gray-400">+-</span>
                           )}
-                      </div>
+                        </div>
                         <input
                           type="text"
                           placeholder="Filter"
                           value={filters[col.key] || ""}
-                          onChange={(e) =>
-                            onFilterChange(col.key, e.target.value)
-                          }
+                          onChange={(e) => onFilterChange(col.key, e.target.value)}
                           className="mt-1 px-2 py-1 border border-gray-300 rounded text-xs"
                         />
                       </div>
@@ -147,7 +182,9 @@ const onSort = (key) => {
                   {columns.map((col) => (
                     <td
                       key={col.key}
-                      className={`px-4 py-2 whitespace-nowrap text-xs ${col.key === 'Warning' ? 'text-red-600' : 'text-gray-900'}`}
+                      className={`px-4 py-2 whitespace-nowrap text-xs ${
+                        col.key === "Warning" ? "text-red-600" : "text-gray-900"
+                      }`}
                     >
                       {col.isAction ? (
                         <div className="flex items-center gap-2 whitespace-nowrap">
@@ -166,17 +203,8 @@ const onSort = (key) => {
                             <TrendingUp size={16} />
                           </ActionIconButton>
                         </div>
-                      ) : col.key === "LaibilityAmount" ||
-                        col.key === "PendingApprovalAmount" ||
-                        col.key === "ProjectionAmount" ||
-                        col.key === "RejectedAmount" ||
-                        col.key === "ClosingAmount" ||
-                        col.key === "CurrentAmount" ||
-                        col.key === "ReceivedAmount"
-                        ? (
-                        `₹${formatIndianNumber(item[col.key])}`
                       ) : (
-                        item[col.key]
+                        renderCellValue(item, col.key)
                       )}
                     </td>
                   ))}
@@ -332,3 +360,6 @@ function ProjectionAmountDialog({ retailer, onClose }) {
     </div>
   );
 }
+
+
+

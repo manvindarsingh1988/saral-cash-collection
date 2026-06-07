@@ -142,9 +142,9 @@ export const apiBase = {
         `${API_URL}/GetMappedCollectorsByRetailerId?userId=${id}`
       )
     ).json(),
-  getLiabilityAmountOfAllRetailers: async (id, userType) =>
+  getLiabilityAmountOfAllRetailers: async (id, userType, includeProjectionAmountBeforeXMinutes = false) =>
     await (
-      await authorizedFetch(`${API_URL}/GetLiabilityAmountOfAllRetailers?id=${id}&userType=${userType}`)
+      await authorizedFetch(`${API_URL}/GetLiabilityAmountOfAllRetailers?id=${id}&userType=${userType}&includeProjectionAmountBeforeXMinutes=${includeProjectionAmountBeforeXMinutes}`)
     ).json(),
   getLiabilityAmountOfAllRetailersByCollectorId: async (id) =>
     await (
@@ -345,7 +345,18 @@ export const apiBase = {
           remark: remark
         }),
       })
-    ).json(),  
+    ).json(),
+  updateProjectionSnapshotMinutes: async (id, projectionSnapshotMinutes) =>
+    await (
+      await authorizedFetch(`${API_URL}/UpdateProjectionSnapshotMinutes`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId: id,
+          projectionSnapshotMinutes,
+        }),
+      })
+    ).json(),
   getPassword: async (id) =>
     await (await authorizedFetch(`${API_URL}/GetPassword?userId=${id}`)).json(),
   linkAllRetailersToNewCollector: async (fromId, toId) =>
@@ -425,3 +436,8 @@ export const apiBase = {
   return await response.blob();
 }
 }
+
+
+
+
+
