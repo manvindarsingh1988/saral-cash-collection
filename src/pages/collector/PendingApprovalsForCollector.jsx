@@ -2,10 +2,11 @@ import React, { useState, useEffect } from "react";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
 import { apiBase } from "../../lib/apiBase";
 import ApprovalLedgerModal from "../../components/admin/ApprovalLedgerModal";
+import { useCollectorApprovalGate } from "../../components/collector/CollectorApprovalGateContext";
 import {
-  base64ToByteArray,
   formatToCustomDateTime,
   getRowColor,
+  handleDownloadFile,
 } from "../../lib/utils";
 import { Download } from "lucide-react";
 
@@ -26,6 +27,7 @@ const columns = [
 
 export default function PendingApprovalsForCollector({ collectorUserId }) {
   useDocumentTitle("Pending Approvals");
+  const { refreshPendingApprovals } = useCollectorApprovalGate();
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -49,6 +51,7 @@ export default function PendingApprovalsForCollector({ collectorUserId }) {
       ]);
       setMasterData(master || {});
       setPendingApprovals(approvals);
+      await refreshPendingApprovals();
     } catch (err) {
       setError(err.message || "Failed to fetch data");
     } finally {
