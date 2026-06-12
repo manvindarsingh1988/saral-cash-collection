@@ -23,8 +23,12 @@ const columns = [
   { key: "Action", label: "Actions", width: "100px" },
 ];
 
-export default function CollectorLedger({ collectorUserId }) {
-  useDocumentTitle("Collector Ledger");
+export default function CollectorLedger({
+  collectorUserId,
+  documentTitle = "Collector Ledger",
+  onLoadingChange,
+}) {
+  useDocumentTitle(documentTitle);
 
   const [collectorLedgers, setCollectorLedgers] = useState([]);
   const [filteredLedgers, setFilteredLedgers] = useState([]);
@@ -65,6 +69,7 @@ export default function CollectorLedger({ collectorUserId }) {
   const fetchCollectorLedgers = async () => {
     try {
       setLoading(true);
+      onLoadingChange?.(true);
       setError(null);
 
       const [data, liabilityData] = await Promise.all([
@@ -80,6 +85,7 @@ export default function CollectorLedger({ collectorUserId }) {
       setError("Failed to fetch collector ledgers");
     } finally {
       setLoading(false);
+      onLoadingChange?.(false);
     }
   };
 

@@ -13,6 +13,7 @@ const routesForRoles = {
     "/users/assign-retail",
     "/approvals/pending",
     "/dashboard/create",
+    "/dashboard/collector-view",
     "/users/add",
     "/users/info",
     "/users/qr-mapping"

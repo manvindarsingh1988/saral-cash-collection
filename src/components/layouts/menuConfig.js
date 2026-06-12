@@ -65,6 +65,11 @@ export const menuConfig = [
         label: "Create Dashboard",
         allow: ["Admin", "MasterCashier", "Cashier"],
       },
+      {
+        to: "dashboard/collector-view",
+        label: "Collector View",
+        allow: ["Admin"],
+      },
     ],
   },
 ];

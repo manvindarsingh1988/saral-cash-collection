@@ -18,6 +18,7 @@ import AssignRetail from "../pages/admin/AssignRetail";
 import CollectorLiabilities from "../pages/admin/CollectorLiabilities";
 import PendingApprovals from "../pages/admin/PendingApprovals";
 import CreateDashboard from "../pages/admin/CreateDashboard";
+import CollectorView from "../pages/admin/CollectorView";
 import UserInfo from "../pages/admin/UserInfo";
 import UserQRMapping from "../pages/admin/UserQRMapping";
 import CashierLiabilities from "../pages/admin/CashierLiabilities";
@@ -87,6 +88,12 @@ export default function UserSpecificDashboard() {
                     path="dashboard/create"
                     element={<CreateDashboard userType={resolvedUserType} id={Id} />}
                   />
+                  {UserType === "Admin" && (
+                    <Route
+                      path="dashboard/collector-view"
+                      element={<CollectorView />}
+                    />
+                  )}
                 </Route>
               )}
 
