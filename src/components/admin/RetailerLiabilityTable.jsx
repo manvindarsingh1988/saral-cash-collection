@@ -15,6 +15,7 @@ function getColumns(showProjectionAmountBeforeXMinutes, showProjectionAmountWith
     { heading: "Projection Amount", key: "ProjectionAmount", width: "80px" },
     { heading: "Projection Without Current Sale", key: "ProjectionAmountWithoutCurrentSale", width: "100px" },
     { heading: "Laibility Amount", key: "LaibilityAmount", width: "80px" },
+    { heading: "Ewallet Pending Amount", key: "PendingAmount", width: "80px" },
     { heading: "Pending Approval Amount", key: "PendingApprovalAmount", width: "80px" },
     { heading: "FixedFund Charge", key: "RejectedAmount", width: "80px" },
     { heading: "Action", key: "Action", width: "80px", isAction: true },
@@ -113,6 +114,7 @@ export default function RetailerLiabilityTable({
   const renderCellValue = (item, key) => {
     const numericKeys = [
       "LaibilityAmount",
+      "PendingAmount",
       "PendingApprovalAmount",
       "ProjectionAmount",
       "ProjectionAmountBeforeXMinutes",

@@ -200,7 +200,7 @@ export default function RetailDashboard({ retailUserId }) {
         <div className="bg-white shadow rounded-lg p-6">
           {liability && (
             <>
-              <div className="grid grid-cols-1 sm:grid-cols-6 gap-6 mb-6">
+              <div className="grid grid-cols-1 sm:grid-cols-7 gap-6 mb-6">
                 <div className="bg-white shadow rounded-lg p-4">
                   <dt className="text-sm font-medium text-gray-500">
                     Opening Amount
@@ -224,6 +224,15 @@ export default function RetailDashboard({ retailUserId }) {
                   </dt>
                   <dd className="mt-1 text-2xl font-semibold text-gray-900">
                     ₹ {formatIndianNumber(liability.PendingApprovalAmount)}
+                  </dd>
+                </div>
+
+                <div className="bg-white shadow rounded-lg p-4">
+                  <dt className="text-sm font-medium text-gray-500">
+                    Ewallet Pending Amount
+                  </dt>
+                  <dd className="mt-1 text-2xl font-semibold text-gray-900">
+                    ₹ {formatIndianNumber(liability.PendingAmount)}
                   </dd>
                 </div>
 
