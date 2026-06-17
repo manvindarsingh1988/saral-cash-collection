@@ -14,6 +14,7 @@ const routesForRoles = {
     "/approvals/pending",
     "/dashboard/create",
     "/dashboard/collector-view",
+    "/fund/additional",
     "/users/add",
     "/users/info",
     "/users/qr-mapping"
@@ -67,7 +68,7 @@ export default function ProtectedRoute({ children }) {
     }
   }, [navigate, location.pathname]);
 
-  if (!user) return null; // Or a loading spinner
+  if (!user) return null;
 
   const allowedRoutes = routesForRoles[user.UserType] || [];
 

@@ -2,8 +2,8 @@ export const menuConfig = [
   {
     title: "Liabilities",
     children: [
-      { 
-        to: "liabilities/retailer", 
+      {
+        to: "liabilities/retailer",
         label: "Retailer Liabilities",
         allow: ["Admin", "MasterCashier", "Cashier", "ZoneManager"]
       },
@@ -68,6 +68,16 @@ export const menuConfig = [
       {
         to: "dashboard/collector-view",
         label: "Collector View",
+        allow: ["Admin"],
+      },
+    ],
+  },
+  {
+    title: "Fund",
+    children: [
+      {
+        to: "fund/additional",
+        label: "Additional Fund",
         allow: ["Admin"],
       },
     ],

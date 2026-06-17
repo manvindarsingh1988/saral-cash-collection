@@ -396,6 +396,41 @@ export const apiBase = {
         body: JSON.stringify({ qrId }),
       })
     ).json(),
+  getAdditionalFundInfos: async (collectorId = "", fromDate = "", toDate = "") => {
+    const params = new URLSearchParams();
+    if (collectorId) params.set("collectorId", collectorId);
+    if (fromDate) params.set("fromDate", fromDate);
+    if (toDate) params.set("toDate", toDate);
+    const query = params.toString();
+
+    return await (
+      await authorizedFetch(
+        `${API_URL}/GetAdditionalFundInfos${query ? `?${query}` : ""}`
+      )
+    ).json();
+  },
+  addAdditionalFundInfo: async (data) =>
+    await (
+      await authorizedFetch(`${API_URL}/AddAdditionalFundInfo`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      })
+    ).json(),
+  updateAdditionalFundInfo: async (data) =>
+    await (
+      await authorizedFetch(`${API_URL}/UpdateAdditionalFundInfo`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      })
+    ).json(),
+  deleteAdditionalFundInfo: async (id) =>
+    await (
+      await authorizedFetch(`${API_URL}/DeleteAdditionalFundInfo?id=${id}`, {
+        method: "POST",
+      })
+    ).json(),
   deleteLinking: async (cid, rid) =>
     await (
       await authorizedFetch(
