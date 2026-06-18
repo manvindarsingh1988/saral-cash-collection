@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { apiBase } from "../../lib/apiBase";
 import SearchableSelect from "../../components/SearchableSelect";
+import TruncatedCell from "../../components/TruncatedCell";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
 
 const currentDateString = () => new Date().toISOString().slice(0, 10);
@@ -17,6 +18,17 @@ const createInitialForm = () => ({
   Amount: "",
   Remarks: "",
 });
+
+function CenterLoader({ label }) {
+  return (
+    <div className="app-loading-state">
+      <div className="app-loading-card">
+        <div className="app-spinner" />
+        <div className="app-loading-label">{label}</div>
+      </div>
+    </div>
+  );
+}
 
 export default function AdditionalFund({
   readOnly = false,
@@ -167,9 +179,9 @@ export default function AdditionalFund({
   }
 
   return (
-    <div className="w-full max-w-none p-4 sm:p-6 space-y-6">
+    <div className="flex h-full min-h-0 w-full max-w-none flex-col gap-6 overflow-hidden">
       {!readOnly && (
-        <section className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
+        <section className="shrink-0 rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
           <div className="mb-4 flex items-center justify-between">
             <div>
               <h2 className="text-lg font-semibold text-slate-900">
@@ -180,7 +192,7 @@ export default function AdditionalFund({
             <button
               type="button"
               onClick={resetForm}
-              className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+              className="app-button-secondary"
             >
               Reset
             </button>
@@ -237,7 +249,7 @@ export default function AdditionalFund({
               <button
                 type="submit"
                 disabled={saving}
-                className="w-full rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
+                className="app-button-primary w-full disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {saving ? "Saving..." : form.Id ? "Update Entry" : "Add Entry"}
               </button>
@@ -246,7 +258,7 @@ export default function AdditionalFund({
         </section>
       )}
 
-      <section className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
+      <section className="flex min-h-0 flex-1 flex-col rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
         <div className="mb-4 flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
           <div>
             <h2 className="text-lg font-semibold text-slate-900">Additional Fund Entries</h2>
@@ -298,17 +310,17 @@ export default function AdditionalFund({
             From Date cannot be greater than To Date.
           </div>
         ) : loading ? (
-          <div className="rounded-xl border border-dashed border-slate-300 px-4 py-10 text-center text-sm text-slate-500">
-            Loading additional fund entries...
+          <div className="flex min-h-0 flex-1 items-center justify-center">
+            <CenterLoader label="Loading additional fund entries..." />
           </div>
         ) : entries.length === 0 ? (
-          <div className="rounded-xl border border-dashed border-slate-300 px-4 py-10 text-center text-sm text-slate-500">
+          <div className="flex min-h-0 flex-1 items-center justify-center rounded-xl border border-dashed border-slate-300 px-4 py-10 text-center text-sm text-slate-500">
             No additional fund entries found.
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-slate-200 text-sm">
-              <thead className="bg-slate-50">
+          <div className="app-table-shell min-h-0 flex-1 overflow-auto">
+            <table className="app-table min-w-full divide-y divide-slate-200 text-sm">
+              <thead className="sticky top-0 z-10 bg-slate-50">
                 <tr>
                   <th className="px-4 py-3 text-left font-semibold text-slate-600">Collector</th>
                   <th className="px-4 py-3 text-left font-semibold text-slate-600">Collector Id</th>
@@ -323,20 +335,30 @@ export default function AdditionalFund({
               <tbody className="divide-y divide-slate-100">
                 {entries.map((entry) => (
                   <tr key={entry.Id} className="hover:bg-slate-50">
-                    <td className="px-4 py-3 font-medium text-slate-900">{entry.CollectorName || "-"}</td>
-                    <td className="px-4 py-3 text-slate-600">{entry.CollectorId}</td>
-                    <td className="px-4 py-3 text-right text-slate-900">
-                      {Number(entry.Amount || 0).toLocaleString(undefined, {
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 5,
-                      })}
+                    <td className="px-4 py-3 font-medium text-slate-900">
+                      <TruncatedCell>{entry.CollectorName || "-"}</TruncatedCell>
                     </td>
                     <td className="px-4 py-3 text-slate-600">
-                      {entry.RecievedDate
-                        ? new Date(entry.RecievedDate).toLocaleString()
-                        : "-"}
+                      <TruncatedCell>{entry.CollectorId}</TruncatedCell>
                     </td>
-                    <td className="px-4 py-3 text-slate-600">{entry.Remarks || "-"}</td>
+                    <td className="px-4 py-3 text-right text-slate-900">
+                      <TruncatedCell>
+                        {Number(entry.Amount || 0).toLocaleString(undefined, {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 5,
+                        })}
+                      </TruncatedCell>
+                    </td>
+                    <td className="px-4 py-3 text-slate-600">
+                      <TruncatedCell>
+                        {entry.RecievedDate
+                          ? new Date(entry.RecievedDate).toLocaleString()
+                          : "-"}
+                      </TruncatedCell>
+                    </td>
+                    <td className="px-4 py-3 text-slate-600">
+                      <TruncatedCell>{entry.Remarks || "-"}</TruncatedCell>
+                    </td>
                     {!readOnly && (
                       <td className="px-4 py-3">
                         <div className="flex justify-end gap-2">
