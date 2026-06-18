@@ -1,7 +1,8 @@
-import React, { use, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { apiBase } from "../../lib/apiBase";
 import SearchableSelect from "../../components/SearchableSelect";
 import Tooltip from "../../components/Tooltip";
+import TruncatedCell from "../../components/TruncatedCell";
 import {
   formatIndianNumber,
   formatToCustomDateTime,
@@ -11,27 +12,69 @@ import CollectorLedgerModal from "../../components/LedgerModal";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
 
 const columns = [
-  { key: "Id", label: "ID", width: "50px" },
-  { key: "CollectorName", label: "Collector", width: "150px" },
-  { key: "Amount", label: "Amount", width: "100px" },
-  { key: "TransactionTypes", label: "Transaction Type", width: "120px" },
-  { key: "WorkFlows", label: "Workflow", width: "120px" },
-  { key: "Date", label: "Transaction Date", width: "100px" },
-  { key: "GivenOn", label: "Given On", width: "100px" },
-  { key: "Comment", label: "Remarks", width: "150px" },
-  { key: "Action", label: "Action" },
+  { key: "Id", label: "ID", width: "80px" },
+  { key: "CollectorName", label: "Collector", width: "220px" },
+  { key: "Amount", label: "Amount", width: "140px" },
+  { key: "TransactionTypes", label: "Transaction Type", width: "180px" },
+  { key: "WorkFlows", label: "Workflow", width: "180px" },
+  { key: "Date", label: "Transaction Date", width: "170px" },
+  { key: "GivenOn", label: "Given On", width: "170px" },
+  { key: "Comment", label: "Remarks", width: "220px" },
+  { key: "Action", label: "Action", width: "120px" },
 ];
+
+const summaryCards = [
+  { key: "LaibilityAmount", label: "Liability", color: "#dc2626" },
+  { key: "ProjectionAmount", label: "Projection Amount", color: "#7c3aed" },
+  {
+    key: "PendingApprovalAmount",
+    label: "Pending Approval Amount",
+    color: "#d97706",
+  },
+  { key: "RejectedAmount", label: "Rejected Amount", color: "#db2777" },
+];
+
+function SliderToggle({ checked, onChange, label }) {
+  return (
+    <div className="flex min-h-[42px] items-center gap-3">
+      <button
+        type="button"
+        role="switch"
+        aria-checked={checked}
+        aria-label={label}
+        onClick={() => onChange(!checked)}
+        className={`app-switch ${checked ? "is-active" : ""}`}
+      >
+        <span className="app-switch-thumb" />
+      </button>
+      <span className="text-sm font-medium text-slate-700">{label}</span>
+    </div>
+  );
+}
+
+function CenterLoader({ label }) {
+  return (
+    <div className="app-loading-state">
+      <div className="app-loading-card">
+        <div className="app-spinner" />
+        <div className="app-loading-label">{label}</div>
+      </div>
+    </div>
+  );
+}
 
 export default function CollectorDashboard({ collectorUserId }) {
   useDocumentTitle("Collector Dashboard");
+
   const [isModalOpen, setModalOpen] = useState(false);
   const [editData, setEditData] = useState(null);
   const [showAll, setShowAll] = useState(false);
   const [selectedRetailerId, setSelectedRetailerId] = useState("");
   const [liability, setLiability] = useState(null);
-  const [ledger, setLedger] = useState(null);
+  const [ledger, setLedger] = useState([]);
   const [masterData, setMasterData] = useState(null);
   const [retailers, setRetailers] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [filters, setFilters] = useState({
     CollectorId: "",
     Amount: "",
@@ -45,25 +88,25 @@ export default function CollectorDashboard({ collectorUserId }) {
   useEffect(() => {
     const loadMasterData = async () => {
       try {
-        const [master, retailers] = await Promise.all([
+        const [master, retailerList] = await Promise.all([
           apiBase.getMasterData(),
           apiBase.getMappedUsersByCollectorId(collectorUserId),
         ]);
-        setMasterData(master);
-        setRetailers(retailers);
+        setMasterData(master || {});
+        setRetailers(retailerList || []);
       } catch (err) {
         console.error("Failed to load master data:", err);
       }
     };
 
     loadMasterData();
-  }, []);
+  }, [collectorUserId]);
 
   useEffect(() => {
     if (selectedRetailerId) {
       fetchData();
     }
-  }, [showAll]);
+  }, [selectedRetailerId, showAll]);
 
   const fetchData = async () => {
     if (!collectorUserId || !selectedRetailerId) {
@@ -72,6 +115,7 @@ export default function CollectorDashboard({ collectorUserId }) {
     }
 
     try {
+      setLoading(true);
       const [ledgerData, liabilityData] = await Promise.all([
         apiBase.getLadgerInfoByRetaileridAndCollectorId(
           showAll,
@@ -81,11 +125,14 @@ export default function CollectorDashboard({ collectorUserId }) {
         apiBase.getLiabilityAmountByRetailerId(selectedRetailerId),
       ]);
 
-      setLiability(liabilityData);
-      setLedger(ledgerData);
+      setLiability(liabilityData || null);
+      setLedger(ledgerData || []);
     } catch (err) {
       console.error("Fetch failed:", err);
-      setLedger(null);
+      setLedger([]);
+      setLiability(null);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -103,19 +150,15 @@ export default function CollectorDashboard({ collectorUserId }) {
     setFilters((prev) => ({ ...prev, [key]: value }));
   };
 
-  const openAddLedger = () => {
-    setEditData(null);
-    setModalOpen(true);
-  };
-
   const openEditLedger = (data) => {
     if (
       !data ||
       data.WorkFlow == "5" ||
       data.WorkFlow == "3" ||
       data.WorkFlow == "2"
-    )
+    ) {
       return;
+    }
     setEditData(data);
     setModalOpen(true);
   };
@@ -145,27 +188,40 @@ export default function CollectorDashboard({ collectorUserId }) {
     }
   };
 
-  const filteredData = (ledger || []).filter((item) => {
+  const filteredData = ledger.filter((item) => {
     return Object.entries(filters).every(([key, value]) => {
-      if (key === "WorkFlows") {
-        key = "WorkFlow";
-      } else if (key === "TransactionTypes") {
-        key = "TransactionType";
+      let resolvedKey = key;
+      if (resolvedKey === "WorkFlows") {
+        resolvedKey = "WorkFlow";
+      } else if (resolvedKey === "TransactionTypes") {
+        resolvedKey = "TransactionType";
       }
 
       if (!value) return true;
-      const itemValue = item[key];
+      const itemValue = item[resolvedKey];
       if (itemValue === null || itemValue === undefined) return false;
-      return itemValue.toString().toLowerCase().includes(value.toLowerCase());
+
+      const normalizedValue =
+        resolvedKey === "TransactionType"
+          ? getMasterValue("TransactionTypes", item.TransactionType)
+          : resolvedKey === "WorkFlow"
+          ? getMasterValue("WorkFlows", item.WorkFlow)
+          : itemValue;
+
+      return normalizedValue
+        ?.toString()
+        .toLowerCase()
+        .includes(value.toLowerCase());
     });
   });
 
   const handleDeleteLedger = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this ledger entry?"))
+    if (!window.confirm("Are you sure you want to delete this ledger entry?")) {
       return;
+    }
 
     try {
-      await apiBase.deleteLedgerInfo(id); // Make sure this API exists
+      await apiBase.deleteLedgerInfo(id);
       await fetchData();
     } catch (err) {
       console.error("Delete failed:", err);
@@ -173,218 +229,193 @@ export default function CollectorDashboard({ collectorUserId }) {
   };
 
   return (
-    <>
-      <div className="space-y-6">
-        <div className="bg-white shadow rounded-lg p-6">
-          <div className="rounded-lg shadow-sm">
-            <div className="flex flex-col sm:flex-row sm:items-end gap-4">
-              {/* Retailer Dropdown */}
-              <div className="flex-1">
-                <label className="block text-sm font-medium text-indigo-700 mb-1">
-                  Select Retailer
-                </label>
-                <SearchableSelect
-                  value={selectedRetailerId}
-                  onChange={setSelectedRetailerId}
-                  options={retailers.map((r) => ({
-                    value: r.RetailerUserId,
-                    label: `${r.RetailerUserName} (${r.RetailerUserId})`,
-                  }))}
-                  placeholder="Select Retailer"
-                  searchPlaceholder="Search retailer..."
-                />
-              </div>
-
-              {/* Search Button */}
-              <button
-                onClick={fetchData}
-                className="bg-indigo-600 text-white px-6 py-2 rounded-md hover:bg-indigo-700 transition duration-200 mt-2 sm:mt-0"
-              >
-                🔍 Search
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {liability && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-            <div className="bg-white shadow rounded-lg p-4">
-              <dt className="text-sm font-medium text-gray-500">Liability</dt>
-              <dd className="mt-1 text-2xl font-semibold text-gray-900">
-                ₹ {formatIndianNumber(liability.LaibilityAmount)}
-              </dd>
-            </div>
-
-            <div className="bg-white shadow rounded-lg p-4">
-              <dt className="text-sm font-medium text-gray-500">
-                Projection Amount
-              </dt>
-              <dd className="mt-1 text-2xl font-semibold text-gray-900">
-                ₹ {formatIndianNumber(liability.ProjectionAmount)}
-              </dd>
-            </div>
-
-            <div className="bg-white shadow rounded-lg p-4">
-              <dt className="text-sm font-medium text-gray-500">
-                Pending Approval Amount
-              </dt>
-              <dd className="mt-1 text-2xl font-semibold text-gray-900">
-                ₹ {formatIndianNumber(liability.PendingApprovalAmount)}
-              </dd>
-            </div>
-
-            <div className="bg-white shadow rounded-lg p-4">
-              <dt className="text-sm font-medium text-gray-500">
-                Rejected Amount
-              </dt>
-              <dd className="mt-1 text-2xl font-semibold text-gray-900">
-                ₹ {liability.RejectedAmount}
-              </dd>
-            </div>
-          </div>
-        )}
-
-        {filteredData.length > 0 ? (
-          <>
-            <div className="flex justify-start mb-2">
-              <input
-                type="checkbox"
-                id="show-all"
-                checked={showAll}
-                onChange={() => {
-                  setShowAll(!showAll);
-                }}
-              />
-              <label htmlFor="show-all" className="ml-2 text-md text-black-500">
-                Show All
+    <div className="flex h-full min-h-0 flex-col gap-6">
+      <div className="shrink-0 rounded-lg bg-white p-6 shadow">
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-end">
+            <div className="flex-1">
+              <label className="mb-1 block text-sm font-medium text-indigo-700">
+                Select Retailer
               </label>
+              <SearchableSelect
+                value={selectedRetailerId}
+                onChange={setSelectedRetailerId}
+                options={retailers.map((retailer) => ({
+                  value: retailer.RetailerUserId,
+                  label: `${retailer.RetailerUserName} (${retailer.RetailerUserId})`,
+                }))}
+                placeholder="Select Retailer"
+                searchPlaceholder="Search retailer..."
+              />
             </div>
-            <div className="bg-white rounded-lg shadow p-6">
-              <div className="overflow-y-auto border border-gray-200 rounded h-[400px]">
-                <table className="w-full table-auto divide-y divide-gray-200 text-xs">
-                  <thead className="bg-gray-50 sticky top-0 z-10 border-b border-gray-200">
-                    <tr>
-                      {columns.map(({ key, label, width }) => (
-                        <th
-                          key={key}
-                          className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase"
-                          style={{ whiteSpace: "nowrap" }}
-                        >
-                          <div className="flex flex-col min-w-fit">
-                            <span>{label}</span>
-                            {["TransactionTypes", "WorkFlows"].includes(key) &&
-                            masterData ? (
-                              <select
-                                value={filters[key]}
-                                onChange={(e) =>
-                                  handleFilterChange(key, e.target.value)
-                                }
-                                className="mt-1 px-1 py-0.5 border border-gray-300 rounded text-xs"
-                                // style={{ width }}
-                              >
-                                <option value="">All</option>
-                                {masterData[key]?.map((opt) => (
-                                  <option key={opt.Id} value={opt.Id}>
-                                    {opt.Description}
-                                  </option>
-                                ))}
-                              </select>
-                            ) : key !== "Action" ? (
-                              <input
-                                type="text"
-                                // style={{ width }}
-                                value={filters[key] || ""}
-                                onChange={(e) =>
-                                  handleFilterChange(key, e.target.value)
-                                }
-                                className="mt-1 px-1 py-0.5 border border-gray-300 rounded text-xs"
-                                placeholder="Filter"
-                              />
-                            ) : (
-                              ""
-                            )}
-                          </div>
-                        </th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {filteredData.map((item) => (
-                      <tr
-                        key={item.Id}
-                        // onClick={() => openEditLedger(item)}
-                        className={`cursor-pointer hover:bg-gray-100 ${getRowColor(
-                          item.WorkFlow
-                        )}`}
+
+            <button
+              onClick={fetchData}
+              className="app-button-primary shrink-0"
+            >
+              Search
+            </button>
+          </div>
+
+          {filteredData.length > 0 ? (
+            <SliderToggle
+              checked={showAll}
+              onChange={setShowAll}
+              label="Show All"
+            />
+          ) : null}
+        </div>
+      </div>
+
+      {liability ? (
+        <div className="liability-summary grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {summaryCards.map(({ key, label, color }) => (
+            <div key={key} className="metric-tile" style={{ "--tile-color": color }}>
+              <dt className="metric-tile-label">{label}</dt>
+              <dd className="metric-tile-value">
+                Rs {formatIndianNumber(liability[key])}
+              </dd>
+            </div>
+          ))}
+        </div>
+      ) : null}
+
+      {filteredData.length > 0 ? (
+        <div className="flex min-h-0 flex-1 flex-col rounded-lg bg-white p-4 shadow sm:p-6">
+          <div className="relative min-h-0 flex-1">
+            {loading ? (
+              <div className="absolute inset-0 z-20 flex items-center justify-center rounded-2xl bg-white/70 backdrop-blur-[2px]">
+                <CenterLoader label="Loading collector data..." />
+              </div>
+            ) : null}
+
+            <div className="app-table-shell min-h-0 h-full overflow-auto">
+              <table className="app-table min-w-full divide-y divide-gray-200 text-xs">
+                <thead className="sticky top-0 z-10 bg-gray-50">
+                  <tr>
+                    {columns.map(({ key, label, width }) => (
+                      <th
+                        key={key}
+                        className="px-4 py-2 text-left text-xs font-medium uppercase text-gray-700"
+                        style={{ width, minWidth: width, maxWidth: width }}
                       >
-                        <td className="px-4 py-2">
-                          <Tooltip content="Click to edit">
-                            <a
-                              className="text-blue-600 underline hover:text-blue-800"
-                              onClick={(e) => {
-                                e.preventDefault();
-                                openEditLedger(item);
-                              }}
+                        <div className="flex flex-col min-w-fit">
+                          <span>{label}</span>
+                          {["TransactionTypes", "WorkFlows"].includes(key) &&
+                          masterData ? (
+                            <select
+                              value={filters[key] || ""}
+                              onChange={(e) =>
+                                handleFilterChange(key, e.target.value)
+                              }
+                              className="mt-1 w-full rounded border border-gray-300 px-2 py-1 text-xs"
                             >
-                              {item.Id}
-                            </a>
-                          </Tooltip>
-                        </td>
-                        <td className="px-4 py-2">{item.CollectorName}</td>
-                        <td className="px-4 py-2">
-                          ₹ {formatIndianNumber(item.Amount)}
-                        </td>
-                        <td className="px-4 py-2">
+                              <option value="">All</option>
+                              {masterData[key]?.map((opt) => (
+                                <option key={opt.Id} value={opt.Id}>
+                                  {opt.Description}
+                                </option>
+                              ))}
+                            </select>
+                          ) : key !== "Action" ? (
+                            <input
+                              type="text"
+                              value={filters[key] || ""}
+                              onChange={(e) =>
+                                handleFilterChange(key, e.target.value)
+                              }
+                              className="mt-1 w-full rounded border border-gray-300 px-2 py-1 text-xs"
+                              placeholder="Filter"
+                            />
+                          ) : null}
+                        </div>
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200 bg-white">
+                  {filteredData.map((item) => (
+                    <tr
+                      key={item.Id}
+                      className={`cursor-pointer hover:bg-gray-100 ${getRowColor(
+                        item.WorkFlow
+                      )}`}
+                    >
+                      <td className="px-4 py-2">
+                        <Tooltip content="Click to edit">
+                          <a
+                            className="text-blue-600 underline hover:text-blue-800"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              openEditLedger(item);
+                            }}
+                          >
+                            <TruncatedCell>{item.Id}</TruncatedCell>
+                          </a>
+                        </Tooltip>
+                      </td>
+                      <td className="px-4 py-2">
+                        <TruncatedCell>{item.CollectorName || "-"}</TruncatedCell>
+                      </td>
+                      <td className="px-4 py-2">
+                        <TruncatedCell>Rs {formatIndianNumber(item.Amount)}</TruncatedCell>
+                      </td>
+                      <td className="px-4 py-2">
+                        <TruncatedCell>
                           {getMasterValue(
                             "TransactionTypes",
                             item.TransactionType
                           )}
-                        </td>
-                        <td className="px-4 py-2">
+                        </TruncatedCell>
+                      </td>
+                      <td className="px-4 py-2">
+                        <TruncatedCell>
                           {getMasterValue("WorkFlows", item.WorkFlow)}
-                        </td>
-                        <td className="px-4 py-2">
-                          {formatToCustomDateTime(item.Date)}
-                        </td>
-                        <td className="px-4 py-2">
-                          {formatToCustomDateTime(item.GivenOn)}
-                        </td>
-                        <td className="px-4 py-2 break-words max-w-[200px]">
-                          {item.Comment}
-                        </td>
-                        <td className="px-4 py-2">
-                          {getMasterValue("WorkFlows", item.WorkFlow) ===
-                            "Initiate" && (
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation(); // Prevent triggering row edit
-                                handleDeleteLedger(item.Id);
-                              }}
-                              className="text-red-600 hover:text-red-800 text-xs"
-                            >
-                              Delete
-                            </button>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </>
-        ) : (
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="overflow-y-auto border border-gray-200 rounded h-[400px] flex items-center justify-center">
-              <p className="text-gray-500 text-lg">
-                No data available for selected date.
-              </p>
+                        </TruncatedCell>
+                      </td>
+                      <td className="px-4 py-2">
+                        <TruncatedCell>{formatToCustomDateTime(item.Date)}</TruncatedCell>
+                      </td>
+                      <td className="px-4 py-2">
+                        <TruncatedCell>{formatToCustomDateTime(item.GivenOn)}</TruncatedCell>
+                      </td>
+                      <td className="px-4 py-2">
+                        <TruncatedCell>{item.Comment || "-"}</TruncatedCell>
+                      </td>
+                      <td className="px-4 py-2">
+                        {getMasterValue("WorkFlows", item.WorkFlow) ===
+                        "Initiate" ? (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteLedger(item.Id);
+                            }}
+                            className="text-xs text-red-600 hover:text-red-800"
+                          >
+                            Delete
+                          </button>
+                        ) : null}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      ) : (
+        <div className="flex min-h-0 flex-1 flex-col rounded-lg bg-white p-6 shadow">
+          <div className="app-table-shell flex min-h-0 flex-1 items-center justify-center">
+            <p className="text-lg text-gray-500">
+              {loading
+                ? "Loading collector data..."
+                : "No data available for selected retailer."}
+            </p>
+          </div>
+        </div>
+      )}
 
-      {isModalOpen && (
+      {isModalOpen ? (
         <CollectorLedgerModal
           masterData={masterData}
           isOpen={isModalOpen}
@@ -394,7 +425,7 @@ export default function CollectorDashboard({ collectorUserId }) {
           modelFor="RetailerLedger"
           collectorId={collectorUserId}
         />
-      )}
-    </>
+      ) : null}
+    </div>
   );
 }

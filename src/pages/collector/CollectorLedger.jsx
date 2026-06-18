@@ -3,6 +3,7 @@ import { Download } from "lucide-react";
 import LedgerModal from "../../components/LedgerModal";
 import Tooltip from "../../components/Tooltip";
 import TooltipIconButton from "../../components/TooltipIconButton";
+import TruncatedCell from "../../components/TruncatedCell";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
 import { apiBase } from "../../lib/apiBase";
 import {
@@ -34,25 +35,30 @@ const getWorkflowRowStyle = (workFlow) => {
 
 function SliderToggle({ active, onToggle, label }) {
   return (
-    <label className="flex items-center gap-3">
-      <span className="text-sm font-medium text-slate-700">{label}</span>
+    <div className="flex min-h-[42px] items-center gap-3">
       <button
         type="button"
         role="switch"
         aria-checked={active}
         aria-label={label}
         onClick={onToggle}
-        className={`relative inline-flex h-7 w-12 items-center rounded-full transition ${
-          active ? "bg-blue-600" : "bg-slate-300"
-        }`}
+        className={`app-switch ${active ? "is-active" : ""}`}
       >
-        <span
-          className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-sm transition ${
-            active ? "translate-x-6" : "translate-x-1"
-          }`}
-        />
+        <span className="app-switch-thumb" />
       </button>
-    </label>
+      <span className="text-sm font-medium text-slate-700">{label}</span>
+    </div>
+  );
+}
+
+function CenterLoader({ label }) {
+  return (
+    <div className="app-loading-state">
+      <div className="app-loading-card">
+        <div className="app-spinner" />
+        <div className="app-loading-label">{label}</div>
+      </div>
+    </div>
   );
 }
 
@@ -206,9 +212,9 @@ export default function CollectorLedger({
   };
 
   return (
-    <div className="spacer-6">
+    <div className="flex h-full min-h-0 flex-col gap-6 overflow-hidden">
       {liability && (
-        <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-8">
+        <div className="liability-summary grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8">
           {[
             ["Opening Amount", liability.ClosingAmount],
             ["Liability", liability.LaibilityAmount],
@@ -219,56 +225,67 @@ export default function CollectorLedger({
             ["Collector Initiated Amount", liability.CollectorInitiatedAmount],
             ["Fund Added By Admin", liability.RejectedAmount],
           ].map(([label, value]) => (
-            <div key={label} className="bg-white shadow rounded-lg p-4">
-              <dt className="text-sm font-medium text-gray-500">{label}</dt>
-              <dd className="mt-1 text-2xl font-semibold text-gray-900">
-                Rs {formatIndianNumber(value)}
-              </dd>
+            <div key={label} className="metric-tile">
+              <dt className="metric-tile-label">{label}</dt>
+              <dd className="metric-tile-value">Rs {formatIndianNumber(value)}</dd>
             </div>
           ))}
         </div>
       )}
 
-      <div className="bg-white rounded-lg shadow p-6">
-        {loading && <div>Loading...</div>}
-        {error && <div className="text-red-600">{error}</div>}
+      <div className="shrink-0 rounded-lg bg-white p-4 shadow sm:p-6">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex flex-wrap items-center gap-6">
+            <SliderToggle
+              label="Show All"
+              active={showAll}
+              onToggle={() => setShowAll((value) => !value)}
+            />
+            <SliderToggle
+              label="Load dashboard by Valuation Date"
+              active={loadDashboardByValuationDate}
+              onToggle={() =>
+                setLoadDashboardByValuationDate((value) => !value)
+              }
+            />
+          </div>
+          <div className="shrink-0">
+            <button
+              onClick={openAddLedger}
+              className="app-button-primary"
+            >
+              Add Ledger Entry
+            </button>
+          </div>
+        </div>
+      </div>
 
-        {!loading && filteredLedgers.length >= 0 && (
-          <>
-            <div className="mb-2 flex items-center justify-between gap-4">
-              <div className="flex flex-wrap items-center gap-6">
-                <SliderToggle
-                  label="Show All"
-                  active={showAll}
-                  onToggle={() => setShowAll((value) => !value)}
-                />
-                <SliderToggle
-                  label="Load dashboard by Valuation Date"
-                  active={loadDashboardByValuationDate}
-                  onToggle={() =>
-                    setLoadDashboardByValuationDate((value) => !value)
-                  }
-                />
-              </div>
-              <div className="shrink-0">
-                <button
-                  onClick={openAddLedger}
-                  className="rounded-md bg-blue-600 px-5 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700"
-                >
-                  Add Ledger Entry
-                </button>
-              </div>
-            </div>
+      <div className="flex min-h-0 flex-1 flex-col rounded-lg bg-white shadow">
+        <div className="flex min-h-0 flex-1 flex-col p-4 sm:p-6">
+          {error && <div className="mb-3 text-red-600">{error}</div>}
 
-            <div className="overflow-y-auto border border-gray-200 rounded h-[400px]">
-              <table className="w-full table-auto divide-y divide-gray-200 text-sm">
-                <thead className="bg-gray-50 sticky top-0 z-10 border-b border-gray-200">
+          <div className="relative min-h-0 flex-1">
+            {loading && (
+              <div className="absolute inset-0 z-30 flex items-center justify-center rounded-2xl bg-white/70 backdrop-blur-[2px]">
+                <CenterLoader label="Loading collector ledgers..." />
+              </div>
+            )}
+
+            <div className="app-table-shell min-h-0 h-full overflow-auto">
+              <table className="app-table min-w-full divide-y divide-gray-200 text-sm">
+                <thead className="bg-gray-50">
                   <tr>
-                    {columns.map(({ key, label }) => (
+                    {columns.map(({ key, label, width }) => (
                       <th
                         key={key}
-                        className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase"
-                        style={{ whiteSpace: "nowrap" }}
+                        className="sticky top-0 z-20 px-4 py-2 text-left text-xs font-medium uppercase text-gray-700"
+                        style={{
+                          width,
+                          minWidth: width,
+                          maxWidth: width,
+                          background:
+                            "linear-gradient(180deg, rgba(239, 246, 255, 0.98), rgba(226, 232, 240, 0.9))",
+                        }}
                       >
                         <div className="flex flex-col min-w-fit">
                           <span>{label}</span>
@@ -276,7 +293,7 @@ export default function CollectorLedger({
                             <select
                               value={filters[key] || ""}
                               onChange={(e) => handleFilterChange(key, e.target.value)}
-                              className="mt-1 px-1 py-0.5 border border-gray-300 rounded text-xs"
+                              className="mt-1 w-full rounded border border-gray-300 px-2 py-1 text-xs"
                             >
                               <option value="">All</option>
                               {masterData[key + "s"]?.map((opt) => (
@@ -290,26 +307,24 @@ export default function CollectorLedger({
                               type="text"
                               value={filters[key] || ""}
                               onChange={(e) => handleFilterChange(key, e.target.value)}
-                              className="mt-1 px-1 py-0.5 border border-gray-300 rounded text-xs"
+                              className="mt-1 w-full rounded border border-gray-300 px-2 py-1 text-xs"
                               placeholder="Filter"
                             />
-                          ) : (
-                            ""
-                          )}
+                          ) : null}
                         </div>
                       </th>
                     ))}
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200 text-xs">
+                <tbody className="divide-y divide-gray-100 bg-white text-xs">
                   {filteredLedgers.map((item) => {
                     const rowStyle = getWorkflowRowStyle(item.WorkFlow);
 
                     return (
                       <tr key={item.Id} className="cursor-pointer">
-                        <td className="px-2 py-2" style={rowStyle}>
+                        <td className="px-4 py-2" style={rowStyle}>
                           {item.WorkFlow == "5" || item.WorkFlow == "3" ? (
-                            <span className="text-green-600">{item.Id}</span>
+                            <TruncatedCell className="text-green-600">{item.Id}</TruncatedCell>
                           ) : (
                             <Tooltip content="Click to edit">
                               <a
@@ -319,70 +334,80 @@ export default function CollectorLedger({
                                   openEditLedger(item);
                                 }}
                               >
-                                {item.Id}
+                                <TruncatedCell>{item.Id}</TruncatedCell>
                               </a>
                             </Tooltip>
                           )}
                         </td>
-                        <td className="px-2 py-2" style={rowStyle}>
-                          {item.CashierName}
+                        <td className="px-4 py-2" style={rowStyle}>
+                          <TruncatedCell>{item.CashierName || "-"}</TruncatedCell>
                         </td>
-                        <td className="px-2 py-2" style={rowStyle}>
-                          {item.ToCollectorName || item.ToCollector || "-"}
+                        <td className="px-4 py-2" style={rowStyle}>
+                          <TruncatedCell>{item.ToCollectorName || item.ToCollector || "-"}</TruncatedCell>
                         </td>
-                        <td className="px-2 py-2" style={rowStyle}>
-                          Rs {formatIndianNumber(item.Amount)}
+                        <td className="px-4 py-2" style={rowStyle}>
+                          <TruncatedCell>Rs {formatIndianNumber(item.Amount)}</TruncatedCell>
                         </td>
-                        <td className="px-2 py-2" style={rowStyle}>
-                          {getMasterValue("TransactionTypes", item.TransactionType)}
+                        <td className="px-4 py-2" style={rowStyle}>
+                          <TruncatedCell>
+                            {getMasterValue("TransactionTypes", item.TransactionType)}
+                          </TruncatedCell>
                         </td>
-                        <td className="px-2 py-2" style={rowStyle}>
-                          {getMasterValue("WorkFlows", item.WorkFlow)}
+                        <td className="px-4 py-2" style={rowStyle}>
+                          <TruncatedCell>{getMasterValue("WorkFlows", item.WorkFlow)}</TruncatedCell>
                         </td>
-                        <td className="px-2 py-2" style={rowStyle}>
-                          {formatToCustomDateTime(item.GivenOn)}
+                        <td className="px-4 py-2" style={rowStyle}>
+                          <TruncatedCell>{formatToCustomDateTime(item.GivenOn)}</TruncatedCell>
                         </td>
-                        <td className="px-2 py-2" style={rowStyle}>
-                          {formatToCustomDateTime(item.Date)}
+                        <td className="px-4 py-2" style={rowStyle}>
+                          <TruncatedCell>{formatToCustomDateTime(item.Date)}</TruncatedCell>
                         </td>
-                        <td className="px-2 py-2" style={rowStyle}>
-                          {formatToCustomDateTime(item.ValuationDate)}
+                        <td className="px-4 py-2" style={rowStyle}>
+                          <TruncatedCell>{formatToCustomDateTime(item.ValuationDate)}</TruncatedCell>
                         </td>
-                        <td className="px-2 py-2 break-words max-w-[200px]" style={rowStyle}>
-                          {item.Comment}
+                        <td className="px-4 py-2" style={rowStyle}>
+                          <TruncatedCell>{item.Comment || "-"}</TruncatedCell>
                         </td>
-                        <td className="px-2 py-2" style={rowStyle}>
-                          {[1, 6].includes(item.WorkFlow) && (
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleDeleteLedger(item.Id);
-                              }}
-                              className="text-red-600 hover:text-red-800 text-xs"
-                            >
-                              Delete
-                            </button>
-                          )}
-                          {item.DocId ? (
-                            <TooltipIconButton
-                              label="Download File"
-                              onClick={() => handleDownloadFile(item.DocId, item.Id)}
-                              className="ml-2 text-blue-600 text-sm mb-1 hover:underline text-left"
-                            >
-                              <Download className="w-4 h-4" />
-                            </TooltipIconButton>
-                          ) : (
-                            ""
-                          )}
+                        <td className="px-4 py-2" style={rowStyle}>
+                          <div className="flex items-center gap-2">
+                            {[1, 6].includes(item.WorkFlow) && (
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDeleteLedger(item.Id);
+                                }}
+                                className="text-xs text-red-600 hover:text-red-800"
+                              >
+                                Delete
+                              </button>
+                            )}
+                            {item.DocId ? (
+                              <TooltipIconButton
+                                label="Download File"
+                                onClick={() => handleDownloadFile(item.DocId, item.Id)}
+                                className="text-blue-600 text-sm hover:underline"
+                              >
+                                <Download className="h-4 w-4" />
+                              </TooltipIconButton>
+                            ) : null}
+                          </div>
                         </td>
                       </tr>
                     );
                   })}
+
+                  {filteredLedgers.length === 0 && !loading ? (
+                    <tr>
+                      <td colSpan={columns.length} className="py-4 text-center text-gray-500">
+                        No records found.
+                      </td>
+                    </tr>
+                  ) : null}
                 </tbody>
               </table>
             </div>
-          </>
-        )}
+          </div>
+        </div>
       </div>
 
       {isModalOpen && (
