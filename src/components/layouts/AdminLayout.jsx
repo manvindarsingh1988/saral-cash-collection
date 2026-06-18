@@ -26,9 +26,9 @@ export default function AdminLayout() {
 }, [currentPath, user?.UserType]);
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="app-shell">
       {/* Navbar */}
-      <nav className="bg-indigo-600">
+      <nav className="app-nav relative z-40">
         <div className="mx-auto max-w-8xl px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 items-center justify-between">
             {/* Mobile Menu Toggle */}
@@ -58,7 +58,7 @@ export default function AdminLayout() {
 
         {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <div className="md:hidden bg-indigo-500 px-2 pt-2 pb-3 space-y-1">
+          <div className="md:hidden border-t border-white/10 bg-white/10 px-2 pb-3 pt-2 space-y-1 backdrop-blur">
             <NavLinks
               user={user}
               currentPath={currentPath}
@@ -69,23 +69,32 @@ export default function AdminLayout() {
         )}
       </nav>
 
-      {activeMenu && (
-        <div className="bg-white border-b">
-          <div className="mx-auto max-w-8xl px-4 py-3 sm:px-6 lg:px-8">
-            <div className="text-sm text-gray-500">
-              {activeMenu.parent}
-            </div>
-            <div className="text-xl font-semibold text-gray-800">
-              {activeMenu.label}
+      <div className="app-content">
+        {activeMenu && (
+          <div className="mx-auto mt-4 w-full max-w-8xl px-4 sm:px-6 lg:px-8">
+            <div className="page-heading flex w-full flex-col gap-4 rounded-2xl px-4 py-3 sm:flex-row sm:items-start sm:justify-between sm:px-6">
+              <div>
+                <div className="text-sm text-gray-500">
+                  {activeMenu.parent}
+                </div>
+                <div className="text-xl font-semibold text-gray-800">
+                  {activeMenu.label}
+                </div>
+              </div>
+              <div
+                id="page-header-actions"
+                className="flex min-h-[2.5rem] flex-wrap items-center justify-start gap-3 sm:justify-end"
+              >
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
       
-      {/* Page Content */}
-      <main className="mx-auto max-w-8xl px-4 py-4 sm:px-6 lg:px-8">
-        <Outlet />
-      </main>
+        {/* Page Content */}
+        <main className="mx-auto flex-1 min-h-0 w-full max-w-8xl overflow-auto px-4 py-6 sm:px-6 lg:px-8">
+          <Outlet />
+        </main>
+      </div>
     </div>
   );
 }
@@ -144,9 +153,9 @@ function DesktopNav({ user, currentPath }) {
             {/* Dropdown */}
             <div
               className="
-                absolute left-0 top-full
+                absolute left-0 top-full pt-2
                 min-w-[220px]
-                rounded-md bg-white shadow-lg
+                rounded-2xl border border-slate-200/70 bg-white/95 shadow-lg backdrop-blur
                 opacity-0 invisible
                 group-hover:opacity-100 group-hover:visible
                 transition-opacity duration-150

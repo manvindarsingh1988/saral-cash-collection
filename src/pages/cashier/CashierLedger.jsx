@@ -9,6 +9,7 @@ import {
 } from "../../lib/utils";
 import LedgerModal from "../../components/LedgerModal";
 import { Download } from "lucide-react";
+import TooltipIconButton from "../../components/TooltipIconButton";
 
 const columns = [
   { key: "Id", label: "ID", width: "50px" },
@@ -21,6 +22,38 @@ const columns = [
   { key: "Comments", label: "Comments", width: "150px" },
   { key: "Action", label: "Actions", width: "100px" },
 ];
+
+const summaryCards = [
+  { key: "LaibilityAmount", label: "Liability", color: "#dc2626" },
+  { key: "RejectedAmount", label: "Rejected Amount", color: "#db2777" },
+  { key: "PendingApprovalAmount", label: "Pending Approval Amount", color: "#d97706" },
+  { key: "ProjectionAmount", label: "Projection Amount", color: "#7c3aed" },
+  { key: "CollectorInitiatedAmount", label: "Collector Initiated Amount", color: "#2563eb" },
+];
+
+function SliderToggle({ active, onToggle, label }) {
+  return (
+    <label className="flex items-center gap-3">
+      <span className="text-sm font-medium text-slate-700">{label}</span>
+      <button
+        type="button"
+        role="switch"
+        aria-checked={active}
+        aria-label={label}
+        onClick={onToggle}
+        className={`relative inline-flex h-7 w-12 items-center rounded-full transition ${
+          active ? "bg-blue-600" : "bg-slate-300"
+        }`}
+      >
+        <span
+          className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-sm transition ${
+            active ? "translate-x-6" : "translate-x-1"
+          }`}
+        />
+      </button>
+    </label>
+  );
+}
 
 export default function CashierLedger({ cashierUserId }) {
   useDocumentTitle("Cashier Ledger");
@@ -151,55 +184,21 @@ export default function CashierLedger({ cashierUserId }) {
     <div className="spacer-6">
       {liability && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 mb-6">
-          <div className="bg-white shadow rounded-lg p-4">
-            <dt className="text-sm font-medium text-gray-500">Liability</dt>
-            <dd className="mt-1 text-2xl font-semibold text-gray-900">
-              ₹ {formatIndianNumber(liability.LaibilityAmount)}
-            </dd>
-          </div>
-
-          <div className="bg-white shadow rounded-lg p-4">
-            <dt className="text-sm font-medium text-gray-500">
-              Rejected Amount
-            </dt>
-            <dd className="mt-1 text-2xl font-semibold text-gray-900">
-              ₹ {formatIndianNumber(liability.RejectedAmount)}
-            </dd>
-          </div>
-
-          <div className="bg-white shadow rounded-lg p-4">
-            <dt className="text-sm font-medium text-gray-500">
-              Pending Approval Amount
-            </dt>
-            <dd className="mt-1 text-2xl font-semibold text-gray-900">
-              ₹ {formatIndianNumber(liability.PendingApprovalAmount)}
-            </dd>
-          </div>
-
-          <div className="bg-white shadow rounded-lg p-4">
-            <dt className="text-sm font-medium text-gray-500">
-              Projection Amount
-            </dt>
-            <dd className="mt-1 text-2xl font-semibold text-gray-900">
-              ₹ {formatIndianNumber(liability.ProjectionAmount)}
-            </dd>
-          </div>
-
-          <div className="bg-white shadow rounded-lg p-4">
-            <dt className="text-sm font-medium text-gray-500">
-              Collector Initiated Amount
-            </dt>
-            <dd className="mt-1 text-2xl font-semibold text-gray-900">
-              ₹ {formatIndianNumber(liability.CollectorInitiatedAmount)}
-            </dd>
-          </div>
+          {summaryCards.map(({ key, label, color }) => (
+            <div key={key} className="metric-tile" style={{ "--tile-color": color }}>
+              <dt className="metric-tile-label">{label}</dt>
+              <dd className="metric-tile-value">
+                ₹ {formatIndianNumber(liability[key])}
+              </dd>
+            </div>
+          ))}
         </div>
       )}
 
       <div className="flex justify-end mb-2">
         <button
           onClick={openAddLedger}
-          className="bg-green-600 text-white px-4 py-1.5 rounded hover:bg-green-700"
+          className="rounded-md bg-blue-600 px-5 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700"
         >
           Add Ledger Entry
         </button>
@@ -212,18 +211,14 @@ export default function CashierLedger({ cashierUserId }) {
 
         {!loading && filteredLedgers.length >= 0 && (
           <>
-            <div className="flex justify-start mb-2">
-              <input
-                type="checkbox"
-                id="show-all"
-                checked={showAll}
-                onChange={() => {
-                  setShowAll(!showAll);
+            <div className="mb-2 flex items-center gap-3">
+              <SliderToggle
+                label="Show All"
+                active={showAll}
+                onToggle={() => {
+                  setShowAll((value) => !value);
                 }}
               />
-              <label htmlFor="show-all" className="ml-2 text-md text-black-500">
-                Show All
-              </label>
             </div>
             <div className="overflow-y-auto border border-gray-200 rounded h-[400px]">
               <table className="w-full table-auto divide-y divide-gray-200 text-sm">
@@ -326,13 +321,13 @@ export default function CashierLedger({ cashierUserId }) {
                           </button>
                         )}
                         {item.DocId ? (
-                          <button
-                            title="Download File"
+                          <TooltipIconButton
+                            label="Download File"
                             onClick={() => handleDownloadFile(item.DocId, item.Id)}
                             className="ml-2 text-blue-600 text-sm mb-1 hover:underline text-left"
                           >
                             <Download className="w-4 h-4" />
-                          </button>
+                          </TooltipIconButton>
                         ) : (
                           ""
                         )}

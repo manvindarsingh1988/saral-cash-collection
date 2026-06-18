@@ -1,8 +1,37 @@
 import React, { useEffect, useState } from "react";
-import { apiBase } from "../../lib/apiBase";
-import useDocumentTitle from "../../hooks/useDocumentTitle";
-import { formatIndianNumber } from "../../lib/utils";
 import LadgerDetailsDialog from "../../components/LedgerDetailsDialog";
+import Tooltip from "../../components/Tooltip";
+import TruncatedCell from "../../components/TruncatedCell";
+import useDocumentTitle from "../../hooks/useDocumentTitle";
+import { apiBase } from "../../lib/apiBase";
+import { sortTableRows } from "../../lib/tableSort";
+import { formatIndianNumber } from "../../lib/utils";
+
+const columns = [
+  { key: "Warning", label: "Warning", width: "150px" },
+  { key: "UserId", label: "ID", width: "110px" },
+  { key: "UserName", label: "Name", width: "260px" },
+  { key: "ClosingAmount", label: "Opening", width: "140px" },
+  { key: "LaibilityAmount", label: "Liability (Rs)", width: "150px" },
+  { key: "PendingApprovalAmount", label: "Pending (Rs)", width: "150px" },
+  { key: "ProjectionAmount", label: "Projection (Rs)", width: "150px" },
+  { key: "CurrentAmount", label: "Current", width: "130px" },
+  { key: "RetailerInitiatedAmount", label: "Collectors Initiated Amount", width: "180px" },
+  { key: "LinkedMasterCashier", label: "Linked Master Cashier", width: "230px" },
+];
+
+const currencyText = (value) => `Rs ${formatIndianNumber(value || 0)}`;
+
+function CenterLoader({ label = "Loading..." }) {
+  return (
+    <div className="app-loading-state">
+      <div className="app-loading-card">
+        <div className="app-spinner" />
+        <div className="app-loading-label">{label}</div>
+      </div>
+    </div>
+  );
+}
 
 export default function CashierLiabilities({ userType, id }) {
   useDocumentTitle("Cashier Liabilities");
@@ -34,8 +63,9 @@ export default function CashierLiabilities({ userType, id }) {
     ProjectionAmount: "",
     CurrentAmount: "",
     RetailerInitiatedAmount: "",
-    LinkedMasterCashier: ""
+    LinkedMasterCashier: "",
   });
+  const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
 
   useEffect(() => {
     fetchCashierLiabilities();
@@ -48,34 +78,13 @@ export default function CashierLiabilities({ userType, id }) {
       setCashierLiabilities(data || []);
 
       setSummary({
-        totalLaibilityAmount: data.reduce(
-          (acc, x) => acc + (x.LaibilityAmount || 0),
-          0
-        ),
-        totalPendingApprovalAmount: data.reduce(
-          (acc, x) => acc + (x.PendingApprovalAmount || 0),
-          0
-        ),
-        totalProjectionAmount: data.reduce(
-          (acc, x) => acc + (x.ProjectionAmount || 0),
-          0
-        ),
-        totalRejectedAmount: data.reduce(
-          (acc, x) => acc + (x.RejectedAmount || 0),
-          0
-        ),
-        totalCurrentAmount: data.reduce(
-          (acc, x) => acc + (x.CurrentAmount || 0),
-          0
-        ),
-        totalClosingAmount: data.reduce(
-          (acc, x) => acc + (x.ClosingAmount || 0),
-          0
-        ),
-        totalRetailerInitiatedAmount: data.reduce(
-          (acc, x) => acc + (x.RetailerInitiatedAmount || 0),
-          0
-        ),
+        totalLaibilityAmount: data.reduce((acc, x) => acc + (x.LaibilityAmount || 0), 0),
+        totalPendingApprovalAmount: data.reduce((acc, x) => acc + (x.PendingApprovalAmount || 0), 0),
+        totalProjectionAmount: data.reduce((acc, x) => acc + (x.ProjectionAmount || 0), 0),
+        totalRejectedAmount: data.reduce((acc, x) => acc + (x.RejectedAmount || 0), 0),
+        totalCurrentAmount: data.reduce((acc, x) => acc + (x.CurrentAmount || 0), 0),
+        totalClosingAmount: data.reduce((acc, x) => acc + (x.ClosingAmount || 0), 0),
+        totalRetailerInitiatedAmount: data.reduce((acc, x) => acc + (x.RetailerInitiatedAmount || 0), 0),
       });
     } catch (err) {
       console.error(err);
@@ -89,11 +98,22 @@ export default function CashierLiabilities({ userType, id }) {
     setFilters((prev) => ({ ...prev, [key]: value }));
   };
 
-  const filteredData = cashierLiabilities.filter((item) =>
-    Object.entries(filters).every(([key, value]) => {
-      if (!value) return true;
-      return item[key]?.toString().toLowerCase().includes(value.toLowerCase());
-    })
+  const onSort = (key) => {
+    setSortConfig((prev) =>
+      prev.key === key
+        ? { key, direction: prev.direction === "asc" ? "desc" : "asc" }
+        : { key, direction: "asc" }
+    );
+  };
+
+  const filteredData = sortTableRows(
+    cashierLiabilities.filter((item) =>
+      Object.entries(filters).every(([key, value]) => {
+        if (!value) return true;
+        return item[key]?.toString().toLowerCase().includes(value.toLowerCase());
+      })
+    ),
+    sortConfig
   );
 
   const handleMoreDetails = (cashierId, model) => {
@@ -103,74 +123,65 @@ export default function CashierLiabilities({ userType, id }) {
   };
 
   return (
-    <div className="p-4 space-y-4">
-      {loading && <div className="text-center text-gray-600">Loading...</div>}
+    <div className="flex h-full min-h-0 flex-col p-4">
+      {loading && <CenterLoader label="Loading cashier liabilities..." />}
       {error && <div className="text-red-600">{error}</div>}
 
       {!loading && cashierLiabilities.length > 0 && (
-        <>
-          {/* Summary Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6 mb-4">
-            
+        <div className="flex min-h-0 flex-1 flex-col gap-4">
+          <div className="liability-summary grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6">
             {[
               { label: "Opening Amount", value: summary.totalClosingAmount },
-              {
-                label: "Liability Amount",
-                value: summary.totalLaibilityAmount,
-              },
-              {
-                label: "Pending Approval",
-                value: summary.totalPendingApprovalAmount,
-              },
-              {
-                label: "Projection Amount",
-                value: summary.totalProjectionAmount,
-              },
+              { label: "Liability Amount", value: summary.totalLaibilityAmount },
+              { label: "Pending Approval", value: summary.totalPendingApprovalAmount },
+              { label: "Projection Amount", value: summary.totalProjectionAmount },
               { label: "Current Amount", value: summary.totalCurrentAmount },
-              
-              {
-                label: "Collectors Initiated Amount",
-                value: summary.totalRetailerInitiatedAmount,
-              },
+              { label: "Collectors Initiated Amount", value: summary.totalRetailerInitiatedAmount },
             ].map((item) => (
-              <div key={item.label} className="bg-white rounded-lg shadow p-4">
-                <span className="text-sm text-gray-500">{item.label}</span>
-                <span className="text-lg font-bold text-gray-800 block">
-                  ₹ {formatIndianNumber(item.value)}
-                </span>
+              <div key={item.label} className="metric-tile">
+                <span className="metric-tile-label">{item.label}</span>
+                <span className="metric-tile-value">{currencyText(item.value)}</span>
               </div>
             ))}
           </div>
 
-          <div className="bg-white rounded-lg shadow p-4 sm:p-6">
-            <div className="overflow-x-auto border border-gray-200 rounded">
-              <table className="min-w-full text-sm text-gray-700">
-                <thead className="bg-gray-50">
-                  <tr>  
-                    <th className="px-4 py-2 text-left">Warning</th>                  
-                    <th className="px-4 py-2 text-left">ID</th>
-                    <th className="px-4 py-2 text-left">Name</th>
-                    <th className="px-4 py-2 text-left">Opening</th>
-                    <th className="px-4 py-2 text-left">Liability (₹)</th>
-                    <th className="px-4 py-2 text-left">Pending (₹)</th>
-                    <th className="px-4 py-2 text-left">Projection (₹)</th>
-                    <th className="px-4 py-2 text-left">Current</th>                    
-                    <th className="px-4 py-2 text-left">
-                      Collectors Initiated Amount
-                    </th>
-                    <th className="px-4 py-2 text-left">
-                      Linked Master Cashier
-                    </th>
+          <div className="flex min-h-0 flex-1 flex-col rounded-lg bg-white p-4 shadow sm:p-6">
+            <div className="app-table-shell min-h-0 flex-1 overflow-auto">
+              <table className="app-table min-w-full text-sm text-gray-700">
+                <thead className="sticky top-0 z-10 bg-gray-50">
+                  <tr>
+                    {columns.map((column) => (
+                      <th
+                        key={column.key}
+                        className="px-4 py-2 text-left"
+                        style={{ width: column.width, minWidth: column.width, maxWidth: column.width }}
+                      >
+                        <button
+                          type="button"
+                          onClick={() => onSort(column.key)}
+                          className={`flex items-center gap-1 text-left ${column.key === "Warning" ? "text-red-600" : ""}`}
+                        >
+                          <span>{column.label}</span>
+                          <span className="text-[10px] text-slate-400">
+                            {sortConfig.key === column.key
+                              ? sortConfig.direction === "asc"
+                                ? "▲"
+                                : "▼"
+                              : "↕"}
+                          </span>
+                        </button>
+                      </th>
+                    ))}
                   </tr>
                   <tr className="bg-white">
-                    {Object.entries(filters).map(([key, value]) => (
-                      <td key={key} className="px-4 py-2">
+                    {columns.map((column) => (
+                      <td key={column.key} className="px-4 py-2">
                         <input
                           type="text"
-                          placeholder={key}
-                          className="w-full border rounded px-2 py-1 text-sm"
-                          value={value}
-                          onChange={(e) => onFilterChange(key, e.target.value)}
+                          placeholder={column.key}
+                          className="w-full rounded border px-2 py-1 text-sm"
+                          value={filters[column.key] || ""}
+                          onChange={(e) => onFilterChange(column.key, e.target.value)}
                         />
                       </td>
                     ))}
@@ -179,52 +190,59 @@ export default function CashierLiabilities({ userType, id }) {
                 <tbody>
                   {filteredData.map((item) => (
                     <tr key={item.UserId} className="border-t text-xs">
-                      <td className="px-4 py-2 text-red-600">{item.Warning}</td>
-                      <td className="px-4 py-2">{item.UserId}</td>
-                      <td className="px-4 py-2">{item.UserName || "—"}</td>
                       <td className="px-4 py-2">
-                        ₹ {formatIndianNumber(item.ClosingAmount)}
+                        <TruncatedCell className="text-red-600">{item.Warning || "-"}</TruncatedCell>
                       </td>
                       <td className="px-4 py-2">
-                        <button
-                          onClick={() =>
-                            handleMoreDetails(item.UserId, "CashierCleared")
-                          }
-                          className="text-blue-600 underline"
-                        >
-                          ₹ {formatIndianNumber(item.LaibilityAmount)}
-                        </button>
+                        <TruncatedCell>{item.UserId}</TruncatedCell>
                       </td>
                       <td className="px-4 py-2">
-                        <button
-                          onClick={() =>
-                            handleMoreDetails(item.UserId, "CashierHandover")
-                          }
-                          className="text-blue-600 underline"
-                        >
-                          ₹ {formatIndianNumber(item.PendingApprovalAmount)}
-                        </button>
+                        <TruncatedCell>{item.UserName || "-"}</TruncatedCell>
                       </td>
                       <td className="px-4 py-2">
-                        ₹ {formatIndianNumber(item.ProjectionAmount)}
+                        <TruncatedCell>{currencyText(item.ClosingAmount)}</TruncatedCell>
                       </td>
                       <td className="px-4 py-2">
-                        ₹ {formatIndianNumber(item.CurrentAmount)}
-                      </td>                      
-                      <td className="px-4 py-2">
-                        ₹ {formatIndianNumber(item.RetailerInitiatedAmount)}
+                        <Tooltip content={currencyText(item.LaibilityAmount)} className="block w-full">
+                          <button
+                            onClick={() => handleMoreDetails(item.UserId, "CashierCleared")}
+                            className="w-full text-left text-blue-600 underline"
+                          >
+                            <TruncatedCell>{currencyText(item.LaibilityAmount)}</TruncatedCell>
+                          </button>
+                        </Tooltip>
                       </td>
-                      <td className="px-4 py-2">{item.LinkedMasterCashier || "—"}</td>
+                      <td className="px-4 py-2">
+                        <Tooltip content={currencyText(item.PendingApprovalAmount)} className="block w-full">
+                          <button
+                            onClick={() => handleMoreDetails(item.UserId, "CashierHandover")}
+                            className="w-full text-left text-blue-600 underline"
+                          >
+                            <TruncatedCell>{currencyText(item.PendingApprovalAmount)}</TruncatedCell>
+                          </button>
+                        </Tooltip>
+                      </td>
+                      <td className="px-4 py-2">
+                        <TruncatedCell>{currencyText(item.ProjectionAmount)}</TruncatedCell>
+                      </td>
+                      <td className="px-4 py-2">
+                        <TruncatedCell>{currencyText(item.CurrentAmount)}</TruncatedCell>
+                      </td>
+                      <td className="px-4 py-2">
+                        <TruncatedCell>{currencyText(item.RetailerInitiatedAmount)}</TruncatedCell>
+                      </td>
+                      <td className="px-4 py-2">
+                        <TruncatedCell>{item.LinkedMasterCashier || "-"}</TruncatedCell>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
           </div>
-        </>
+        </div>
       )}
 
-      {/* Ledger Dialog */}
       {openDialog && (
         <LadgerDetailsDialog
           onClose={() => {

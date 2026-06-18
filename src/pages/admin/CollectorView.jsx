@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { apiBase } from "../../lib/apiBase";
+import SearchableSelect from "../../components/SearchableSelect";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
 import CollectorLedger from "../collector/CollectorLedger";
 
@@ -33,26 +34,25 @@ export default function CollectorView() {
   return (
     <div className="space-y-6">
       <div className="bg-white rounded-lg shadow p-6">
-        <div className="flex flex-col gap-2 sm:max-w-md">
-          <label className="text-sm font-medium text-gray-700">
+        <div className="flex flex-col gap-3 sm:max-w-2xl">
+          <label className="text-base font-semibold text-gray-700">
             Select Collector
           </label>
-          <select
+          <SearchableSelect
             value={selectedCollectorId}
-            onChange={(e) => {
-              const nextCollectorId = e.target.value;
+            onChange={(nextCollectorId) => {
               setSelectedCollectorId(nextCollectorId);
               setViewLoading(Boolean(nextCollectorId));
             }}
-            className="w-full rounded border border-gray-300 px-3 py-2"
-          >
-            <option value="">Select Collector</option>
-            {collectors.map((collector) => (
-              <option key={collector.Id} value={collector.Id}>
-                {collector.UserName}
-              </option>
-            ))}
-          </select>
+            options={collectors.map((collector) => ({
+              value: collector.Id,
+              label: `${collector.UserName} (${collector.Id})`,
+            }))}
+            placeholder="Select Collector"
+            searchPlaceholder="Search collector..."
+            buttonClassName="min-h-[60px] text-base"
+            panelClassName="text-base"
+          />
           {loading && <div className="text-sm text-gray-500">Loading collectors...</div>}
           {error && <div className="text-sm text-red-600">{error}</div>}
         </div>

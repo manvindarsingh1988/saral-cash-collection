@@ -1,5 +1,8 @@
 import React, { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
+import { X } from "lucide-react";
 import { apiBase } from "../lib/apiBase";
+import TruncatedCell from "./TruncatedCell";
 
 const columns = [
   { heading: "ID", key: "Id", width: "100px" },
@@ -14,11 +17,9 @@ const columns = [
   { heading: "Cashier", key: "CashierName", width: "200px" },
 ];
 
-// fetchers
 const fetchMap = {
   Retailer: (id, fromDate, toDate) =>
     apiBase.getLadgerInfoByRetailerid(true, id, fromDate, toDate),
-
   Collector: (id) => apiBase.getCollectorLiabilityDetails(id),
   Cleared: (id) => apiBase.getCollectorLiabilityDetails(id),
   Handover: (id) => apiBase.getCollectorLedgerDetails(id),
@@ -26,7 +27,11 @@ const fetchMap = {
   CashierCleared: (id) => apiBase.getCashierLiabilityDetails(id),
 };
 
-export default function LadgerDetailsDialog({ userId, onClose, modelFor = "Retailer" }) {
+export default function LadgerDetailsDialog({
+  userId,
+  onClose,
+  modelFor = "Retailer",
+}) {
   const [ladgerData, setLadgerData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [masterData, setMasterData] = useState({});
@@ -56,10 +61,7 @@ export default function LadgerDetailsDialog({ userId, onClose, modelFor = "Retai
               fetchFn(userId, fromDate, toDate),
               apiBase.getMasterData(),
             ])
-          : await Promise.all([
-              fetchFn(userId),
-              apiBase.getMasterData(),
-            ]);
+          : await Promise.all([fetchFn(userId), apiBase.getMasterData()]);
 
       setLadgerData(ladger || []);
       setMasterData(master || {});
@@ -93,91 +95,104 @@ export default function LadgerDetailsDialog({ userId, onClose, modelFor = "Retai
     }
   };
 
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-      <div className="bg-white p-6 rounded shadow max-w-5xl w-full max-h-[80vh] overflow-y-auto relative">
-        <h2 className="text-xl font-semibold mb-4">Ledger Info</h2>
-
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 text-gray-500 hover:text-gray-800"
-        >
-          ✕
-        </button>
-
-        {/* Date filter only for Retailer */}
-        {modelFor === "Retailer" && (
-          <div className="flex gap-4 mb-4 items-end">
-            <div>
-              <label className="block text-sm">From Date</label>
-              <input
-                type="date"
-                value={fromDate}
-                onChange={(e) => setFromDate(e.target.value)}
-                className="border px-2 py-1 rounded"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm">To Date</label>
-              <input
-                type="date"
-                value={toDate}
-                onChange={(e) => setToDate(e.target.value)}
-                className="border px-2 py-1 rounded"
-              />
-            </div>
-
-            <button
-              onClick={loadData}
-              className="bg-blue-600 text-white px-4 py-2 rounded"
-            >
-              Search
-            </button>
+  const modalContent = (
+    <div className="app-modal-overlay">
+      <div className="app-modal app-modal-lg relative flex h-[min(86vh,820px)] flex-col">
+        <div className="app-modal-header">
+          <div>
+            <h2 className="app-modal-title">Ledger Info</h2>
+            <p className="app-modal-subtitle">View transaction history and details.</p>
           </div>
-        )}
+          <button onClick={onClose} className="app-modal-close" aria-label="Close">
+            <X size={18} />
+          </button>
+        </div>
 
-        {error && <div className="text-red-600 mb-2">{error}</div>}
+        <div className="flex min-h-0 flex-1 flex-col p-6">
+          {modelFor === "Retailer" && (
+            <div className="mb-4 flex flex-wrap items-end gap-4">
+              <div>
+                <label className="app-modal-label block">From Date</label>
+                <input
+                  type="date"
+                  value={fromDate}
+                  onChange={(e) => setFromDate(e.target.value)}
+                  className="border px-3 py-2 rounded-lg"
+                />
+              </div>
 
-        {loading ? (
-          <div>Loading...</div>
-        ) : ladgerData.length === 0 ? (
-          <div>No data available.</div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="min-w-full border border-gray-300 text-sm text-left">
-              <thead className="bg-gray-100 text-gray-700 font-semibold">
-                <tr>
-                  {columns.map((col) => (
-                    <th
-                      key={col.key}
-                      className="px-4 py-2 border"
-                      style={{ width: col.width }}
-                    >
-                      {col.heading}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {ladgerData.map((entry, idx) => (
-                  <tr key={idx} className="border-t">
-                    {columns.map((col) => (
-                      <td
-                        key={col.key}
-                        className="px-4 py-2 border"
-                        style={{ width: col.width }}
-                      >
-                        {getCellValue(entry, col.key)}
-                      </td>
+              <div>
+                <label className="app-modal-label block">To Date</label>
+                <input
+                  type="date"
+                  value={toDate}
+                  onChange={(e) => setToDate(e.target.value)}
+                  className="border px-3 py-2 rounded-lg"
+                />
+              </div>
+
+              <button
+                onClick={loadData}
+                className="app-button-primary"
+              >
+                Search
+              </button>
+            </div>
+          )}
+
+          {error && <div className="mb-2 text-red-600">{error}</div>}
+
+          {loading ? (
+            <div>Loading...</div>
+          ) : ladgerData.length === 0 ? (
+            <div>No data available.</div>
+          ) : (
+            <div className="min-h-0 flex-1">
+              <div className="app-table-shell h-full min-h-0 overflow-auto">
+                <table className="app-table min-w-full text-sm text-left">
+                  <thead className="sticky top-0 z-10 bg-gray-100 text-gray-700 font-semibold">
+                    <tr>
+                      {columns.map((col) => (
+                        <th
+                          key={col.key}
+                          className="border-b border-slate-200"
+                          style={{
+                            width: col.width,
+                            minWidth: col.width,
+                            maxWidth: col.width,
+                          }}
+                        >
+                          {col.heading}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {ladgerData.map((entry, idx) => (
+                      <tr key={idx} className="border-t">
+                        {columns.map((col) => (
+                          <td
+                            key={col.key}
+                            style={{
+                              width: col.width,
+                              minWidth: col.width,
+                              maxWidth: col.width,
+                            }}
+                          >
+                            <TruncatedCell>{getCellValue(entry, col.key)}</TruncatedCell>
+                          </td>
+                        ))}
+                      </tr>
                     ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
+
+  return createPortal(modalContent, document.body);
 }

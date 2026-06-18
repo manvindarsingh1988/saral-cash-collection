@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { apiBase } from "../../lib/apiBase";
+import SearchableSelect from "../../components/SearchableSelect";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
 
 export default function AssignRetail() {
@@ -161,18 +162,17 @@ export default function AssignRetail() {
         <label className="block text-sm font-medium text-gray-700">
           Select Source Collector
         </label>
-        <select
-          className="w-full px-3 py-2 border border-indigo-300 rounded-md shadow-sm mt-1"
+        <SearchableSelect
+          className="mt-1"
           value={selectedCollector?.Id || ""}
-          onChange={(e) => handleCollectorSelect(e.target.value)}
-        >
-          <option value="">Select collector</option>
-          {collectors.map((c) => (
-            <option key={c.Id} value={c.Id}>
-              {c.UserName}
-            </option>
-          ))}
-        </select>
+          onChange={handleCollectorSelect}
+          options={collectors.map((c) => ({
+            value: c.Id,
+            label: `${c.UserName} (${c.Id})`,
+          }))}
+          placeholder="Select collector"
+          searchPlaceholder="Search collector..."
+        />
       </div>
 
       {/* Target Collector and Shift Panel */}
@@ -186,20 +186,19 @@ export default function AssignRetail() {
               <label className="block text-sm font-medium text-gray-700">
                 Select Target Collector
               </label>
-              <select
-                className="w-full px-3 py-2 border border-indigo-300 rounded-md shadow-sm mt-1"
+              <SearchableSelect
+                className="mt-1"
                 value={newCollectorId}
-                onChange={(e) => setNewCollectorId(e.target.value)}
-              >
-                <option value="">Select collector</option>
-                {collectors
+                onChange={setNewCollectorId}
+                options={collectors
                   .filter((c) => c.Id !== selectedCollector?.Id)
-                  .map((c) => (
-                    <option key={c.Id} value={c.Id}>
-                      {c.UserName}
-                    </option>
-                  ))}
-              </select>
+                  .map((c) => ({
+                    value: c.Id,
+                    label: `${c.UserName} (${c.Id})`,
+                  }))}
+                placeholder="Select collector"
+                searchPlaceholder="Search collector..."
+              />
             </div>
 
             <div className="flex items-end">

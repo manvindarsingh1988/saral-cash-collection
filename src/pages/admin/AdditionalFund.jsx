@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { apiBase } from "../../lib/apiBase";
+import SearchableSelect from "../../components/SearchableSelect";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
 
 const currentDateString = () => new Date().toISOString().slice(0, 10);
@@ -191,19 +192,18 @@ export default function AdditionalFund({
           <form onSubmit={handleSubmit} className="grid gap-4 xl:grid-cols-[2fr_0.9fr_2fr_0.9fr] xl:items-end">
             <div>
               <label className="mb-2 block text-sm font-medium text-slate-700">Collector</label>
-              <select
-                name="CollectorId"
+              <SearchableSelect
                 value={form.CollectorId}
-                onChange={handleChange}
-                className="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm shadow-sm outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
-              >
-                <option value="">Select collector</option>
-                {collectors.map((collector) => (
-                  <option key={collector.Id} value={collector.Id}>
-                    {collector.UserName} ({collector.Id})
-                  </option>
-                ))}
-              </select>
+                onChange={(value) =>
+                  handleChange({ target: { name: "CollectorId", value } })
+                }
+                options={collectors.map((collector) => ({
+                  value: collector.Id,
+                  label: `${collector.UserName} (${collector.Id})`,
+                }))}
+                placeholder="Select collector"
+                searchPlaceholder="Search collector..."
+              />
             </div>
 
             <div>
@@ -278,18 +278,16 @@ export default function AdditionalFund({
             {!readOnly && (
               <div>
                 <label className="mb-2 block text-sm font-medium text-slate-700">Filter by collector</label>
-                <select
+                <SearchableSelect
                   value={filterCollectorId}
-                  onChange={(event) => setFilterCollectorId(event.target.value)}
-                  className="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm shadow-sm outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
-                >
-                  <option value="">All collectors</option>
-                  {collectors.map((collector) => (
-                    <option key={collector.Id} value={collector.Id}>
-                      {collector.UserName} ({collector.Id})
-                    </option>
-                  ))}
-                </select>
+                  onChange={setFilterCollectorId}
+                  options={collectors.map((collector) => ({
+                    value: collector.Id,
+                    label: `${collector.UserName} (${collector.Id})`,
+                  }))}
+                  placeholder="All collectors"
+                  searchPlaceholder="Search collector..."
+                />
               </div>
             )}
           </div>

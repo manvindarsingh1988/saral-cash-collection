@@ -7,6 +7,7 @@ import {
   CollectorApprovalGateContext,
   useCollectorApprovalGate,
 } from "../collector/CollectorApprovalGateContext";
+import Tooltip from "../Tooltip";
 
 const allowedWhilePendingRoutes = ["/", "/pending-approvals", "/fund/additional"];
 
@@ -84,8 +85,8 @@ export default function CollectorLayout({ children }) {
 
   return (
     <CollectorApprovalGateContext.Provider value={gateValue}>
-      <div className="min-h-screen bg-gray-100">
-        <nav className="bg-indigo-600">
+      <div className="app-shell">
+        <nav className="app-nav">
           <div className="mx-auto max-w-8xl px-4 sm:px-6 lg:px-8">
             <div className="flex h-16 items-center justify-between">
               {/* Mobile toggle */}
@@ -118,7 +119,7 @@ export default function CollectorLayout({ children }) {
 
           {/* Mobile menu */}
           {mobileMenuOpen && (
-            <div className="md:hidden bg-indigo-500 px-2 pt-2 pb-3 space-y-1">
+            <div className="md:hidden border-t border-white/10 bg-white/10 px-2 pb-3 pt-2 space-y-1 backdrop-blur">
               <NavLinks
                 isActive={isActive}
                 mobile
@@ -128,14 +129,18 @@ export default function CollectorLayout({ children }) {
           )}
         </nav>
 
-        <main className="mx-auto max-w-8xl px-4 py-6 sm:px-6 lg:px-8">
-          {hasPendingApprovals && (
-            <div className="mb-4 rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-              Complete all pending ledger approvals before using other collector pages.
-            </div>
-          )}
-          {children}
-        </main>
+        <div className="app-content">
+          <main className="mx-auto flex flex-1 min-h-0 w-full max-w-8xl flex-col overflow-hidden px-4 py-6 sm:px-6 lg:px-8">
+            {hasPendingApprovals && (
+              <div className="mb-4 shrink-0">
+                <div className="rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900 shadow-sm">
+                Complete all pending ledger approvals before using other collector pages.
+                </div>
+              </div>
+            )}
+            <div className="min-h-0 flex-1 overflow-hidden">{children}</div>
+          </main>
+        </div>
       </div>
     </CollectorApprovalGateContext.Provider>
   );
@@ -162,9 +167,9 @@ function NavLinks({ isActive, mobile = false, setMobileMenuOpen }) {
 
       if (isLocked || loading) {
         return (
-          <span key={to} className={className} title="Finish pending approvals first">
-            {label}
-          </span>
+          <Tooltip key={to} content="Finish pending approvals first">
+            <span className={className}>{label}</span>
+          </Tooltip>
         );
       }
 

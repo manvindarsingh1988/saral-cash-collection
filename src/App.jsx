@@ -9,7 +9,7 @@ import ChangePassword from "./pages/ChangePassword.jsx";
 
 function App() {
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="app-shell">
       <Routes>
         <Route path="/signin" element={<SignIn />} />
         <Route path="/signup" element={<SignUp />} />

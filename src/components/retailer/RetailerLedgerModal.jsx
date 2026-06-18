@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
+import { X } from "lucide-react";
 import { apiBase } from "../../lib/apiBase";
-import { base64ToByteArray } from "../../lib/utils";
+import { handleDownloadFile } from "../../lib/utils";
+import SearchableSelect from "../SearchableSelect";
 
 const fieldLabels = {
   Id: "Id",
@@ -104,11 +106,21 @@ export default function RetailerLedgerModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-30 z-50">
-      <div className="bg-white p-6 rounded shadow-lg space-y-4 w-full max-w-md">
-        <h2 className="text-lg font-semibold">
-          {!initialData ? "Add" : "Update"} Ledger Entry
-        </h2>
+    <div className="app-modal-overlay">
+      <div className="app-modal app-modal-sm">
+        <div className="app-modal-header">
+          <div>
+            <h2 className="app-modal-title">
+              {!initialData ? "Add" : "Update"} Ledger Entry
+            </h2>
+            <p className="app-modal-subtitle">Add retailer ledger details and supporting slip.</p>
+          </div>
+          <button onClick={onClose} className="app-modal-close" aria-label="Close">
+            <X size={18} />
+          </button>
+        </div>
+        <div className="app-modal-body">
+          <div className="app-modal-form">
         {allowedFields.map((key) => {
           console.log("Key:", key, "Value:", formData[key]);
 
@@ -134,24 +146,18 @@ export default function RetailerLedgerModal({
 
           if (key === "CollectorId") {
             inputElement = (
-              <select
-                name={key}
+              <SearchableSelect
                 value={formData[key]}
-                onChange={handleChange}
-                className="border px-2 py-1 rounded"
-              >
-                <option value="" disabled hidden>
-                  Select Collector
-                </option>
-                {collectors?.map((collector) => (
-                  <option
-                    key={collector.CollectorUserId}
-                    value={collector.CollectorUserId}
-                  >
-                    {collector.CollectorUserName}
-                  </option>
-                ))}
-              </select>
+                onChange={(value) =>
+                  handleChange({ target: { name: key, value } })
+                }
+                options={(collectors || []).map((collector) => ({
+                  value: collector.CollectorUserId,
+                  label: `${collector.CollectorUserName} (${collector.CollectorUserId})`,
+                }))}
+                placeholder="Select Collector"
+                searchPlaceholder="Search collector..."
+              />
             );
           } else if (key === "TransactionType" || key === "WorkFlow") {
             inputElement = (
@@ -161,7 +167,7 @@ export default function RetailerLedgerModal({
                   name={key}
                   value={formData[key]}
                   onChange={handleChange}
-                  className="border px-2 py-1 rounded"
+                  className="border px-3 py-2 rounded-lg"
                 >
                   <option value="" disabled hidden>
                     Select {key} Type
@@ -235,7 +241,7 @@ export default function RetailerLedgerModal({
                 name={key}
                 value={formData[key]}
                 onChange={handleChange}
-                className="border px-2 py-1 rounded"
+                className="border px-3 py-2 rounded-lg"
               />
             );
           } else {
@@ -253,29 +259,28 @@ export default function RetailerLedgerModal({
                 type={inputType}
                 value={formData[key]}
                 onChange={handleChange}
-                className="border px-2 py-1 rounded"
+                className="border px-3 py-2 rounded-lg"
               />
             );
           }
 
           return (
-            <div key={key} className="flex flex-col">
+            <div key={key} className="app-modal-field">
               {key !== "StuckInBank" && key !== "StuckInCDM" && (
-                <label className="text-sm text-gray-600">{label}</label>
+                <label className="app-modal-label">{label}</label>
               )}{" "}
               {inputElement}
             </div>
           );
         })}
 
-        {/* File Upload */}
-        <div className="flex flex-col">
-          <label className="text-sm text-gray-600">Upload Slip</label>
+        <div className="app-modal-field">
+          <label className="app-modal-label">Upload Slip</label>
           <input
             type="file"
             multiple
             onChange={handleFileChange}
-            className="border px-2 py-1 rounded"
+            className="border px-3 py-2 rounded-lg"
           />
           {formData?.DocId && (
             <button
@@ -286,15 +291,13 @@ export default function RetailerLedgerModal({
             </button>
           )}
         </div>
-
-        <div className="flex justify-end gap-2">
-          <button onClick={onClose} className="px-4 py-1 rounded border">
+        </div>
+        </div>
+        <div className="app-modal-actions">
+          <button onClick={onClose} className="app-button-secondary">
             Cancel
           </button>
-          <button
-            onClick={handleSubmit}
-            className="bg-blue-600 text-white px-4 py-1.5 rounded hover:bg-blue-700"
-          >
+          <button onClick={handleSubmit} className="app-button-primary">
             Save
           </button>
         </div>

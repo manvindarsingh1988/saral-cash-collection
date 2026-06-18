@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { X } from "lucide-react";
 import { apiBase } from "../../lib/apiBase";
 import { getWorkflows } from "../../lib/ledgerRuleEngine";
 
@@ -102,12 +103,21 @@ export default function ApprovalLedgerModal({
   };
 
   return (
-    <div
-      className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-30 z-50"
-      style={{ marginTop: "0px" }}
-    >
-      <div className="bg-white p-6 rounded shadow-lg space-y-4 w-full max-w-md">
-        <h2 className="text-lg font-semibold">Approve Ledger</h2>
+    <div className="app-modal-overlay">
+      <div className="app-modal app-modal-sm">
+        <div className="app-modal-header">
+          <div>
+            <h2 className="app-modal-title">Approve Ledger</h2>
+            <p className="app-modal-subtitle">
+              Review the submitted details and update workflow if needed.
+            </p>
+          </div>
+          <button onClick={onClose} className="app-modal-close" aria-label="Close">
+            <X size={18} />
+          </button>
+        </div>
+        <div className="app-modal-body">
+          <div className="app-modal-form">
         {allowedFields.map((key) => {
           const alwaysExcludeKeys = [
             "CollectorId",
@@ -147,7 +157,7 @@ export default function ApprovalLedgerModal({
                   name={key}
                   value={formData[key]}
                   onChange={handleChange}
-                  className="border px-2 py-1 rounded"
+                  className="border px-3 py-2 rounded-lg"
                 >
                   <option value="" disabled hidden>
                     Select {key} Type
@@ -189,20 +199,20 @@ export default function ApprovalLedgerModal({
                 type={inputType}
                 value={formData[key] ?? ""}
                 onChange={handleChange}
-                className="border px-2 py-1 rounded"
+                className="border px-3 py-2 rounded-lg"
               />
             );
           }
 
           return (
-            <div key={key} className="flex flex-col">
-              <label className="text-sm text-gray-600">{label}</label>
+            <div key={key} className="app-modal-field">
+              <label className="app-modal-label">{label}</label>
               {inputElement}
             </div>
           );
         })}
 
-        <div className="flex flex-col">
+        <div className="app-modal-field">
           {formData?.DocId && (
             <button
               onClick={async () => {
@@ -228,15 +238,13 @@ export default function ApprovalLedgerModal({
             </button>
           )}
         </div>
-
-        <div className="flex justify-end gap-2">
-          <button onClick={onClose} className="px-4 py-1 rounded border">
+        </div>
+        </div>
+        <div className="app-modal-actions">
+          <button onClick={onClose} className="app-button-secondary">
             Cancel
           </button>
-          <button
-            onClick={handleSubmit}
-            className="bg-blue-600 text-white px-4 py-1.5 rounded hover:bg-blue-700"
-          >
+          <button onClick={handleSubmit} className="app-button-primary">
             Save
           </button>
         </div>

@@ -1,5 +1,7 @@
 import React, { use, useEffect, useState } from "react";
 import { apiBase } from "../../lib/apiBase";
+import SearchableSelect from "../../components/SearchableSelect";
+import Tooltip from "../../components/Tooltip";
 import {
   formatIndianNumber,
   formatToCustomDateTime,
@@ -181,18 +183,16 @@ export default function CollectorDashboard({ collectorUserId }) {
                 <label className="block text-sm font-medium text-indigo-700 mb-1">
                   Select Retailer
                 </label>
-                <select
+                <SearchableSelect
                   value={selectedRetailerId}
-                  onChange={(e) => setSelectedRetailerId(e.target.value)}
-                  className="w-full px-3 py-2 border border-indigo-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                >
-                  <option value="">Select Retailer</option>
-                  {retailers.map((r) => (
-                    <option key={r.RetailerUserId} value={r.RetailerUserId}>
-                      {r.RetailerUserName}
-                    </option>
-                  ))}
-                </select>
+                  onChange={setSelectedRetailerId}
+                  options={retailers.map((r) => ({
+                    value: r.RetailerUserId,
+                    label: `${r.RetailerUserName} (${r.RetailerUserId})`,
+                  }))}
+                  placeholder="Select Retailer"
+                  searchPlaceholder="Search retailer..."
+                />
               </div>
 
               {/* Search Button */}
@@ -311,7 +311,6 @@ export default function CollectorDashboard({ collectorUserId }) {
                   <tbody className="bg-white divide-y divide-gray-200">
                     {filteredData.map((item) => (
                       <tr
-                        title="Click to edit"
                         key={item.Id}
                         // onClick={() => openEditLedger(item)}
                         className={`cursor-pointer hover:bg-gray-100 ${getRowColor(
@@ -319,16 +318,17 @@ export default function CollectorDashboard({ collectorUserId }) {
                         )}`}
                       >
                         <td className="px-4 py-2">
-                          <a
-                            title="Click to edit"
-                            className="text-blue-600 underline hover:text-blue-800"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              openEditLedger(item);
-                            }}
-                          >
-                            {item.Id}
-                          </a>
+                          <Tooltip content="Click to edit">
+                            <a
+                              className="text-blue-600 underline hover:text-blue-800"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                openEditLedger(item);
+                              }}
+                            >
+                              {item.Id}
+                            </a>
+                          </Tooltip>
                         </td>
                         <td className="px-4 py-2">{item.CollectorName}</td>
                         <td className="px-4 py-2">

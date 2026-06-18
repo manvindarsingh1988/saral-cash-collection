@@ -1,28 +1,39 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
+import { Download } from "lucide-react";
+import ApprovalLedgerModal from "../../components/admin/ApprovalLedgerModal";
+import Tooltip from "../../components/Tooltip";
+import TooltipIconButton from "../../components/TooltipIconButton";
+import TruncatedCell from "../../components/TruncatedCell";
+import { useCollectorApprovalGate } from "../../components/collector/CollectorApprovalGateContext";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
 import { apiBase } from "../../lib/apiBase";
-import ApprovalLedgerModal from "../../components/admin/ApprovalLedgerModal";
-import { useCollectorApprovalGate } from "../../components/collector/CollectorApprovalGateContext";
+import { sortTableRows } from "../../lib/tableSort";
 import {
   formatToCustomDateTime,
-  getRowColor,
   handleDownloadFile,
 } from "../../lib/utils";
-import { Download } from "lucide-react";
+
+const getWorkflowRowStyle = (workFlow) => {
+  if (workFlow === 1) return { backgroundColor: "#dbeafe" };
+  if (workFlow === 2 || workFlow === 4) return { backgroundColor: "#fee2e2" };
+  if (workFlow === 5 || workFlow === 3) return { backgroundColor: "#dcfce7" };
+  if (workFlow === 6 || workFlow === 8) return { backgroundColor: "#fef3c7" };
+  return undefined;
+};
 
 const columns = [
-  { heading: "ID", accessor: "Id" },
-  { heading: "Amount (₹)", accessor: "Amount" },
-  { heading: "Cashier Name", accessor: "CashierName" },
-  { heading: "Collector Name", accessor: "CollectorName" },
-  { heading: "To Collector", accessor: "ToCollectorName" },
-  { heading: "Retailer Name", accessor: "RetailerName" },
-  { heading: "Transaction Type", accessor: "TransactionType" },
-  { heading: "Workflow", accessor: "WorkFlow" },
-  { heading: "Date", accessor: "Date" },
-  { heading: "Given On", accessor: "GivenOn" },
-  { heading: "Comment", accessor: "Comment" },
-  { heading: "Actions", accessor: "Actions" },
+  { heading: "ID", accessor: "Id", width: "90px" },
+  { heading: "Amount (Rs)", accessor: "Amount", width: "130px" },
+  { heading: "Cashier Name", accessor: "CashierName", width: "180px" },
+  { heading: "Collector Name", accessor: "CollectorName", width: "180px" },
+  { heading: "To Collector", accessor: "ToCollectorName", width: "180px" },
+  { heading: "Retailer Name", accessor: "RetailerName", width: "220px" },
+  { heading: "Transaction Type", accessor: "TransactionType", width: "150px" },
+  { heading: "Workflow", accessor: "WorkFlow", width: "130px" },
+  { heading: "Date", accessor: "Date", width: "130px" },
+  { heading: "Given On", accessor: "GivenOn", width: "130px" },
+  { heading: "Comment", accessor: "Comment", width: "240px" },
+  { heading: "Actions", accessor: "Actions", width: "110px" },
 ];
 
 export default function PendingApprovalsForCollector({ collectorUserId }) {
@@ -37,6 +48,7 @@ export default function PendingApprovalsForCollector({ collectorUserId }) {
   const [filters, setFilters] = useState({});
   const [masterData, setMasterData] = useState({});
   const [showAll, setShowAll] = useState(false);
+  const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
 
   useEffect(() => {
     fetchPendingApprovals();
@@ -59,29 +71,46 @@ export default function PendingApprovalsForCollector({ collectorUserId }) {
     }
   };
 
-  const getMasterValue = (type, id) => {
-    return masterData?.[type]?.find((x) => x.Id == id)?.Description || id;
-  };
+  const getMasterValue = (type, value) =>
+    masterData?.[type]?.find((x) => x.Id == value)?.Description || value;
 
   const handleFilterChange = (accessor, value) => {
     setFilters((prev) => ({ ...prev, [accessor]: value }));
   };
 
-  const filteredData = pendingApprovals.filter((item) =>
-    columns.every(({ accessor }) => {
-      const filter = filters[accessor];
-      if (!filter) return true;
-      const value = String(item[accessor] ?? "").toLowerCase();
-      return value.includes(filter.toLowerCase());
-    })
+  const onSort = (accessor) => {
+    if (accessor === "Actions") return;
+    setSortConfig((prev) =>
+      prev.key === accessor
+        ? { key: accessor, direction: prev.direction === "asc" ? "desc" : "asc" }
+        : { key: accessor, direction: "asc" }
+    );
+  };
+
+  const filteredData = sortTableRows(
+    pendingApprovals.filter((item) =>
+      columns.every(({ accessor }) => {
+        const filter = filters[accessor];
+        if (!filter) return true;
+        const value = String(item[accessor] ?? "").toLowerCase();
+        return value.includes(filter.toLowerCase());
+      })
+    ),
+    sortConfig,
+    (item, key) => {
+      if (key === "TransactionType") return getMasterValue("TransactionTypes", item.TransactionType);
+      if (key === "WorkFlow") return getMasterValue("WorkFlows", item.WorkFlow);
+      return item[key];
+    }
   );
 
   const renderCell = (item, accessor) => {
     const value = item[accessor];
-    if (accessor === "Amount") return `₹ ${Number(value).toFixed(2)}`;
-    if (accessor === "Date" || accessor === "GivenOn")
-      return formatToCustomDateTime(value) || "—";
-    return value || "—";
+    if (accessor === "Amount") return `Rs ${Number(value || 0).toFixed(2)}`;
+    if (accessor === "Date" || accessor === "GivenOn") {
+      return formatToCustomDateTime(value) || "-";
+    }
+    return value || "-";
   };
 
   const openLedger = (data) => {
@@ -113,50 +142,85 @@ export default function PendingApprovalsForCollector({ collectorUserId }) {
   };
 
   return (
-    <div className="space-y-6 p-4">
-      <div className="bg-white shadow rounded-lg">
-        <div className="p-4 sm:p-6">
-          {loading && <div>Loading...</div>}
+    <div className="flex h-full min-h-0 flex-col gap-6 p-4">
+      <div className="shrink-0 rounded-lg bg-white p-4 shadow sm:p-6">
+        <div className="flex min-h-[42px] items-center gap-3">
+          <button
+            type="button"
+            role="switch"
+            aria-checked={showAll}
+            aria-label="Show All"
+            onClick={() => setShowAll((value) => !value)}
+            className={`app-switch ${showAll ? "is-active" : ""}`}
+          >
+            <span className="app-switch-thumb" />
+          </button>
+          <span className="text-sm font-medium text-slate-700">Show All</span>
+        </div>
+      </div>
+
+      <div className="flex min-h-0 flex-1 flex-col rounded-lg bg-white shadow">
+        <div className="flex min-h-0 flex-1 flex-col p-4 sm:p-6">
           {error && <div className="text-red-600">{error}</div>}
 
-          <div className="flex justify-start mb-2">
-            <input
-              type="checkbox"
-              id="show-all"
-              checked={showAll}
-              onChange={() => {
-                setShowAll(!showAll);
-              }}
-            />
-            <label htmlFor="show-all" className="ml-2 text-md text-black-500">
-              Show All
-            </label>
-          </div>
+          <div className="relative min-h-0 flex-1">
+            {loading && (
+              <div className="absolute inset-0 z-30 flex items-center justify-center rounded-2xl bg-white/70 backdrop-blur-[2px]">
+                <CenterLoader label="Loading pending approvals..." />
+              </div>
+            )}
 
-          <div className="overflow-x-auto">
-            <table className="min-w-full text-sm divide-y divide-gray-200 border border-gray-200 rounded-md">
+            <div className="app-table-shell min-h-0 h-full overflow-auto">
+              <table className="app-table min-w-full divide-y divide-gray-200 text-sm">
               <thead className="bg-gray-50">
                 <tr>
                   {columns.map((col) => (
                     <th
                       key={col.accessor}
-                      className="px-4 py-2 text-left font-medium text-gray-700 uppercase text-xs"
+                      className="sticky top-0 z-20 px-4 py-2 text-left text-xs font-medium uppercase text-gray-700"
+                      style={{
+                        width: col.width,
+                        minWidth: col.width,
+                        maxWidth: col.width,
+                        background:
+                          "linear-gradient(180deg, rgba(239, 246, 255, 0.98), rgba(226, 232, 240, 0.9))",
+                      }}
                     >
-                      {col.heading}
+                      <button
+                        type="button"
+                        onClick={() => onSort(col.accessor)}
+                        className="flex items-center gap-1 text-left"
+                      >
+                        <span>{col.heading}</span>
+                        <span className="text-[10px] text-slate-400">
+                          {sortConfig.key === col.accessor
+                            ? sortConfig.direction === "asc"
+                              ? "▲"
+                              : "▼"
+                            : "↕"}
+                        </span>
+                      </button>
                     </th>
                   ))}
                 </tr>
                 <tr>
                   {columns.map((col) => (
-                    <th key={col.accessor} className="px-4 py-1 text-left">
-                      {["TransactionType", "WorkFlow"].includes(col.accessor) &&
-                      masterData ? (
+                    <th
+                      key={col.accessor}
+                      className="sticky z-20 px-4 py-1 text-left"
+                      style={{
+                        top: "46px",
+                        width: col.width,
+                        minWidth: col.width,
+                        maxWidth: col.width,
+                        background: "rgba(255, 255, 255, 0.98)",
+                      }}
+                    >
+                      {["TransactionType", "WorkFlow"].includes(col.accessor) && masterData ? (
                         <select
                           value={filters[col.accessor] || ""}
-                          onChange={(e) =>
-                            handleFilterChange(col.accessor, e.target.value)
-                          }
-                          className="w-full border border-gray-300 rounded px-2 py-1 text-xs"
+                          onChange={(e) => handleFilterChange(col.accessor, e.target.value)}
+                          className="w-full rounded border border-gray-300 px-2 py-1 text-xs"
                         >
                           <option value="">All</option>
                           {masterData[col.accessor + "s"]?.map((opt) => (
@@ -170,11 +234,9 @@ export default function PendingApprovalsForCollector({ collectorUserId }) {
                           <input
                             type="text"
                             placeholder="Filter..."
-                            className="w-full border border-gray-300 rounded px-2 py-1 text-xs"
+                            className="w-full rounded border border-gray-300 px-2 py-1 text-xs"
                             value={filters[col.accessor] || ""}
-                            onChange={(e) =>
-                              handleFilterChange(col.accessor, e.target.value)
-                            }
+                            onChange={(e) => handleFilterChange(col.accessor, e.target.value)}
                           />
                         )
                       )}
@@ -182,90 +244,91 @@ export default function PendingApprovalsForCollector({ collectorUserId }) {
                   ))}
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-100">
+              <tbody className="divide-y divide-gray-100 bg-white">
                 {filteredData.length > 0 ? (
-                  filteredData.map((item, idx) => (
+                  filteredData.map((item) => (
                     <tr
                       key={item.Id}
-                      className={`cursor-pointer hover:bg-gray-100 ${getRowColor(
-                        item.WorkFlow
-                      )}`}
+                      className="cursor-pointer"
                     >
                       {columns.map((col) => {
                         const val = col.accessor;
+                        const workflowRowStyle = getWorkflowRowStyle(item.WorkFlow);
+
                         if (val === "Id") {
                           return (
-                            <td key={val} className="px-4 py-2">
+                            <td key={val} className="px-4 py-2" style={workflowRowStyle}>
                               {[1].includes(item.WorkFlow) ? (
-                                <button
-                                  onClick={(e) => {
-                                    e.preventDefault();
-                                    openLedger(item);
-                                  }}
-                                  className="text-indigo-600 underline hover:text-indigo-800"
-                                >
-                                  {item[val]}
-                                </button>
+                                <Tooltip content={String(item[val] ?? "")} className="block w-full">
+                                  <button
+                                    onClick={(e) => {
+                                      e.preventDefault();
+                                      openLedger(item);
+                                    }}
+                                    className="w-full text-left text-indigo-600 underline hover:text-indigo-800"
+                                  >
+                                    <TruncatedCell>{item[val]}</TruncatedCell>
+                                  </button>
+                                </Tooltip>
                               ) : (
-                                item[val]
+                                <TruncatedCell>{item[val]}</TruncatedCell>
                               )}
-                            </td>
-                          );
-                        } else if (val === "TransactionType") {
-                          return (
-                            <td key={val} className="px-4 py-2">
-                              {getMasterValue(
-                                "TransactionTypes",
-                                item.TransactionType
-                              )}
-                            </td>
-                          );
-                        } else if (val === "WorkFlow") {
-                          return (
-                            <td key={val} className="px-4 py-2">
-                              {getMasterValue("WorkFlows", item.WorkFlow)}
-                            </td>
-                          );
-                        } else if (val === "Actions") {
-                          return (
-                            <td className="px-4 py-2">
-                              {item.DocId ? (
-                                <button
-                                  title="Download File"
-                                  onClick={() =>
-                                    handleDownloadFile(item.DocId, item.Id)
-                                  }
-                                  className="ml-2 text-blue-600 text-sm mb-1 hover:underline text-left"
-                                >
-                                  <Download className="w-4 h-4" />
-                                </button>
-                              ) : (
-                                ""
-                              )}
-                            </td>
-                          );
-                        } else {
-                          return (
-                            <td key={val} className="px-4 py-2">
-                              {renderCell(item, val)}
                             </td>
                           );
                         }
+
+                        if (val === "TransactionType") {
+                          return (
+                            <td key={val} className="px-4 py-2" style={workflowRowStyle}>
+                              <TruncatedCell>
+                                {getMasterValue("TransactionTypes", item.TransactionType)}
+                              </TruncatedCell>
+                            </td>
+                          );
+                        }
+
+                        if (val === "WorkFlow") {
+                          return (
+                            <td key={val} className="px-4 py-2" style={workflowRowStyle}>
+                              <TruncatedCell>{getMasterValue("WorkFlows", item.WorkFlow)}</TruncatedCell>
+                            </td>
+                          );
+                        }
+
+                        if (val === "Actions") {
+                          return (
+                            <td key={val} className="px-4 py-2" style={workflowRowStyle}>
+                              {item.DocId ? (
+                                <TooltipIconButton
+                                  label="Download File"
+                                  onClick={() => handleDownloadFile(item.DocId, item.Id)}
+                                  className="ml-2 text-left text-sm text-blue-600 hover:underline"
+                                >
+                                  <Download className="h-4 w-4" />
+                                </TooltipIconButton>
+                              ) : null}
+                            </td>
+                          );
+                        }
+
+                        return (
+                          <td key={val} className="px-4 py-2" style={workflowRowStyle}>
+                            <TruncatedCell>{renderCell(item, val)}</TruncatedCell>
+                          </td>
+                        );
                       })}
                     </tr>
                   ))
                 ) : (
                   <tr>
-                    <td
-                      colSpan={columns.length}
-                      className="text-center py-4 text-gray-500"
-                    >
+                    <td colSpan={columns.length} className="py-4 text-center text-gray-500">
                       No matching records found.
                     </td>
                   </tr>
                 )}
               </tbody>
-            </table>
+              </table>
+            </div>
           </div>
         </div>
       </div>
@@ -278,6 +341,17 @@ export default function PendingApprovalsForCollector({ collectorUserId }) {
           onSubmit={handleLedgerSubmit}
         />
       )}
+    </div>
+  );
+}
+
+function CenterLoader({ label }) {
+  return (
+    <div className="app-loading-state">
+      <div className="app-loading-card">
+        <div className="app-spinner" />
+        <div className="app-loading-label">{label}</div>
+      </div>
     </div>
   );
 }

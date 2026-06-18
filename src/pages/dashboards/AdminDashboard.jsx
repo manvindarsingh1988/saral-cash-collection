@@ -1,8 +1,18 @@
 import React, { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { apiBase } from "../../lib/apiBase";
 import { formatIndianNumber } from "../../lib/utils";
 import RetailerLiabilityTable from "../../components/admin/RetailerLiabilityTable";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
+
+const summaryCards = [
+  { key: "totalClosingAmount", label: "Opening Amount", color: "#0f766e" },
+  { key: "totalReceivedAmount", label: "Current Received Amount", color: "#0284c7" },
+  { key: "totalCurrentAmount", label: "Current Amount", color: "#2563eb" },
+  { key: "totalProjectionAmount", label: "Projection Amount", color: "#7c3aed" },
+  { key: "totalLaibilityAmount", label: "Liability Amount", color: "#dc2626" },
+  { key: "totalPendingApprovalAmount", label: "Pending Approval Amount", color: "#d97706" },
+];
 
 export default function AdminDashboard({ userType, id }) {
   useDocumentTitle("Retailer Liabilities");
@@ -86,106 +96,100 @@ export default function AdminDashboard({ userType, id }) {
   };
 
   return (
-    <div className="">
-      <div className="mb-4 flex flex-col gap-3 rounded-lg bg-white p-4 shadow sm:flex-row sm:items-center sm:justify-between">
-        <label className="flex items-center gap-2 text-sm text-gray-700">
-          <input
-            type="checkbox"
-            checked={includeProjectionAmountBeforeXMinutes}
-            onChange={(e) =>
-              setIncludeProjectionAmountBeforeXMinutes(e.target.checked)
-            }
-          />
-          Include Projection Amount Before X Minutes
-        </label>
-        <button
-          type="button"
-          onClick={() => fetchLiabilities()}
-          disabled={loading}
-          className="rounded bg-blue-600 px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
-        >
-          {loading ? "Loading..." : "Load Liabilities"}
-        </button>
-      </div>
+    <div className="flex h-full min-h-0 flex-col">
+      <HeaderActions
+        includeProjectionAmountBeforeXMinutes={includeProjectionAmountBeforeXMinutes}
+        loading={loading}
+        onChangeIncludeProjection={(checked) =>
+          setIncludeProjectionAmountBeforeXMinutes(checked)
+        }
+        onLoad={() => fetchLiabilities()}
+      />
 
-      {loading && (
-        <div className="bg-white rounded-lg shadow p-6 mt-2">Loading...</div>
-      )}
       {error && <div className="text-red-600">{error}</div>}
 
       {liabilities.length > 0 && (
-        <>
-          <div className="rounded-lg py-2">
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6 mb-4">
-              <div className="bg-white overflow-hidden shadow rounded-lg">
-                <div className="px-4 py-5 sm:p-3">
-                  <dt className="text-sm font-medium text-gray-500 truncate">
-                    Opening Amount
-                  </dt>
-                  <dd className="mt-1 text-2xl font-semibold text-gray-900">
-                    Rs {formatIndianNumber(summary.totalClosingAmount)}
+        <div className="flex min-h-0 flex-1 flex-col">
+          <div className="py-2">
+            <div className="mb-4 grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6">
+              {summaryCards.map(({ key, label, color }) => (
+                <div key={key} className="metric-tile" style={{ "--tile-color": color }}>
+                  <dt className="metric-tile-label truncate">{label}</dt>
+                  <dd className="metric-tile-value">
+                    Rs {formatIndianNumber(summary[key])}
                   </dd>
                 </div>
-              </div>
-              <div className="bg-white overflow-hidden shadow rounded-lg">
-                <div className="px-4 py-5 sm:p-3">
-                  <dt className="text-sm font-medium text-gray-500 truncate">
-                    Current Received Amount
-                  </dt>
-                  <dd className="mt-1 text-2xl font-semibold text-gray-900">
-                    Rs {formatIndianNumber(summary.totalReceivedAmount)}
-                  </dd>
-                </div>
-              </div>
-              <div className="bg-white overflow-hidden shadow rounded-lg">
-                <div className="px-4 py-5 sm:p-3">
-                  <dt className="text-sm font-medium text-gray-500 truncate">
-                    Current Amount
-                  </dt>
-                  <dd className="mt-1 text-2xl font-semibold text-gray-900">
-                    Rs {formatIndianNumber(summary.totalCurrentAmount)}
-                  </dd>
-                </div>
-              </div>
-              <div className="bg-white overflow-hidden shadow rounded-lg">
-                <div className="px-4 py-5 sm:p-3">
-                  <dt className="text-sm font-medium text-gray-500 truncate">
-                    Projection Amount
-                  </dt>
-                  <dd className="mt-1 text-2xl font-semibold text-gray-900">
-                    Rs {formatIndianNumber(summary.totalProjectionAmount)}
-                  </dd>
-                </div>
-              </div>
-              <div className="bg-white overflow-hidden shadow rounded-lg">
-                <div className="px-4 py-5 sm:p-3">
-                  <dt className="text-sm font-medium text-gray-500 truncate">
-                    Liability Amount
-                  </dt>
-                  <dd className="mt-1 text-2xl font-semibold text-gray-900">
-                    Rs {formatIndianNumber(summary.totalLaibilityAmount)}
-                  </dd>
-                </div>
-              </div>
-              <div className="bg-white overflow-hidden shadow rounded-lg">
-                <div className="px-4 py-5 sm:p-3">
-                  <dt className="text-sm font-medium text-gray-500 truncate">
-                    Pending Approval Amount
-                  </dt>
-                  <dd className="mt-1 text-2xl font-semibold text-gray-900">
-                    Rs {formatIndianNumber(summary.totalPendingApprovalAmount)}
-                  </dd>
-                </div>
-              </div>
+              ))}
             </div>
           </div>
           <RetailerLiabilityTable
             data={liabilities}
             showProjectionAmountBeforeXMinutes={showProjectionAmountBeforeXMinutes}
           />
-        </>
+        </div>
       )}
     </div>
+  );
+}
+
+function SliderToggle({ checked, onChange, label }) {
+  return (
+    <div className="flex items-center gap-3">
+      <span className="text-sm font-medium text-slate-700">{label}</span>
+      <button
+        type="button"
+        role="switch"
+        aria-checked={checked}
+        aria-label={label}
+        onClick={() => onChange(!checked)}
+        className={`app-switch ${checked ? "is-active" : ""}`}
+      >
+        <span className="app-switch-thumb" />
+      </button>
+    </div>
+  );
+}
+
+function CenterLoader({ label = "Loading..." }) {
+  return (
+    <div className="app-loading-state">
+      <div className="app-loading-card">
+        <div className="app-spinner" />
+        <div className="app-loading-label">{label}</div>
+      </div>
+    </div>
+  );
+}
+
+function HeaderActions({
+  includeProjectionAmountBeforeXMinutes,
+  loading,
+  onChangeIncludeProjection,
+  onLoad,
+}) {
+  const target = typeof document !== "undefined"
+    ? document.getElementById("page-header-actions")
+    : null;
+
+  if (!target) return null;
+
+  return createPortal(
+    <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center sm:justify-end">
+      <SliderToggle
+        checked={includeProjectionAmountBeforeXMinutes}
+        onChange={onChangeIncludeProjection}
+        label="Include Projection Amount Before X Minutes"
+      />
+      <button
+        type="button"
+        onClick={onLoad}
+        disabled={loading}
+        className="app-button-primary disabled:cursor-not-allowed disabled:opacity-50"
+      >
+        {loading ? "Loading..." : "Load Liabilities"}
+      </button>
+    </div>,
+    target
   );
 }
 

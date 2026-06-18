@@ -1,11 +1,31 @@
-import React, { useEffect, useState, useCallback, useMemo } from "react";
-import { apiBase } from "../../lib/apiBase";
-import UpdateOpeningBalanceModal from "../../components/admin/UpdateOpeningBalanceModal";
-import UpdateRemarkModal from "../../components/admin/UpdateRemarkModal";
-import UpdateProjectionSnapshotMinutesModal from "../../components/admin/UpdateProjectionSnapshotMinutesModal";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import ConnectedCollectorsModal from "../../components/admin/ConnectedCollectorsModal";
-import useDocumentTitle from "../../hooks/useDocumentTitle";
 import ShowPasswordModal from "../../components/admin/ShowPasswordModal";
+import Tooltip from "../../components/Tooltip";
+import UpdateOpeningBalanceModal from "../../components/admin/UpdateOpeningBalanceModal";
+import UpdateProjectionSnapshotMinutesModal from "../../components/admin/UpdateProjectionSnapshotMinutesModal";
+import UpdateRemarkModal from "../../components/admin/UpdateRemarkModal";
+import TruncatedCell from "../../components/TruncatedCell";
+import useDocumentTitle from "../../hooks/useDocumentTitle";
+import { apiBase } from "../../lib/apiBase";
+import { sortTableRows } from "../../lib/tableSort";
+
+const columns = [
+  { key: "Id", label: "ID", width: "110px", filter: "id", type: "text" },
+  { key: "UserName", label: "Username", width: "260px", filter: "username", type: "text" },
+  { key: "ParentName", label: "Parent Name", width: "260px", filter: "parentname", type: "text" },
+  { key: "Active", label: "Active", width: "90px", filter: "active", type: "select" },
+  { key: "UserType", label: "User Type", width: "130px", filter: "userType", type: "select" },
+  { key: "OpeningBalance", label: "Opening Balance", width: "150px", filter: "balance", type: "text" },
+  { key: "OpeningBalanceDate", label: "Balance Date", width: "130px", filter: "balanceDate", type: "text" },
+  { key: "ProjectionSnapshotMinutes", label: "Projection Snapshot Minutes", width: "200px" },
+  { key: "IsThirdParty", label: "3rd Party", width: "100px" },
+  { key: "IsSelfSubmitter", label: "Self Submitter", width: "130px" },
+  { key: "Actions", label: "Actions", width: "120px" },
+  { key: "Password", label: "Password", width: "120px" },
+  { key: "Remark", label: "Remark", width: "160px", filter: "remark", type: "text" },
+  { key: "IsUserLinked", label: "Is User Linked", width: "240px", filter: "isUserLinked", type: "text" },
+];
 
 export default function UserInfo() {
   useDocumentTitle("User Info");
@@ -34,6 +54,7 @@ export default function UserInfo() {
     isUserLinked: "",
     parentname: "",
   });
+  const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
 
   const userTypeOptions = useMemo(
     () => [
@@ -44,6 +65,16 @@ export default function UserInfo() {
       { Id: 20, Name: "ZoneManager" },
     ],
     []
+  );
+
+  const visibleColumns = useMemo(
+    () =>
+      columns.filter(
+        (column) =>
+          (column.key === "Password" && currentUser?.UserType === "Admin") ||
+          column.key !== "Password"
+      ),
+    [currentUser?.UserType]
   );
 
   const formatDate = (dateStr) => {
@@ -167,7 +198,7 @@ export default function UserInfo() {
       return "";
     }
 
-    let missing = [];
+    const missing = [];
 
     if (userType === 5) {
       if (LinkedCollectors === 0 && IsSelfSubmitter != 1) missing.push("Collector");
@@ -180,16 +211,19 @@ export default function UserInfo() {
       if (LinkedMasterCashiers === 0) missing.push("Master Cashier");
     }
 
-    let message = "";
+    const messageParts = [];
     if (NoBalanceAdded === 0 && (userType === 5 || userType === 12 || userType === 13)) {
-      message += "Opening balance is not yet added.";
+      messageParts.push("Opening balance is not yet added.");
     }
     if (LedgerCount === 0 && (userType === 5 || userType === 12)) {
-      message += " No ledger is yet created.";
+      messageParts.push("No ledger is yet created.");
     }
     if (missing.length === 0) return "";
 
-    return `User is not linked with any ${missing.join(", ")}. ${message}`.trim();
+    return [
+      `User is not linked with any ${missing.join(", ")}.`,
+      ...messageParts,
+    ].join("\n");
   };
 
   const applyFilters = useCallback(() => {
@@ -228,6 +262,15 @@ export default function UserInfo() {
     setFilters((prev) => ({ ...prev, [name]: value }));
   };
 
+  const onSort = (key) => {
+    if (key === "Actions" || key === "Password") return;
+    setSortConfig((prev) =>
+      prev.key === key
+        ? { key, direction: prev.direction === "asc" ? "desc" : "asc" }
+        : { key, direction: "asc" }
+    );
+  };
+
   const updateFlag = async (userId, value, type) => {
     try {
       const updater =
@@ -254,219 +297,242 @@ export default function UserInfo() {
     }
   };
 
-  const handleShowUserPassword = async (userId) => {
+  const handleShowUserPassword = (userId) => {
     setPendingModalType("password");
     setSelectedUserId(userId);
   };
 
-  const headers = [
-    "Id",
-    "Username",
-    "Parent Name",
-    "Active",
-    "User Type",
-    "Opening Balance",
-    "Balance Date",
-    "Projection Snapshot Minutes",
-    "3rd Party",
-    "Self Submitter",
-    "Actions",
-    "Password",
-    "Remark",
-    "Is User Linked",
-  ].filter(
-    (header) =>
-      (header === "Password" && currentUser?.UserType === "Admin") ||
-      header !== "Password"
+  const sortedUserInfos = useMemo(
+    () =>
+      sortTableRows(filteredUserInfos, sortConfig, (user, key) => {
+        if (key === "OpeningBalanceDate") return formatDate(user.OpeningBalanceDate);
+        if (key === "OpeningBalance") return user.OpeningBalance;
+        if (key === "UserType") {
+          return userTypeOptions.find((t) => t.Id === user.UserType)?.Name || "";
+        }
+        if (key === "IsUserLinked") return getUnlinkedMessage(user?.UserType, user);
+        return user[key];
+      }),
+    [filteredUserInfos, formatDate, sortConfig, userTypeOptions]
   );
 
+  const renderFilter = (column) => {
+    if (!column.filter) return null;
+
+    if (column.type === "select") {
+      const isActive = column.filter === "active";
+      return (
+        <select
+          name={column.filter}
+          value={filters[column.filter]}
+          onChange={handleFilterChange}
+          className="w-full rounded border border-gray-300 px-2 py-1 text-xs"
+        >
+          <option value="">All</option>
+          {isActive ? (
+            <>
+              <option value="yes">Yes</option>
+              <option value="no">No</option>
+            </>
+          ) : (
+            userTypeOptions.map((type) => (
+              <option key={type.Id} value={type.Name}>
+                {type.Name}
+              </option>
+            ))
+          )}
+        </select>
+      );
+    }
+
+    return (
+      <input
+        type="text"
+        name={column.filter}
+        value={filters[column.filter]}
+        onChange={handleFilterChange}
+        placeholder="Filter"
+        className="w-full rounded border border-gray-300 px-2 py-1 text-xs"
+      />
+    );
+  };
+
   return (
-    <div className="p-4 bg-gray-50 rounded-lg shadow border border-gray-200">
+    <div className="flex h-full min-h-0 flex-col">
       {loading ? (
-        <p>Loading user info...</p>
+        <div className="rounded-lg bg-white p-4 shadow">Loading user info...</div>
       ) : (
-        <div className="max-h-[calc(100vh-150px)] overflow-y-auto overflow-x-auto px-2 sm:px-0">
-          <table className="w-full table-auto text-xs sm:text-sm border border-gray-200 rounded-md">
-            <thead className="bg-gray-100 text-left">
-              <tr>
-                {headers.map((header) => (
-                  <th key={header} className="p-2 font-semibold whitespace-nowrap">
-                    {header}
-                    {[
-                      "Id",
-                      "Username",
-                      "Parent Name",
-                      "Active",
-                      "User Type",
-                      "Opening Balance",
-                      "Balance Date",
-                      "Remark",
-                      "Is User Linked",
-                    ].includes(header) && (
-                      <div className="mt-1">
-                        {header === "Active" || header === "User Type" ? (
-                          <select
-                            name={header === "Active" ? "active" : "userType"}
-                            value={header === "Active" ? filters.active : filters.userType}
-                            onChange={handleFilterChange}
-                            className="w-full border border-gray-300 rounded px-2 py-1 text-xs"
-                          >
-                            <option value="">All</option>
-                            {header === "Active" && (
-                              <>
-                                <option value="yes">Yes</option>
-                                <option value="no">No</option>
-                              </>
-                            )}
-                            {header === "User Type" &&
-                              userTypeOptions.map((type) => (
-                                <option key={type.Id} value={type.Name}>
-                                  {type.Name}
-                                </option>
-                              ))}
-                          </select>
-                        ) : (
-                          <input
-                            type="text"
-                            name={
-                              header === "Id"
-                                ? "id"
-                                : header === "Username"
-                                ? "username"
-                                : header === "Parent Name"
-                                ? "parentname"
-                                : header === "Opening Balance"
-                                ? "balance"
-                                : header === "Balance Date"
-                                ? "balanceDate"
-                                : header === "Remark"
-                                ? "remark"
-                                : "isUserLinked"
-                            }
-                            value={
-                              header === "Id"
-                                ? filters.id
-                                : header === "Username"
-                                ? filters.username
-                                : header === "Parent Name"
-                                ? filters.parentname
-                                : header === "Opening Balance"
-                                ? filters.balance
-                                : header === "Balance Date"
-                                ? filters.balanceDate
-                                : header === "Remark"
-                                ? filters.remark
-                                : filters.isUserLinked
-                            }
-                            onChange={handleFilterChange}
-                            placeholder="Filter"
-                            className="w-full border border-gray-300 rounded px-2 py-1 text-xs"
-                          />
-                        )}
-                      </div>
-                    )}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-
-            <tbody className="text-xs">
-              {filteredUserInfos.map((user) => (
-                <tr
-                  key={user.Id}
-                  className={`${!user.Active ? "bg-gray-300" : "even:bg-white odd:bg-gray-50"}`}
-                >
-                  <td
-                    className="p-2 font-medium text-blue-600 cursor-pointer"
-                    onClick={() => handleIdClick(user.Id)}
-                  >
-                    {user.Id}
-                  </td>
-                  <td className="p-2">{user.UserName}</td>
-                  <td className="p-2">{user.ParentName}</td>
-                  <td className="p-2">{user.Active ? "Yes" : "No"}</td>
-                  <td className="p-2">
-                    {userTypeOptions.find((t) => t.Id === user.UserType)?.Name || "-"}
-                  </td>
-                  <td className="p-2">{formatCurrency(user.OpeningBalance)}</td>
-                  <td className="p-2">{formatDate(user.OpeningBalanceDate)}</td>
-                  <td className="p-2">{user.ProjectionSnapshotMinutes ?? "-"}</td>
-                  <td className="p-2">
-                    {user.UserType == 5 ? (
-                      <input
-                        type="checkbox"
-                        checked={user.IsThirdParty}
-                        disabled={!user.Active}
-                        onChange={(e) => updateFlag(user.Id, e.target.checked, "thirdParty")}
-                      />
-                    ) : (
-                      ""
-                    )}
-                  </td>
-                  <td className="p-2">
-                    {user.UserType == 5 ? (
-                      <input
-                        type="checkbox"
-                        checked={user.IsSelfSubmitter}
-                        disabled={!user.Active}
-                        onChange={(e) => updateFlag(user.Id, e.target.checked, "selfSubmitter")}
-                      />
-                    ) : (
-                      ""
-                    )}
-                  </td>
-                  <td className="p-2">
-                    {user.Active ? (
-                      <div className="flex flex-col space-y-1">
+        <div className="flex min-h-0 flex-1 flex-col rounded-lg bg-white p-4 shadow sm:p-6">
+          <div className="app-table-shell min-h-0 flex-1 overflow-auto">
+            <table className="app-table min-w-full table-auto text-sm">
+              <thead className="sticky top-0 z-10 bg-gray-50 text-left">
+                <tr>
+                  {visibleColumns.map((column) => (
+                    <th
+                      key={column.key}
+                      className="px-4 py-2 font-semibold whitespace-nowrap"
+                      style={{
+                        width: column.width,
+                        minWidth: column.width,
+                        maxWidth: column.width,
+                      }}
+                    >
                         <button
-                          className="text-indigo-600 underline text-xs"
-                          onClick={() => handleOpeningBalance(user.Id)}
+                          type="button"
+                          onClick={() => onSort(column.key)}
+                          className="flex items-center gap-1 text-left"
                         >
-                          Edit OB
+                          <span>{column.label}</span>
+                          <span className="text-[10px] text-slate-400">
+                            {sortConfig.key === column.key
+                              ? sortConfig.direction === "asc"
+                                ? "▲"
+                                : "▼"
+                              : "↕"}
+                          </span>
                         </button>
-                        <button
-                          className="text-indigo-600 underline text-xs"
-                          onClick={() => handleAddRemark(user.Id)}
-                        >
-                          Add Remark
-                        </button>
-                        <button
-                          className="text-indigo-600 underline text-xs"
-                          onClick={() =>
-                            handleProjectionSnapshotMinutes(
-                              user.Id,
-                              user.ProjectionSnapshotMinutes
-                            )
-                          }
-                        >
-                          Set Minutes
-                        </button>
-                      </div>
-                    ) : (
-                      ""
-                    )}
-                  </td>
-
-                  {currentUser?.UserType === "Admin" && (
-                    <td className="p-2 relative">
-                      <button
-                        className="text-blue-600 underline"
-                        onClick={() => handleShowUserPassword(user.Id)}
-                      >
-                        Get Password
-                      </button>
-                    </td>
-                  )}
-                  <td className="p-2">{user.Remark}</td>
-                  <td className="p-2">
-                    <span className="text-red-600">
-                      {getUnlinkedMessage(user?.UserType, user)}
-                    </span>
-                  </td>
+                      </th>
+                  ))}
                 </tr>
-              ))}
-            </tbody>
-          </table>
+                <tr className="bg-white">
+                  {visibleColumns.map((column) => (
+                    <td
+                      key={column.key}
+                      className="px-4 py-2"
+                      style={{
+                        width: column.width,
+                        minWidth: column.width,
+                        maxWidth: column.width,
+                      }}
+                    >
+                      {renderFilter(column)}
+                    </td>
+                  ))}
+                </tr>
+              </thead>
+
+              <tbody className="text-xs">
+                {sortedUserInfos.map((user) => {
+                  const isInactive = !user.Active;
+                  const inactiveCellStyle = isInactive
+                    ? { backgroundColor: "#d1d5db", color: "#475569" }
+                    : undefined;
+                  const userTypeLabel =
+                    userTypeOptions.find((t) => t.Id === user.UserType)?.Name || "-";
+                  const unlinkedMessage = getUnlinkedMessage(user?.UserType, user);
+
+                  return (
+                    <tr key={user.Id}>
+                      <td className="px-4 py-3" style={inactiveCellStyle}>
+                        <Tooltip content={String(user.Id)} className="block w-full">
+                          <button
+                            className={`w-full text-left font-medium ${
+                              user.Active ? "text-blue-600" : "text-slate-500"
+                            }`}
+                            onClick={() => handleIdClick(user.Id)}
+                          >
+                            <TruncatedCell>{user.Id}</TruncatedCell>
+                          </button>
+                        </Tooltip>
+                      </td>
+                      <td className="px-4 py-3" style={inactiveCellStyle}>
+                        <TruncatedCell>{user.UserName || "-"}</TruncatedCell>
+                      </td>
+                      <td className="px-4 py-3" style={inactiveCellStyle}>
+                        <TruncatedCell>{user.ParentName || "-"}</TruncatedCell>
+                      </td>
+                      <td className="px-4 py-3" style={inactiveCellStyle}>
+                        <TruncatedCell>{user.Active ? "Yes" : "No"}</TruncatedCell>
+                      </td>
+                      <td className="px-4 py-3" style={inactiveCellStyle}>
+                        <TruncatedCell>{userTypeLabel}</TruncatedCell>
+                      </td>
+                      <td className="px-4 py-3" style={inactiveCellStyle}>
+                        <TruncatedCell>{formatCurrency(user.OpeningBalance)}</TruncatedCell>
+                      </td>
+                      <td className="px-4 py-3" style={inactiveCellStyle}>
+                        <TruncatedCell>{formatDate(user.OpeningBalanceDate)}</TruncatedCell>
+                      </td>
+                      <td className="px-4 py-3" style={inactiveCellStyle}>
+                        <TruncatedCell>{user.ProjectionSnapshotMinutes ?? "-"}</TruncatedCell>
+                      </td>
+                      <td className="px-4 py-3" style={inactiveCellStyle}>
+                        {user.UserType == 5 ? (
+                          <input
+                            type="checkbox"
+                            checked={user.IsThirdParty}
+                            disabled={!user.Active}
+                            onChange={(e) => updateFlag(user.Id, e.target.checked, "thirdParty")}
+                          />
+                        ) : null}
+                      </td>
+                      <td className="px-4 py-3" style={inactiveCellStyle}>
+                        {user.UserType == 5 ? (
+                          <input
+                            type="checkbox"
+                            checked={user.IsSelfSubmitter}
+                            disabled={!user.Active}
+                            onChange={(e) => updateFlag(user.Id, e.target.checked, "selfSubmitter")}
+                          />
+                        ) : null}
+                      </td>
+                      <td className="px-4 py-3" style={inactiveCellStyle}>
+                        {user.Active ? (
+                          <div className="flex flex-col gap-1">
+                            <button
+                              className="text-left text-xs text-indigo-600 underline"
+                              onClick={() => handleOpeningBalance(user.Id)}
+                            >
+                              Edit OB
+                            </button>
+                            <button
+                              className="text-left text-xs text-indigo-600 underline"
+                              onClick={() => handleAddRemark(user.Id)}
+                            >
+                              Add Remark
+                            </button>
+                            <button
+                              className="text-left text-xs text-indigo-600 underline"
+                              onClick={() =>
+                                handleProjectionSnapshotMinutes(
+                                  user.Id,
+                                  user.ProjectionSnapshotMinutes
+                                )
+                              }
+                            >
+                              Set Minutes
+                            </button>
+                          </div>
+                        ) : null}
+                      </td>
+
+                      {currentUser?.UserType === "Admin" && (
+                        <td className="px-4 py-3" style={inactiveCellStyle}>
+                          <button
+                            className={user.Active ? "text-blue-600 underline" : "text-slate-500 underline"}
+                            onClick={() => handleShowUserPassword(user.Id)}
+                          >
+                            Get Password
+                          </button>
+                        </td>
+                      )}
+
+                      <td className="px-4 py-3" style={inactiveCellStyle}>
+                        <TruncatedCell>{user.Remark || "-"}</TruncatedCell>
+                      </td>
+                      <td className="px-4 py-3" style={inactiveCellStyle}>
+                        <Tooltip content={unlinkedMessage} className="block max-w-full">
+                          <div className="max-w-full whitespace-pre-line break-words text-red-600">
+                            {unlinkedMessage || "-"}
+                          </div>
+                        </Tooltip>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
 

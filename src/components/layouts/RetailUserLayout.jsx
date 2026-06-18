@@ -20,8 +20,8 @@ export default function RetailUserLayout({ children }) {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <nav className="bg-indigo-600">
+    <div className="app-shell">
+      <nav className="app-nav">
         <div className="mx-auto max-w-8xl px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 items-center justify-between">
             {/* Mobile menu button */}
@@ -54,15 +54,17 @@ export default function RetailUserLayout({ children }) {
 
         {/* Mobile nav */}
         {mobileMenuOpen && (
-          <div className="md:hidden bg-indigo-500 px-2 pt-2 pb-3 space-y-1">
+          <div className="md:hidden border-t border-white/10 bg-white/10 px-2 pb-3 pt-2 space-y-1 backdrop-blur">
             <NavLinks isActive={isActive} mobile />
           </div>
         )}
       </nav>
 
-      <main className="mx-auto max-w-8xl px-4 py-6 sm:px-6 lg:px-8">
-        {children}
-      </main>
+      <div className="app-content">
+        <main className="mx-auto flex-1 min-h-0 w-full max-w-8xl overflow-auto px-4 py-6 sm:px-6 lg:px-8">
+          {children}
+        </main>
+      </div>
     </div>
   );
 }

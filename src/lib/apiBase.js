@@ -164,10 +164,13 @@ export const apiBase = {
         `${API_URL}/GetLiabilityAmountByRetailerId?userId=${id}`
       )
     ).json(),
-  getLiabilityAmountByCollectorId: async (id) =>
+  getLiabilityAmountByCollectorId: async (
+    id,
+    loadDashboardByValuationDate = false
+  ) =>
     await (
       await authorizedFetch(
-        `${API_URL}/GetLiabilityAmountByCollectorId?userId=${id}`
+        `${API_URL}/GetLiabilityAmountByCollectorId?userId=${id}&loadDashboardByValuationDate=${loadDashboardByValuationDate}`
       )
     ).json(),
   getLiabilityAmountByCashierId: async (id) =>
@@ -471,8 +474,3 @@ export const apiBase = {
   return await response.blob();
 }
 }
-
-
-
-
-

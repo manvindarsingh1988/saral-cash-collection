@@ -1,6 +1,8 @@
 /* eslint-disable */
 import { useState, useEffect } from "react";
+import { X } from "lucide-react";
 import { apiBase } from "../lib/apiBase";
+import SearchableSelect from "./SearchableSelect";
 import {
   generateSafeGuid,
   handleDownloadFile,
@@ -19,13 +21,26 @@ export default function LedgerModal({
 }) {
   const isCollectorLedger = modelFor === "CollectorLedger";
   const isCashierLedger = modelFor === "CashierLedger";
+  const now = new Date();
 
   const workflows =
     isCollectorLedger || isCashierLedger
       ? masterData?.WorkFlows?.filter((w) => w?.Id === 4)
       : masterData?.WorkFlows;
 
-  const today = new Date().toISOString().split("T")[0];
+  const today = now.toISOString().split("T")[0];
+
+  const buildValuationDate = (selectedDate) => {
+    if (!selectedDate) {
+      return new Date();
+    }
+
+    if (selectedDate === today) {
+      return new Date();
+    }
+
+    return new Date(`${selectedDate}T23:55:00`);
+  };
 
   const [formData, setFormData] = useState({
     RetailerId: "",
@@ -37,6 +52,7 @@ export default function LedgerModal({
     Amount: "",
     WorkFlow: "1",
     Date: today,
+    ValuationDate: today,
     GivenOn: today,
     Comment: "",
     StuckInBank: false,
@@ -61,6 +77,10 @@ export default function LedgerModal({
         Amount: initialData?.Amount ?? "",
         WorkFlow: initialData?.WorkFlow?.toString() ?? "1",
         Date: initialData?.Date?.split("T")[0] ?? today,
+        ValuationDate:
+          initialData?.ValuationDate?.split("T")[0] ??
+          initialData?.Date?.split("T")[0] ??
+          today,
         GivenOn: today,
         Comment: initialData?.Comment ?? "",
         StuckInBank: initialData?.WorkFlow === 6,
@@ -142,6 +162,9 @@ export default function LedgerModal({
       TransactionType: parseInt(formData.TransactionType),
       WorkFlow: formData.StuckInBank ? 6 : formData.StuckInCDM ? 8 : 1,
       Date: new Date(formData.Date),
+      ValuationDate: isCollectorLedger
+        ? buildValuationDate(formData.ValuationDate)
+        : null,
       GivenOn: new Date(formData.GivenOn),
       Comment: formData.Comment,
       DocId:
@@ -169,20 +192,31 @@ export default function LedgerModal({
   };
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-30 z-50">
-      <div className="bg-white p-6 rounded shadow-lg space-y-4 w-full max-w-md">
-        <h2 className="text-lg font-semibold">
-          {!initialData ? "Add" : "Update"} Ledger Entry
-        </h2>
+    <div className="app-modal-overlay">
+      <div className="app-modal app-modal-sm">
+        <div className="app-modal-header">
+          <div>
+            <h2 className="app-modal-title">
+              {!initialData ? "Add" : "Update"} Ledger Entry
+            </h2>
+            <p className="app-modal-subtitle">
+              Enter ledger details and save the transaction.
+            </p>
+          </div>
+          <button onClick={onClose} className="app-modal-close" aria-label="Close">
+            <X size={18} />
+          </button>
+        </div>
 
-        {/* Transaction Type */}
-        <div className="flex flex-col">
-          <label className="text-sm text-gray-600">Transaction Type</label>
+        <div className="app-modal-body">
+          <div className="app-modal-form">
+        <div className="app-modal-field">
+          <label className="app-modal-label">Transaction Type</label>
           <select
             name="TransactionType"
             value={formData.TransactionType}
             onChange={handleChange}
-            className="border px-2 py-1 rounded"
+            className="border px-3 py-2 rounded-lg"
           >
             <option value="" disabled>
               Select Transaction Type
@@ -196,7 +230,7 @@ export default function LedgerModal({
             ))}
           </select>
           {["2", "3", "4", "5", "6"].includes(formData.TransactionType) && (
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="app-modal-note">
               <strong>Note:</strong> Please mention transaction details in
               comments to avoid rejection.
             </p>
@@ -204,8 +238,8 @@ export default function LedgerModal({
         </div>
 
         {isCollectorLedger && formData.TransactionType === "1" && (
-          <div className="flex flex-col gap-2">
-            <label className="text-sm text-gray-600">Handover To</label>
+          <div className="app-modal-field">
+            <label className="app-modal-label">Handover To</label>
             <div className="flex items-center gap-4">
               <label className="flex items-center gap-2 text-sm text-gray-700">
                 <input
@@ -235,13 +269,13 @@ export default function LedgerModal({
         {!isCashierLedger &&
           formData.TransactionType === "1" &&
           formData.HandoverTo === "cashier" && (
-          <div className="flex flex-col">
-            <label className="text-sm text-gray-600">Cashier</label>
+          <div className="app-modal-field">
+            <label className="app-modal-label">Cashier</label>
             <select
               name="CashierId"
               value={formData.CashierId}
               onChange={handleChange}
-              className="border px-2 py-1 rounded"
+              className="border px-3 py-2 rounded-lg"
             >
               <option value="" disabled>
                 Select Cashier
@@ -258,49 +292,63 @@ export default function LedgerModal({
         {isCollectorLedger &&
           formData.TransactionType === "1" &&
           formData.HandoverTo === "collector" && (
-            <div className="flex flex-col">
-              <label className="text-sm text-gray-600">To Collector</label>
-              <select
-                name="ToCollector"
+            <div className="app-modal-field">
+              <label className="app-modal-label">To Collector</label>
+              <SearchableSelect
                 value={formData.ToCollector}
-                onChange={handleChange}
-                className="border px-2 py-1 rounded"
-              >
-                <option value="" disabled>
-                  Select Collector
-                </option>
-                {collectors
+                onChange={(value) =>
+                  handleChange({ target: { name: "ToCollector", value } })
+                }
+                options={(collectors
                   ?.filter((collector) => `${collector.Id}` !== `${userId}`)
-                  .map((collector) => (
-                    <option key={collector.Id} value={collector.Id}>
-                      {collector.UserName}
-                    </option>
-                  ))}
-              </select>
+                  .map((collector) => ({
+                    value: collector.Id,
+                    label: `${collector.UserName} (${collector.Id})`,
+                  })) || [])}
+                placeholder="Select Collector"
+                searchPlaceholder="Search collector..."
+              />
             </div>
           )}
 
         {/* Amount */}
-        <div className="flex flex-col">
-          <label className="text-sm text-gray-600">Amount</label>
+        <div className="app-modal-field">
+          <label className="app-modal-label">Amount</label>
           <input
             name="Amount"
             type="number"
             value={formData.Amount}
             onChange={handleChange}
-            className="border px-2 py-1 rounded"
+            className="border px-3 py-2 rounded-lg"
           />
         </div>
 
+        {isCollectorLedger && (
+          <div className="app-modal-field">
+            <label className="app-modal-label">Valuation Date</label>
+            <input
+              name="ValuationDate"
+              type="date"
+              value={formData.ValuationDate}
+              onChange={handleChange}
+              max={today}
+              className="border px-3 py-2 rounded-lg"
+            />
+            <p className="app-modal-note">
+              Today sends current date and time. Past dates send 23:55:00.
+            </p>
+          </div>
+        )}
+
         {/* WorkFlow */}
         {!isCollectorLedger && !isCashierLedger && (
-          <div className="flex flex-col">
-            <label className="text-sm text-gray-600">WorkFlow</label>
+          <div className="app-modal-field">
+            <label className="app-modal-label">WorkFlow</label>
             <select
               name="WorkFlow"
               value={formData.WorkFlow}
               onChange={handleChange}
-              className="border px-2 py-1 rounded"
+              className="border px-3 py-2 rounded-lg"
             >
               <option value="" disabled>
                 Select Workflow
@@ -317,20 +365,20 @@ export default function LedgerModal({
         )}
 
         {/* Comment */}
-        <div className="flex flex-col">
-          <label className="text-sm text-gray-600">Comment</label>
+        <div className="app-modal-field">
+          <label className="app-modal-label">Comment</label>
           <input
             name="Comment"
             type="text"
             value={formData.Comment}
             onChange={handleChange}
-            className="border px-2 py-1 rounded"
+            className="border px-3 py-2 rounded-lg"
           />
         </div>
 
         {/* StuckInBank */}
         {formData.TransactionType === "2" && (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
             <input
               name="StuckInBank"
               type="checkbox"
@@ -344,7 +392,7 @@ export default function LedgerModal({
 
         {/* StuckInCDM */}
         {formData.TransactionType === "6" && (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
             <input
               name="StuckInCDM"
               type="checkbox"
@@ -356,14 +404,13 @@ export default function LedgerModal({
           </div>
         )}
 
-        {/* File Upload */}
-        <div className="flex flex-col">
-          <label className="text-sm text-gray-600">Upload Slip</label>
+        <div className="app-modal-field">
+          <label className="app-modal-label">Upload Slip</label>
           <input
             type="file"
             multiple
             onChange={handleFileChange}
-            className="border px-2 py-1 rounded"
+            className="border px-3 py-2 rounded-lg"
           />
           {formData?.DocId && (
             <button
@@ -374,16 +421,13 @@ export default function LedgerModal({
             </button>
           )}
         </div>
-
-        {/* Buttons */}
-        <div className="flex justify-end gap-2">
-          <button onClick={onClose} className="px-4 py-1 rounded border">
+        </div>
+        </div>
+        <div className="app-modal-actions">
+          <button onClick={onClose} className="app-button-secondary">
             Cancel
           </button>
-          <button
-            onClick={handleSubmit}
-            className="bg-blue-600 text-white px-4 py-1.5 rounded hover:bg-blue-700"
-          >
+          <button onClick={handleSubmit} className="app-button-primary">
             Save
           </button>
         </div>

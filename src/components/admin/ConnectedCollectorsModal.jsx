@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { X } from "lucide-react";
 import { apiBase } from "../../lib/apiBase";
 
 export default function ConnectedCollectorsModal({
@@ -30,78 +31,47 @@ export default function ConnectedCollectorsModal({
   }
 
   return (
-    <div
-      style={{
-        position: "fixed",
-        top: 0,
-        left: 0,
-        width: "100vw",
-        height: "100vh",
-        backgroundColor: "rgba(0,0,0,0.5)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        zIndex: 1000,
-      }}
-      onClick={() => setShowModal(false)}
-    >
-      <div
-        onClick={(e) => e.stopPropagation()}
-        style={{
-          backgroundColor: "white",
-          padding: "2rem",
-          borderRadius: "8px",
-          width: "400px",
-          maxHeight: "80vh",
-          overflowY: "auto",
-        }}
-      >
-        <h3 style={{ marginBottom: "1rem" }}>
-          Connected Collectors for ID: {selectedUserId}
-        </h3>
+    <div className="app-modal-overlay" onClick={() => setShowModal(false)}>
+      <div className="app-modal app-modal-sm" onClick={(e) => e.stopPropagation()}>
+        <div className="app-modal-header">
+          <div>
+            <h3 className="app-modal-title">Connected Collectors</h3>
+            <p className="app-modal-subtitle">User ID: {selectedUserId}</p>
+          </div>
+          <button
+            onClick={() => setShowModal(false)}
+            className="app-modal-close"
+            aria-label="Close"
+          >
+            <X size={18} />
+          </button>
+        </div>
+        <div className="app-modal-body">
         {connectedCollectors?.length === 0 ? (
-          <p>No collectors found.</p>
+          <p className="text-sm text-slate-500">No collectors found.</p>
         ) : (
           <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))",
-              gap: "12px",
-              padding: "0",
-              listStyleType: "none",
-            }}
+            className="grid grid-cols-1 gap-3"
           >
             {connectedCollectors.map((collector) => (
               <div
                 key={collector.CollectorUserId}
-                style={{
-                  border: "1px solid #ccc",
-                  borderRadius: "6px",
-                  padding: "10px",
-                  backgroundColor: "#f9f9f9",
-                }}
+                className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3"
               >
-                <strong>{collector.CollectorUser}</strong>
-                <br />
-                ID: {collector.CollectorUserId}
+                <strong className="block text-slate-800">{collector.CollectorUser}</strong>
+                <span className="text-sm text-slate-500">
+                  ID: {collector.CollectorUserId}
+                </span>
               </div>
             ))}
           </div>
         )}
-        <button
-          onClick={() => setShowModal(false)}
-          style={{
-            marginTop: "1rem",
-            padding: "0.5rem 1rem",
-            borderRadius: "4px",
-            backgroundColor: "#007bff",
-            color: "white",
-            border: "none",
-            cursor: "pointer",
-          }}
-        >
-          Close
-        </button>
+        </div>
+        <div className="app-modal-actions">
+          <button onClick={() => setShowModal(false)} className="app-button-primary">
+            Close
+          </button>
+        </div>
       </div>
     </div>
   );

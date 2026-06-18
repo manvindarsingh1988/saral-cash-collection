@@ -66,11 +66,17 @@ export default function ChangePassword() {
   const passwordStrength = getPasswordStrength(newPassword);
 
   return (
-    <div className="flex min-h-screen items-center justify-center">
-      <div className="w-full max-w-md space-y-8 rounded-lg bg-white p-6 shadow-md">
-        <h2 className="text-center text-2xl font-bold text-gray-900">
-          Change Password
-        </h2>
+    <div className="auth-shell">
+      <div className="auth-card space-y-8">
+        <div className="auth-brand">
+          <div className="auth-kicker">Saral Cash Flow</div>
+          <h2 className="text-center text-2xl font-bold text-gray-900">
+            Change Password
+          </h2>
+          <p className="mt-3 text-center text-sm text-slate-500">
+            Keep your access secure without leaving the shared theme behind.
+          </p>
+        </div>
         <form className="space-y-6" onSubmit={handleChangePassword}>
           {error && (
             <div className="rounded bg-red-50 p-2 text-sm text-red-700">

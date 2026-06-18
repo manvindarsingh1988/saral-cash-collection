@@ -4,6 +4,14 @@ import { formatIndianNumber } from "../../lib/utils";
 import RetailerLiabilityTable from "../../components/admin/RetailerLiabilityTable";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
 
+const summaryCards = [
+  { key: "totalClosingAmount", label: "Opening Amount", color: "#0f766e" },
+  { key: "totalLaibilityAmount", label: "Liability Amount", color: "#dc2626" },
+  { key: "totalPendingApprovalAmount", label: "Pending Approval Amount", color: "#d97706" },
+  { key: "totalProjectionAmount", label: "Projection Amount", color: "#7c3aed" },
+  { key: "totalCurrentAmount", label: "Current Amount", color: "#2563eb" },
+];
+
 export default function RetailerLiabilitiesForCollector({ collectorUserId }) {
   useDocumentTitle("Retailer Liabilities");
   const [loading, setLoading] = useState(false);
@@ -73,67 +81,32 @@ export default function RetailerLiabilitiesForCollector({ collectorUserId }) {
     }
   };
 
+  const hasData = liabilities.length > 0;
+
   return (
-    <div className="">
+    <div className="flex h-full min-h-0 flex-col">
       {loading && (
-        <div className="bg-white rounded-lg shadow p-6 mt-2">Loading...</div>
+        <div className="app-loading-state">
+          <div className="app-loading-card">
+            <div className="app-spinner" />
+            <div className="app-loading-label">Loading liabilities...</div>
+          </div>
+        </div>
       )}
       {error && <div className="text-red-600">{error}</div>}
 
-      {liabilities.length > 0 && (
+      {!loading && hasData && (
         <>
           <div className="rounded-lg py-2">
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-5 mb-4">
-              <div className="bg-white overflow-hidden shadow rounded-lg">
-                <div className="px-4 py-5 sm:p-3">
-                  <dt className="text-sm font-medium text-gray-500 truncate">
-                    Opening Amount
-                  </dt>
-                  <dd className="mt-1 text-2xl font-semibold text-gray-900">
-                    Rs {formatIndianNumber(summary.totalClosingAmount)}
+              {summaryCards.map(({ key, label, color }) => (
+                <div key={key} className="metric-tile" style={{ "--tile-color": color }}>
+                  <dt className="metric-tile-label truncate">{label}</dt>
+                  <dd className="metric-tile-value">
+                    Rs {formatIndianNumber(summary[key])}
                   </dd>
                 </div>
-              </div>
-              <div className="bg-white overflow-hidden shadow rounded-lg">
-                <div className="px-4 py-5 sm:p-3">
-                  <dt className="text-sm font-medium text-gray-500 truncate">
-                    Liability Amount
-                  </dt>
-                  <dd className="mt-1 text-2xl font-semibold text-gray-900">
-                    Rs {formatIndianNumber(summary.totalLaibilityAmount)}
-                  </dd>
-                </div>
-              </div>
-              <div className="bg-white overflow-hidden shadow rounded-lg">
-                <div className="px-4 py-5 sm:p-3">
-                  <dt className="text-sm font-medium text-gray-500 truncate">
-                    Pending Approval Amount
-                  </dt>
-                  <dd className="mt-1 text-2xl font-semibold text-gray-900">
-                    Rs {formatIndianNumber(summary.totalPendingApprovalAmount)}
-                  </dd>
-                </div>
-              </div>
-              <div className="bg-white overflow-hidden shadow rounded-lg">
-                <div className="px-4 py-5 sm:p-3">
-                  <dt className="text-sm font-medium text-gray-500 truncate">
-                    Projection Amount
-                  </dt>
-                  <dd className="mt-1 text-2xl font-semibold text-gray-900">
-                    Rs {formatIndianNumber(summary.totalProjectionAmount)}
-                  </dd>
-                </div>
-              </div>
-              <div className="bg-white overflow-hidden shadow rounded-lg">
-                <div className="px-4 py-5 sm:p-3">
-                  <dt className="text-sm font-medium text-gray-500 truncate">
-                    Current Amount
-                  </dt>
-                  <dd className="mt-1 text-2xl font-semibold text-gray-900">
-                    Rs {formatIndianNumber(summary.totalCurrentAmount)}
-                  </dd>
-                </div>
-              </div>
+              ))}
             </div>
           </div>
           <RetailerLiabilityTable data={liabilities} />

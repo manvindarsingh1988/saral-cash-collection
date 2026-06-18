@@ -24,12 +24,16 @@ export default function SignUp() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center">
-      <div className="w-full max-w-md space-y-8 rounded-lg bg-white p-6 shadow-md">
-        <div>
+    <div className="auth-shell">
+      <div className="auth-card space-y-8">
+        <div className="auth-brand">
+          <div className="auth-kicker">Saral Cash Flow</div>
           <h2 className="text-center text-3xl font-bold tracking-tight text-gray-900">
             Create your account
           </h2>
+          <p className="mt-3 text-center text-sm text-slate-500">
+            Start with the same visual system used across the rest of the application.
+          </p>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSignUp}>
           {error && (

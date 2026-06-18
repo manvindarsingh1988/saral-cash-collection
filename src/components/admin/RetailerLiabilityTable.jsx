@@ -1,28 +1,32 @@
 import React, { useState } from "react";
+import { createPortal } from "react-dom";
 import { Eye, TrendingUp } from "lucide-react";
 import { apiBase } from "../../lib/apiBase";
+import { sortTableRows } from "../../lib/tableSort";
 import { formatIndianNumber } from "../../lib/utils";
 import LadgerDetailsDialog from "../LedgerDetailsDialog";
+import TooltipIconButton from "../TooltipIconButton";
+import TruncatedCell from "../TruncatedCell";
 
 function getColumns(showProjectionAmountBeforeXMinutes, showProjectionAmountWithoutCurrentSale) {
   const columns = [
-    { heading: "Warning", key: "Warning", width: "100px" },
-    { heading: "Retailer Name", key: "UserName", width: "120px" },
-    { heading: "Remark", key: "Remark", width: "80px" },
-    { heading: "Opening Amount", key: "ClosingAmount", width: "80px" },
-    { heading: "Current Received Amount", key: "ReceivedAmount", width: "80px" },
-    { heading: "Current Amount", key: "CurrentAmount", width: "80px" },
-    { heading: "Projection Amount", key: "ProjectionAmount", width: "80px" },
-    { heading: "Projection Without Current Sale", key: "ProjectionAmountWithoutCurrentSale", width: "100px" },
-    { heading: "Laibility Amount", key: "LaibilityAmount", width: "80px" },
-    { heading: "Ewallet Pending Amount", key: "PendingAmount", width: "80px" },
-    { heading: "Pending Approval Amount", key: "PendingApprovalAmount", width: "80px" },
-    { heading: "FixedFund Charge", key: "RejectedAmount", width: "80px" },
-    { heading: "Action", key: "Action", width: "80px", isAction: true },
-    { heading: "Counter Location", key: "CounterLocation", width: "80px" },
-    { heading: "Linked Collector", key: "LinkedCollector", width: "80px" },
-    { heading: "Linked Cashier", key: "LinkedCashier", width: "80px" },
-    { heading: "Linked Master Cashier", key: "LinkedMasterCashier", width: "80px" },
+    { heading: "Warning", key: "Warning", width: "140px" },
+    { heading: "Retailer Name", key: "UserName", width: "240px" },
+    { heading: "Remark", key: "Remark", width: "140px" },
+    { heading: "Opening Amount", key: "ClosingAmount", width: "140px" },
+    { heading: "Current Received Amount", key: "ReceivedAmount", width: "150px" },
+    { heading: "Current Amount", key: "CurrentAmount", width: "140px" },
+    { heading: "Projection Amount", key: "ProjectionAmount", width: "140px" },
+    { heading: "Projection Without Current Sale", key: "ProjectionAmountWithoutCurrentSale", width: "180px" },
+    { heading: "Laibility Amount", key: "LaibilityAmount", width: "140px" },
+    { heading: "Ewallet Pending Amount", key: "PendingAmount", width: "160px" },
+    { heading: "Pending Approval Amount", key: "PendingApprovalAmount", width: "160px" },
+    { heading: "FixedFund Charge", key: "RejectedAmount", width: "140px" },
+    { heading: "Action", key: "Action", width: "96px", isAction: true },
+    { heading: "Counter Location", key: "CounterLocation", width: "180px" },
+    { heading: "Linked Collector", key: "LinkedCollector", width: "180px" },
+    { heading: "Linked Cashier", key: "LinkedCashier", width: "180px" },
+    { heading: "Linked Master Cashier", key: "LinkedMasterCashier", width: "220px" },
   ];
 
   if (showProjectionAmountBeforeXMinutes) {
@@ -60,47 +64,28 @@ export default function RetailerLiabilityTable({
   });
 
   const onSort = (key) => {
-    setSortConfig((prev) => {
-      if (prev.key === key) {
-        return {
-          key,
-          direction: prev.direction === "asc" ? "desc" : "asc",
-        };
-      }
-      return { key, direction: "asc" };
-    });
+    setSortConfig((prev) =>
+      prev.key === key
+        ? { key, direction: prev.direction === "asc" ? "desc" : "asc" }
+        : { key, direction: "asc" }
+    );
   };
 
   const onFilterChange = (key, value) => {
     setFilters((prev) => ({ ...prev, [key]: value }));
   };
 
-  const filteredData = data
-    .filter((item) => {
+  const filteredData = sortTableRows(
+    data.filter((item) => {
       return Object.entries(filters).every(([key, value]) => {
         if (!value) return true;
         const itemValue = item[key];
         if (itemValue === null || itemValue === undefined) return false;
         return itemValue.toString().toLowerCase().includes(value.toLowerCase());
       });
-    })
-    .sort((a, b) => {
-      if (!sortConfig.key) return 0;
-
-      const { key, direction } = sortConfig;
-      let valA = a[key];
-      let valB = b[key];
-
-      const isNumeric = !isNaN(Number(valA)) && !isNaN(Number(valB));
-      if (isNumeric) {
-        valA = Number(valA);
-        valB = Number(valB);
-      }
-
-      if (valA < valB) return direction === "asc" ? -1 : 1;
-      if (valA > valB) return direction === "asc" ? 1 : -1;
-      return 0;
-    });
+    }),
+    sortConfig
+  );
 
   const onMoreDetails = (retailUserId) => {
     setSelectedRetailer(retailUserId);
@@ -137,44 +122,56 @@ export default function RetailerLiabilityTable({
   };
 
   return (
-    <div className="bg-white rounded-lg shadow p-4 sm:p-6">
-      <div className="overflow-x-auto">
-        <div className="overflow-y-auto max-h-[600px] border border-gray-200 rounded text-xs">
-          <table className="min-w-full table-auto divide-y divide-gray-200">
+    <div className="flex min-h-0 flex-1 flex-col rounded-lg bg-white p-4 shadow sm:p-6">
+      <div className="min-h-0 flex-1 overflow-x-auto">
+        <div className="app-table-shell h-full min-h-0 overflow-y-auto text-xs">
+          <table className="app-table min-w-full table-auto divide-y divide-gray-200">
             <thead className="bg-gray-50 sticky top-0 z-10">
               <tr>
                 {columns.map((col) => (
                   <th
                     key={col.key}
-                    className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    className="px-4 py-2 text-left"
+                    style={{ width: col.width, minWidth: col.width, maxWidth: col.width }}
                   >
                     {col.isAction ? (
-                      col.heading
+                      <span>{col.heading}</span>
                     ) : (
-                      <div className="flex flex-col">
-                        <div
-                          className="flex items-center cursor-pointer select-none"
-                          onClick={() => onSort(col.key)}
-                        >
-                          <span>{col.heading}</span>
-                          {sortConfig.key === col.key ? (
-                            <span className="ml-1 text-gray-500">
-                              {sortConfig.direction === "asc" ? "^" : "v"}
-                            </span>
-                          ) : (
-                            <span className="ml-1 text-gray-400">+-</span>
-                          )}
-                        </div>
-                        <input
-                          type="text"
-                          placeholder="Filter"
-                          value={filters[col.key] || ""}
-                          onChange={(e) => onFilterChange(col.key, e.target.value)}
-                          className="mt-1 px-2 py-1 border border-gray-300 rounded text-xs"
-                        />
-                      </div>
+                      <button
+                        type="button"
+                        onClick={() => onSort(col.key)}
+                        className={`flex items-center gap-1 text-left ${col.key === "Warning" ? "text-red-600" : ""}`}
+                      >
+                        <span>{col.heading}</span>
+                        <span className="text-[10px] text-slate-400">
+                          {sortConfig.key === col.key
+                            ? sortConfig.direction === "asc"
+                              ? "▲"
+                              : "▼"
+                            : "↕"}
+                        </span>
+                      </button>
                     )}
                   </th>
+                ))}
+              </tr>
+              <tr className="bg-white">
+                {columns.map((col) => (
+                  <td
+                    key={col.key}
+                    className="px-4 py-2"
+                    style={{ width: col.width, minWidth: col.width, maxWidth: col.width }}
+                  >
+                    {col.isAction ? null : (
+                      <input
+                        type="text"
+                        placeholder="Filter"
+                        value={filters[col.key] || ""}
+                        onChange={(e) => onFilterChange(col.key, e.target.value)}
+                        className="w-full rounded border px-2 py-1 text-sm"
+                      />
+                    )}
+                  </td>
                 ))}
               </tr>
             </thead>
@@ -187,6 +184,7 @@ export default function RetailerLiabilityTable({
                       className={`px-4 py-2 whitespace-nowrap text-xs ${
                         col.key === "Warning" ? "text-red-600" : "text-gray-900"
                       }`}
+                      style={{ width: col.width, minWidth: col.width, maxWidth: col.width }}
                     >
                       {col.isAction ? (
                         <div className="flex items-center gap-2 whitespace-nowrap">
@@ -206,7 +204,9 @@ export default function RetailerLiabilityTable({
                           </ActionIconButton>
                         </div>
                       ) : (
-                        renderCellValue(item, col.key)
+                        <TruncatedCell className={col.key === "Warning" ? "text-red-600" : ""}>
+                          {renderCellValue(item, col.key)}
+                        </TruncatedCell>
                       )}
                     </td>
                   ))}
@@ -239,18 +239,13 @@ export default function RetailerLiabilityTable({
 
 function ActionIconButton({ label, onClick, className = "", children }) {
   return (
-    <button
-      type="button"
+    <TooltipIconButton
+      label={label}
       onClick={onClick}
-      title={label}
-      aria-label={label}
-      className={`group relative inline-flex h-7 w-7 flex-none items-center justify-center rounded border bg-white ${className}`}
+      className={`inline-flex h-7 w-7 flex-none items-center justify-center rounded border bg-white ${className}`}
     >
       {children}
-      <span className="pointer-events-none absolute left-1/2 top-full z-30 mt-1 hidden -translate-x-1/2 whitespace-nowrap rounded bg-gray-900 px-2 py-1 text-[11px] normal-case tracking-normal text-white shadow group-hover:block">
-        {label}
-      </span>
-    </button>
+    </TooltipIconButton>
   );
 }
 
@@ -282,9 +277,9 @@ function ProjectionAmountDialog({ retailer, onClose }) {
     }
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
-      <div className="relative w-full max-w-md rounded bg-white p-6 shadow">
+  const modalContent = (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/45 p-4">
+      <div className="relative w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
         <button
           onClick={onClose}
           className="absolute right-4 top-4 text-gray-500 hover:text-gray-800"
@@ -361,6 +356,8 @@ function ProjectionAmountDialog({ retailer, onClose }) {
       </div>
     </div>
   );
+
+  return createPortal(modalContent, document.body);
 }
 
 

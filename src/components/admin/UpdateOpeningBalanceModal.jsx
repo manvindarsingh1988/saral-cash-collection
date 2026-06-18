@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { X } from "lucide-react";
 import { apiBase } from "../../lib/apiBase";
 
 export default function UpdateOpeningBalanceModal({
@@ -33,95 +34,65 @@ export default function UpdateOpeningBalanceModal({
   }
 
   return (
-    <div
-      style={{
-        position: "fixed",
-        top: 0,
-        left: 0,
-        width: "100vw",
-        height: "100vh",
-        backgroundColor: "rgba(0,0,0,0.5)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        zIndex: 1000,
-      }}
-    >
-      <div
-        onClick={(e) => e.stopPropagation()}
-        style={{
-          backgroundColor: "white",
-          padding: "2rem",
-          borderRadius: "8px",
-          width: "400px",
-          maxHeight: "80vh",
-          overflowY: "auto",
-        }}
-      >
-        <h3 style={{ marginBottom: "1rem" }}>Update Opening Balance</h3>
-
-        <div style={{ marginBottom: "1rem" }}>
-          <label htmlFor="opening-balance">Id</label>
+    <div className="app-modal-overlay">
+      <div className="app-modal app-modal-sm">
+        <div className="app-modal-header">
+          <div>
+            <h3 className="app-modal-title">Update Opening Balance</h3>
+            <p className="app-modal-subtitle">Set opening balance for selected user.</p>
+          </div>
+          <button
+            onClick={() => handleOpeningBalanceModalClose(null, null)}
+            className="app-modal-close"
+            aria-label="Close"
+          >
+            <X size={18} />
+          </button>
+        </div>
+        <div className="app-modal-body">
+        <div className="app-modal-form">
+        <div className="app-modal-field">
+          <label htmlFor="opening-balance" className="app-modal-label">Id</label>
           <input
             disabled
             type="text"
             id="id"
             value={`${selectedUserId}`}
-            style={{ width: "100%", padding: "8px", marginTop: "4px" }}
-            className="date-picker border-2 border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+            className="date-picker border px-3 py-2 rounded-lg shadow-sm"
           />
         </div>
 
-        <div style={{ marginBottom: "1rem" }}>
-          <label htmlFor="opening-balance">Opening Balance</label>
+        <div className="app-modal-field">
+          <label htmlFor="opening-balance" className="app-modal-label">Opening Balance</label>
           <input
             type="number"
             id="opening-balance"
             value={openingBalance}
             onChange={(e) => setOpeningBalance(e.target.value)}
-            style={{ width: "100%", padding: "8px", marginTop: "4px" }}
-            className="date-picker border-2 border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+            className="date-picker border px-3 py-2 rounded-lg shadow-sm"
           />
         </div>
 
-        <div style={{ marginBottom: "1.5rem" }}>
-          <label htmlFor="date">Date</label>
+        <div className="app-modal-field">
+          <label htmlFor="date" className="app-modal-label">Date</label>
           <input
             type="date"
             id="date"
             value={openingBalanceDate}
             onChange={(e) => setDate(e.target.value)}
-            style={{ width: "100%", padding: "8px", marginTop: "4px" }}
-            className="date-picker border-2 border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+            className="date-picker border px-3 py-2 rounded-lg shadow-sm"
           />
         </div>
-
-        <div
-          style={{ display: "flex", justifyContent: "flex-end", gap: "1rem" }}
-        >
+        </div>
+        </div>
+        <div className="app-modal-actions">
           <button
             onClick={() => handleOpeningBalanceModalClose(null, null)}
-            style={{
-              padding: "0.5rem 1rem",
-              backgroundColor: "#ccc",
-              border: "none",
-              borderRadius: "4px",
-              cursor: "pointer",
-            }}
+            className="app-button-secondary"
           >
             Close
           </button>
-          <button
-            onClick={handleSave}
-            style={{
-              padding: "0.5rem 1rem",
-              backgroundColor: "#007bff",
-              color: "white",
-              border: "none",
-              borderRadius: "4px",
-              cursor: "pointer",
-            }}
-          >
+          <button onClick={handleSave} className="app-button-primary">
             Save
           </button>
         </div>
