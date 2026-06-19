@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { apiBase } from "../../lib/apiBase";
+import AppLogo from "../AppLogo";
 import UserProfileMenu from "../UserProfileMenu";
 import { Menu, X } from "lucide-react";
 
@@ -36,9 +37,7 @@ export default function RetailUserLayout({ children }) {
 
             {/* Logo and title */}
             <div className="flex items-center">
-              <span className="text-white text-xl font-bold">
-                Saral Cash Flow
-              </span>
+              <AppLogo />
             </div>
 
             {/* Desktop nav (optional links) */}

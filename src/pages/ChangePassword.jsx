@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import AppLogo from "../components/AppLogo";
 import { apiBase } from "../lib/apiBase";
 
 export default function ChangePassword() {
@@ -69,6 +70,7 @@ export default function ChangePassword() {
     <div className="auth-shell">
       <div className="auth-card space-y-8">
         <div className="auth-brand">
+          <AppLogo variant="auth" className="justify-center" />
           <div className="auth-kicker">Saral Cash Flow</div>
           <h2 className="text-center text-2xl font-bold text-gray-900">
             Change Password

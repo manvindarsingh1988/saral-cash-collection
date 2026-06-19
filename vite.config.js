@@ -3,7 +3,7 @@ import react from "@vitejs/plugin-react";
 import { VitePWA } from "vite-plugin-pwa";
 
 export default defineConfig({
-  base: "./", // replace with actual repo name
+  base: "./",
   plugins: [
     react(),
     VitePWA({
@@ -18,27 +18,27 @@ export default defineConfig({
         theme_color: "#317EFB",
         icons: [
           {
-            src: "/icons/icon_64.png",
+            src: "/icons/icon_64_v2.png",
             sizes: "64x64",
             type: "image/png",
           },
           {
-            src: "/icons/icon_128.png",
+            src: "/icons/icon_128_v2.png",
             sizes: "128x128",
             type: "image/png",
           },
           {
-            src: "/icons/icon_192.png", // 👈 Required
+            src: "/icons/icon_192_v2.png",
             sizes: "192x192",
             type: "image/png",
           },
           {
-            src: "/icons/icon_256.png",
+            src: "/icons/icon_256_v2.png",
             sizes: "256x256",
             type: "image/png",
           },
           {
-            src: "/icons/icon_512.png", // 👈 Required
+            src: "/icons/icon_512_v2.png",
             sizes: "512x512",
             type: "image/png",
           },

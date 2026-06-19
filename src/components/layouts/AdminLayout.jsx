@@ -1,6 +1,7 @@
-import { useState, useMemo } from "react";
+import React, { useState, useMemo } from "react";
 import { Link, useLocation, Outlet, useNavigate } from "react-router-dom";
 import { apiBase } from "../../lib/apiBase";
+import AppLogo from "../AppLogo";
 import UserProfileMenu from "../UserProfileMenu";
 import { Menu, X } from "lucide-react";
 import { menuConfig } from "./menuConfig";
@@ -43,7 +44,7 @@ export default function AdminLayout() {
 
             {/* Logo */}
             <div className="flex items-center">
-              <span className="text-white text-xl font-bold">Saral Cash Flow</span>
+              <AppLogo />
             </div>
 
             {/* Desktop Menu */}

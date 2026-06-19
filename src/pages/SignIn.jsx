@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import AppLogo from "../components/AppLogo";
 import { apiBase } from "../lib/apiBase";
 
 export default function SignIn() {
@@ -33,7 +34,7 @@ export default function SignIn() {
     <div className="auth-shell">
       <div className="auth-card space-y-8">
         <div className="auth-brand">
-          <div className="auth-kicker">Saral Cash Flow</div>
+          <AppLogo variant="auth" className="justify-center" />
           <h2 className="text-center text-3xl font-bold tracking-tight text-gray-900">
             Sign in to your account
           </h2>
