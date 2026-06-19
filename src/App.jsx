@@ -9,22 +9,20 @@ import ChangePassword from "./pages/ChangePassword.jsx";
 
 function App() {
   return (
-    <div className="app-shell">
-      <Routes>
-        <Route path="/signin" element={<SignIn />} />
-        <Route path="/signup" element={<SignUp />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="change-password" element={<ChangePassword />} />
-        <Route
-          path="/*"
-          element={
-            <ProtectedRoute>
-              <UserSpecificDashboard />
-            </ProtectedRoute>
-          }
-        />
-      </Routes>
-    </div>
+    <Routes>
+      <Route path="/signin" element={<SignIn />} />
+      <Route path="/signup" element={<SignUp />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="change-password" element={<ChangePassword />} />
+      <Route
+        path="/*"
+        element={
+          <ProtectedRoute>
+            <UserSpecificDashboard />
+          </ProtectedRoute>
+        }
+      />
+    </Routes>
   );
 }
 

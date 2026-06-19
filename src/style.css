@@ -67,6 +67,12 @@
     overflow: hidden;
   }
 
+  .app-main-scroll {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    touch-action: pan-y;
+  }
+
   .app-shell::before {
     content: "";
     position: fixed;
@@ -369,6 +375,19 @@
   }
 
   @media (max-width: 640px) {
+    body {
+      overflow: auto;
+    }
+
+    .app-shell {
+      min-height: 100dvh;
+      height: 100dvh;
+    }
+
+    .app-content {
+      min-height: 0;
+    }
+
     .app-modal-overlay {
       align-items: flex-start;
       justify-content: center;

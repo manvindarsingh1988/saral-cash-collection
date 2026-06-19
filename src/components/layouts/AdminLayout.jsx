@@ -92,7 +92,7 @@ export default function AdminLayout() {
         )}
       
         {/* Page Content */}
-        <main className="mx-auto flex-1 min-h-0 w-full max-w-8xl overflow-auto px-4 py-6 sm:px-6 lg:px-8">
+        <main className="app-main-scroll mx-auto flex-1 min-h-0 w-full max-w-8xl overflow-auto px-4 py-6 sm:px-6 lg:px-8">
           <Outlet />
         </main>
       </div>

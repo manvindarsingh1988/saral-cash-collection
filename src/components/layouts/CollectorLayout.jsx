@@ -129,7 +129,7 @@ export default function CollectorLayout({ children }) {
         </nav>
 
         <div className="app-content">
-          <main className="mx-auto flex flex-1 min-h-0 w-full max-w-8xl flex-col overflow-hidden px-4 py-6 sm:px-6 lg:px-8">
+          <main className="app-main-scroll mx-auto flex flex-1 min-h-0 w-full max-w-8xl flex-col overflow-auto px-4 py-6 sm:px-6 lg:px-8">
             {hasPendingApprovals && (
               <div className="mb-4 shrink-0">
                 <div className="rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900 shadow-sm">
