@@ -375,17 +375,33 @@
   }
 
   @media (max-width: 640px) {
+    html,
+    body,
+    #app {
+      height: auto;
+      min-height: 100%;
+    }
+
     body {
       overflow: auto;
+      min-height: 100dvh;
     }
 
     .app-shell {
       min-height: 100dvh;
-      height: 100dvh;
+      height: auto;
+      overflow: visible;
     }
 
     .app-content {
-      min-height: 0;
+      min-height: auto;
+      overflow: visible;
+    }
+
+    .app-main-scroll {
+      min-height: auto;
+      overflow: visible !important;
+      overscroll-behavior: auto;
     }
 
     .app-modal-overlay {

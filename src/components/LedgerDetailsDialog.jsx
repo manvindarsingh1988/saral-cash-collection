@@ -108,7 +108,7 @@ export default function LadgerDetailsDialog({
           </button>
         </div>
 
-        <div className="flex min-h-0 flex-1 flex-col p-6">
+        <div className="app-modal-body">
           {modelFor === "Retailer" && (
             <div className="mb-4 flex flex-wrap items-end gap-4">
               <div>
@@ -147,8 +147,8 @@ export default function LadgerDetailsDialog({
           ) : ladgerData.length === 0 ? (
             <div>No data available.</div>
           ) : (
-            <div className="min-h-0 flex-1">
-              <div className="app-table-shell h-full min-h-0 overflow-auto">
+            <div className="min-h-0">
+              <div className="app-table-shell max-h-[55dvh] overflow-auto sm:max-h-[60dvh]">
                 <table className="app-table min-w-full text-sm text-left">
                   <thead className="sticky top-0 z-10 bg-gray-100 text-gray-700 font-semibold">
                     <tr>
