@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { createPortal } from "react-dom";
-import { Eye, TrendingUp } from "lucide-react";
+import { Eye, TrendingUp, X } from "lucide-react";
 import { apiBase } from "../../lib/apiBase";
 import { sortTableRows } from "../../lib/tableSort";
 import { formatIndianNumber } from "../../lib/utils";
@@ -278,80 +278,83 @@ function ProjectionAmountDialog({ retailer, onClose }) {
   };
 
   const modalContent = (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/45 p-4">
-      <div className="relative w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
-        <button
-          onClick={onClose}
-          className="absolute right-4 top-4 text-gray-500 hover:text-gray-800"
-        >
-          x
-        </button>
+    <div className="app-modal-overlay" onClick={onClose}>
+      <div className="app-modal app-modal-md" onClick={(e) => e.stopPropagation()}>
+        <div className="app-modal-header">
+          <div>
+            <h2 className="app-modal-title">Projection Amount</h2>
+            <p className="app-modal-subtitle">
+              Check the projected amount for a selected retailer and time.
+            </p>
+          </div>
+          <button
+            onClick={onClose}
+            className="app-modal-close"
+            aria-label="Close"
+          >
+            <X size={18} />
+          </button>
+        </div>
 
-        <h2 className="mb-4 text-lg font-semibold text-gray-900">
-          Projection Amount
-        </h2>
+        <div className="app-modal-body">
+          <div className="app-modal-form">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div className="app-modal-field">
+                <label className="app-modal-label">Retailer ID</label>
+                <input
+                  value={retailer.UserId || ""}
+                  readOnly
+                  className="w-full rounded-lg border bg-slate-100 px-3 py-2 text-sm"
+                />
+              </div>
+              <div className="app-modal-field">
+                <label className="app-modal-label">Retailer Name</label>
+                <input
+                  value={retailer.UserName || ""}
+                  readOnly
+                  className="w-full rounded-lg border bg-slate-100 px-3 py-2 text-sm"
+                />
+              </div>
+            </div>
 
-        <div className="space-y-4">
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <div>
-              <label className="block text-sm text-gray-600">Retailer ID</label>
+            <div className="app-modal-field">
+              <label className="app-modal-label">Date Time</label>
               <input
-                value={retailer.UserId || ""}
-                readOnly
-                className="mt-1 w-full rounded border bg-gray-100 px-3 py-2 text-sm"
+                type="datetime-local"
+                value={selectedDate}
+                onChange={(e) => {
+                  setSelectedDate(e.target.value);
+                  setAmount("");
+                  setError("");
+                }}
+                className="w-full rounded-lg border px-3 py-2 text-sm"
               />
             </div>
-            <div>
-              <label className="block text-sm text-gray-600">
-                Retailer Name
-              </label>
+
+            <div className="app-modal-field">
+              <label className="app-modal-label">Projection Amount</label>
               <input
-                value={retailer.UserName || ""}
+                value={amount ? `Rs ${amount}` : ""}
                 readOnly
-                className="mt-1 w-full rounded border bg-gray-100 px-3 py-2 text-sm"
+                className="w-full rounded-lg border bg-slate-100 px-3 py-2 text-sm"
               />
             </div>
-          </div>
 
-          <div>
-            <label className="block text-sm text-gray-600">Date Time</label>
-            <input
-              type="datetime-local"
-              value={selectedDate}
-              onChange={(e) => {
-                setSelectedDate(e.target.value);
-                setAmount("");
-                setError("");
-              }}
-              className="mt-1 w-full rounded border px-3 py-2 text-sm"
-            />
+            {error && <div className="text-sm text-red-600">{error}</div>}
           </div>
+        </div>
 
-          <div>
-            <label className="block text-sm text-gray-600">
-              Projection Amount
-            </label>
-            <input
-              value={amount ? `Rs ${amount}` : ""}
-              readOnly
-              className="mt-1 w-full rounded border bg-gray-100 px-3 py-2 text-sm"
-            />
-          </div>
-
-          {error && <div className="text-sm text-red-600">{error}</div>}
-
-          <div className="flex justify-end gap-2">
-            <button onClick={onClose} className="rounded border px-4 py-2">
-              Cancel
-            </button>
-            <button
-              onClick={fetchProjectionAmount}
-              disabled={loading || !selectedDate}
-              className="rounded bg-blue-600 px-4 py-2 text-white disabled:opacity-50"
-            >
-              {loading ? "Fetching..." : "Get Projection Amount"}
-            </button>
-          </div>
+        <div className="app-modal-actions">
+          <button onClick={onClose} className="app-button-secondary">
+            Cancel
+          </button>
+          <button
+            onClick={fetchProjectionAmount}
+            disabled={loading || !selectedDate}
+            className="app-button-primary disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {loading ? "Fetching..." : "Get Projection Amount"}
+          </button>
         </div>
       </div>
     </div>

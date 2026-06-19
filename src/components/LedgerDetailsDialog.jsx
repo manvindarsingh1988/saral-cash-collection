@@ -97,7 +97,7 @@ export default function LadgerDetailsDialog({
 
   const modalContent = (
     <div className="app-modal-overlay">
-      <div className="app-modal app-modal-lg relative flex h-[min(86vh,820px)] flex-col">
+      <div className="app-modal app-modal-lg relative">
         <div className="app-modal-header">
           <div>
             <h2 className="app-modal-title">Ledger Info</h2>
