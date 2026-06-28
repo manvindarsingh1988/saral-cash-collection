@@ -142,9 +142,9 @@ export const apiBase = {
         `${API_URL}/GetMappedCollectorsByRetailerId?userId=${id}`
       )
     ).json(),
-  getLiabilityAmountOfAllRetailers: async (id, userType, includeProjectionAmountBeforeXMinutes = false) =>
+  getLiabilityAmountOfAllRetailers: async (id, userType) =>
     await (
-      await authorizedFetch(`${API_URL}/GetLiabilityAmountOfAllRetailers?id=${id}&userType=${userType}&includeProjectionAmountBeforeXMinutes=${includeProjectionAmountBeforeXMinutes}`)
+      await authorizedFetch(`${API_URL}/GetLiabilityAmountOfAllRetailers?id=${id}&userType=${userType}&includeProjectionAmountBeforeXMinutes=false`)
     ).json(),
   getLiabilityAmountOfAllRetailersByCollectorId: async (id) =>
     await (

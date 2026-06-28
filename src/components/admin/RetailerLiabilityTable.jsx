@@ -8,7 +8,7 @@ import LadgerDetailsDialog from "../LedgerDetailsDialog";
 import TooltipIconButton from "../TooltipIconButton";
 import TruncatedCell from "../TruncatedCell";
 
-function getColumns(showProjectionAmountBeforeXMinutes, showProjectionAmountWithoutCurrentSale) {
+function getColumns() {
   const columns = [
     { heading: "Retailer Name", key: "UserName", width: "240px" },
     { heading: "Opening Balance", key: "ClosingAmount", width: "140px" },
@@ -37,10 +37,8 @@ function getColumns(showProjectionAmountBeforeXMinutes, showProjectionAmountWith
 
 export default function RetailerLiabilityTable({
   data,
-  showProjectionAmountBeforeXMinutes = false,
-  showProjectionAmountWithoutCurrentSale = false,
 }) {
-  const columns = getColumns(showProjectionAmountBeforeXMinutes, showProjectionAmountWithoutCurrentSale);
+  const columns = getColumns();
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedRetailer, setSelectedRetailer] = useState(null);
   const [projectionRetailer, setProjectionRetailer] = useState(null);
@@ -357,6 +355,5 @@ function ProjectionAmountDialog({ retailer, onClose }) {
 
   return createPortal(modalContent, document.body);
 }
-
 
 
