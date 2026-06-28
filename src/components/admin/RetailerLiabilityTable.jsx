@@ -10,18 +10,19 @@ import TruncatedCell from "../TruncatedCell";
 
 function getColumns(showProjectionAmountBeforeXMinutes, showProjectionAmountWithoutCurrentSale) {
   const columns = [
-    { heading: "Warning", key: "Warning", width: "140px" },
     { heading: "Retailer Name", key: "UserName", width: "240px" },
-    { heading: "Remark", key: "Remark", width: "140px" },
-    { heading: "Opening Amount", key: "ClosingAmount", width: "140px" },
-    { heading: "Current Received Amount", key: "ReceivedAmount", width: "150px" },
-    { heading: "Current Amount", key: "CurrentAmount", width: "140px" },
-    { heading: "Projection Amount", key: "ProjectionAmount", width: "140px" },
-    { heading: "Projection Without Current Sale", key: "ProjectionAmountWithoutCurrentSale", width: "180px" },
-    { heading: "Laibility Amount", key: "LaibilityAmount", width: "140px" },
-    { heading: "Ewallet Pending Amount", key: "PendingAmount", width: "160px" },
+    { heading: "Opening Balance", key: "ClosingAmount", width: "140px" },
+    { heading: "Current Sale", key: "CurrentAmount", width: "140px" },
+    { heading: "Ewallet Pending Sale", key: "PendingAmount", width: "160px" },
+    { heading: "Today Received Amount", key: "ReceivedAmount", width: "150px" },
+    { heading: "Closing Amount", key: "ProjectionAmount", width: "140px" },
+    { heading: "Hold Amount", key: "ProjectionAmountBeforeXMinutes", width: "140px" },
     { heading: "Pending Approval Amount", key: "PendingApprovalAmount", width: "160px" },
+    { heading: "Laibility Amount", key: "LaibilityAmount", width: "140px" },
+    { heading: "Projection Without Current Sale", key: "ProjectionAmountWithoutCurrentSale", width: "180px" },
     { heading: "FixedFund Charge", key: "RejectedAmount", width: "140px" },
+    { heading: "Warning", key: "Warning", width: "140px" },    
+    { heading: "Remark", key: "Remark", width: "140px" },
     { heading: "Action", key: "Action", width: "96px", isAction: true },
     { heading: "Counter Location", key: "CounterLocation", width: "180px" },
     { heading: "Linked Collector", key: "LinkedCollector", width: "180px" },
@@ -29,13 +30,7 @@ function getColumns(showProjectionAmountBeforeXMinutes, showProjectionAmountWith
     { heading: "Linked Master Cashier", key: "LinkedMasterCashier", width: "220px" },
   ];
 
-  if (showProjectionAmountBeforeXMinutes) {
-    columns.splice(7, 0, {
-      heading: "Projection Amount Before X Minutes",
-      key: "ProjectionAmountBeforeXMinutes",
-      width: "100px",
-    });
-  }
+  
 
   return columns;
 }

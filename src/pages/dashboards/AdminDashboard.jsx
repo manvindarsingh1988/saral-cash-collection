@@ -43,7 +43,7 @@ export default function AdminDashboard({ userType, id }) {
       const retailerData = await apiBase.getLiabilityAmountOfAllRetailers(
         id,
         userType,
-        includeBeforeXMinutes
+        false
       );
 
       setLiabilities(retailerData || []);
