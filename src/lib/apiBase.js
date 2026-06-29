@@ -399,9 +399,15 @@ export const apiBase = {
         body: JSON.stringify({ qrId }),
       })
     ).json(),
-  getAdditionalFundInfos: async (collectorId = "", fromDate = "", toDate = "") => {
+  getAdditionalFundInfos: async (
+    collectorId = "",
+    retailerId = "",
+    fromDate = "",
+    toDate = ""
+  ) => {
     const params = new URLSearchParams();
     if (collectorId) params.set("collectorId", collectorId);
+    if (retailerId) params.set("retailerId", retailerId);
     if (fromDate) params.set("fromDate", fromDate);
     if (toDate) params.set("toDate", toDate);
     const query = params.toString();

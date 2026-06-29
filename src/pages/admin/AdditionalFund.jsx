@@ -14,7 +14,9 @@ const currentDateTimeLocalString = () => {
 
 const createInitialForm = () => ({
   Id: 0,
+  TargetType: "collector",
   CollectorId: "",
+  RetailerId: "",
   Amount: "",
   Remarks: "",
 });
@@ -38,45 +40,64 @@ export default function AdditionalFund({
   useDocumentTitle(documentTitle);
 
   const [collectors, setCollectors] = useState([]);
+  const [retailers, setRetailers] = useState([]);
   const [entries, setEntries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [filterTargetType, setFilterTargetType] = useState("collector");
   const [filterCollectorId, setFilterCollectorId] = useState("");
+  const [filterRetailerId, setFilterRetailerId] = useState("");
   const [fromDate, setFromDate] = useState(currentDateString());
   const [toDate, setToDate] = useState(currentDateString());
   const [form, setForm] = useState(createInitialForm);
-  const activeCollectorId = readOnly ? collectorId : filterCollectorId;
+  const activeCollectorId =
+    readOnly || filterTargetType === "collector" ? (readOnly ? collectorId : filterCollectorId) : "";
+  const activeRetailerId = !readOnly && filterTargetType === "retailer" ? filterRetailerId : "";
 
   useEffect(() => {
     if (readOnly) return;
-    loadCollectors();
+    loadMasterData();
   }, [readOnly]);
 
   useEffect(() => {
     if (fromDate && toDate && fromDate > toDate) return;
-    loadEntries(activeCollectorId, fromDate, toDate);
-  }, [activeCollectorId, fromDate, toDate]);
+    loadEntries(activeCollectorId, activeRetailerId, fromDate, toDate);
+  }, [activeCollectorId, activeRetailerId, fromDate, toDate]);
 
-  async function loadCollectors() {
+  async function loadMasterData() {
     try {
       setLoading(true);
       setError("");
-      const collectorData = await apiBase.getCollectors();
+      const [collectorData, retailerData] = await Promise.all([
+        apiBase.getCollectors(),
+        apiBase.getRetailUsers(),
+      ]);
       setCollectors(collectorData || []);
+      setRetailers(retailerData || []);
     } catch (err) {
-      setError(err.message || "Failed to load collector data.");
+      setError(err.message || "Failed to load collector and retailer data.");
     } finally {
       setLoading(false);
     }
   }
 
-  async function loadEntries(collectorId = "", fromDateValue = "", toDateValue = "") {
+  async function loadEntries(
+    collectorId = "",
+    retailerId = "",
+    fromDateValue = "",
+    toDateValue = ""
+  ) {
     try {
       setLoading(true);
       setError("");
-      const fundData = await apiBase.getAdditionalFundInfos(collectorId, fromDateValue, toDateValue);
+      const fundData = await apiBase.getAdditionalFundInfos(
+        collectorId,
+        retailerId,
+        fromDateValue,
+        toDateValue
+      );
       setEntries(fundData || []);
     } catch (err) {
       setError(err.message || "Failed to load additional fund entries.");
@@ -93,7 +114,18 @@ export default function AdditionalFund({
 
   function handleChange(event) {
     const { name, value } = event.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+    setForm((prev) => {
+      if (name === "TargetType") {
+        return {
+          ...prev,
+          TargetType: value,
+          CollectorId: value === "collector" ? prev.CollectorId : "",
+          RetailerId: value === "retailer" ? prev.RetailerId : "",
+        };
+      }
+
+      return { ...prev, [name]: value };
+    });
   }
 
   async function handleSubmit(event) {
@@ -101,13 +133,19 @@ export default function AdditionalFund({
     setError("");
     setSuccess("");
 
-    if (!form.CollectorId) {
-      setError("Please select a collector.");
+    const selectedTargetId =
+      form.TargetType === "collector" ? form.CollectorId : form.RetailerId;
+
+    if (!selectedTargetId) {
+      setError(
+        `Please select a ${form.TargetType === "collector" ? "collector" : "retailer"}.`
+      );
       return;
     }
 
-    if (!form.Amount || Number(form.Amount) <= 0) {
-      setError("Please enter a valid amount greater than zero.");
+    const amount = Number(form.Amount);
+    if (!Number.isFinite(amount) || amount === 0) {
+      setError("Please enter a valid non-zero amount.");
       return;
     }
 
@@ -115,8 +153,9 @@ export default function AdditionalFund({
       setSaving(true);
       const payload = {
         Id: form.Id,
-        CollectorId: form.CollectorId,
-        Amount: Number(form.Amount),
+        CollectorId: form.TargetType === "collector" ? form.CollectorId : "",
+        RetailerId: form.TargetType === "retailer" ? form.RetailerId : "",
+        Amount: amount,
         RecievedDate: currentDateTimeLocalString(),
         Remarks: form.Remarks?.trim() || "",
       };
@@ -132,7 +171,7 @@ export default function AdditionalFund({
 
       setSuccess(response?.Response || "Additional fund entry saved successfully.");
       setForm(createInitialForm());
-      await loadEntries(activeCollectorId, fromDate, toDate);
+      await loadEntries(activeCollectorId, activeRetailerId, fromDate, toDate);
     } catch (err) {
       setError(err.message || "Failed to save additional fund entry.");
     } finally {
@@ -145,7 +184,9 @@ export default function AdditionalFund({
     setSuccess("");
     setForm({
       Id: entry.Id,
+      TargetType: entry.RetailerId ? "retailer" : "collector",
       CollectorId: entry.CollectorId || "",
+      RetailerId: entry.RetailerId || "",
       Amount: entry.Amount ?? "",
       Remarks: entry.Remarks || "",
     });
@@ -153,8 +194,13 @@ export default function AdditionalFund({
   }
 
   async function handleDelete(entry) {
+    const entryName =
+      entry.CollectorName ||
+      entry.RetailerName ||
+      entry.CollectorId ||
+      entry.RetailerId;
     const confirmed = window.confirm(
-      `Delete additional fund entry for ${entry.CollectorName || entry.CollectorId}?`
+      `Delete additional fund entry for ${entryName}?`
     );
     if (!confirmed) return;
 
@@ -172,11 +218,33 @@ export default function AdditionalFund({
       }
 
       setSuccess(response?.Response || "Additional fund entry deleted successfully.");
-      await loadEntries(activeCollectorId, fromDate, toDate);
+      await loadEntries(activeCollectorId, activeRetailerId, fromDate, toDate);
     } catch (err) {
       setError(err.message || "Failed to delete additional fund entry.");
     }
   }
+
+  const formTargetOptions =
+    form.TargetType === "collector"
+      ? collectors.map((collector) => ({
+          value: collector.Id,
+          label: `${collector.UserName} (${collector.Id})`,
+        }))
+      : retailers.map((retailer) => ({
+          value: retailer.Id,
+          label: `${retailer.UserName} (${retailer.Id})`,
+        }));
+
+  const filterTargetOptions =
+    filterTargetType === "collector"
+      ? collectors.map((collector) => ({
+          value: collector.Id,
+          label: `${collector.UserName} (${collector.Id})`,
+        }))
+      : retailers.map((retailer) => ({
+          value: retailer.Id,
+          label: `${retailer.UserName} (${retailer.Id})`,
+        }));
 
   return (
     <div className="flex h-full min-h-0 w-full max-w-none flex-col gap-6 overflow-hidden">
@@ -201,20 +269,63 @@ export default function AdditionalFund({
           {error && <div className="mb-4 rounded-xl bg-rose-50 px-4 py-3 text-sm text-rose-700">{error}</div>}
           {success && <div className="mb-4 rounded-xl bg-emerald-50 px-4 py-3 text-sm text-emerald-700">{success}</div>}
 
-          <form onSubmit={handleSubmit} className="grid gap-4 xl:grid-cols-[2fr_0.9fr_2fr_0.9fr] xl:items-end">
+          <form
+            onSubmit={handleSubmit}
+            className="grid gap-4 md:grid-cols-2 xl:grid-cols-[1.15fr_1.5fr_0.9fr_1.7fr_0.9fr] xl:items-end"
+          >
             <div>
-              <label className="mb-2 block text-sm font-medium text-slate-700">Collector</label>
+              <label className="mb-2 block text-sm font-medium text-slate-700">Fund For</label>
+              <div className="flex flex-wrap gap-4 rounded-xl border border-slate-300 px-3 py-2.5 text-sm text-slate-700">
+                <label className="flex items-center gap-2">
+                  <input
+                    type="radio"
+                    name="TargetType"
+                    value="retailer"
+                    checked={form.TargetType === "retailer"}
+                    onChange={handleChange}
+                  />
+                  <span>Retailer</span>
+                </label>
+                <label className="flex items-center gap-2">
+                  <input
+                    type="radio"
+                    name="TargetType"
+                    value="collector"
+                    checked={form.TargetType === "collector"}
+                    onChange={handleChange}
+                  />
+                  <span>Collector</span>
+                </label>
+              </div>
+            </div>
+
+            <div>
+              <label className="mb-2 block text-sm font-medium text-slate-700">
+                {form.TargetType === "collector" ? "Collector" : "Retailer"}
+              </label>
               <SearchableSelect
-                value={form.CollectorId}
-                onChange={(value) =>
-                  handleChange({ target: { name: "CollectorId", value } })
+                value={
+                  form.TargetType === "collector" ? form.CollectorId : form.RetailerId
                 }
-                options={collectors.map((collector) => ({
-                  value: collector.Id,
-                  label: `${collector.UserName} (${collector.Id})`,
-                }))}
-                placeholder="Select collector"
-                searchPlaceholder="Search collector..."
+                onChange={(value) =>
+                  handleChange({
+                    target: {
+                      name: form.TargetType === "collector" ? "CollectorId" : "RetailerId",
+                      value,
+                    },
+                  })
+                }
+                options={formTargetOptions}
+                placeholder={
+                  form.TargetType === "collector"
+                    ? "Select collector"
+                    : "Select retailer"
+                }
+                searchPlaceholder={
+                  form.TargetType === "collector"
+                    ? "Search collector..."
+                    : "Search retailer..."
+                }
               />
             </div>
 
@@ -226,7 +337,6 @@ export default function AdditionalFund({
                 value={form.Amount}
                 onChange={handleChange}
                 step="0.00001"
-                min="0"
                 placeholder="0.00000"
                 className="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm shadow-sm outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
               />
@@ -265,7 +375,7 @@ export default function AdditionalFund({
             <p className="text-sm text-slate-500">
               {readOnly
                 ? "View your additional fund entries by date range. Both dates default to today."
-                : "Filter by collector and date range. Both dates default to today."}
+                : "Filter by retailer or collector and date range. Both dates default to today."}
             </p>
           </div>
           <div className={`grid w-full gap-4 ${readOnly ? "md:grid-cols-2 xl:w-auto xl:min-w-[520px]" : "md:grid-cols-3 xl:w-auto xl:min-w-[760px]"}`}>
@@ -289,16 +399,59 @@ export default function AdditionalFund({
             </div>
             {!readOnly && (
               <div>
-                <label className="mb-2 block text-sm font-medium text-slate-700">Filter by collector</label>
+                <label className="mb-2 block text-sm font-medium text-slate-700">Filter By</label>
+                <div className="mb-2 flex flex-wrap gap-4 rounded-xl border border-slate-300 px-3 py-2.5 text-sm text-slate-700">
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="radio"
+                      name="FilterTargetType"
+                      value="retailer"
+                      checked={filterTargetType === "retailer"}
+                      onChange={(event) => {
+                        setFilterTargetType(event.target.value);
+                        setFilterCollectorId("");
+                      }}
+                    />
+                    <span>Retailer</span>
+                  </label>
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="radio"
+                      name="FilterTargetType"
+                      value="collector"
+                      checked={filterTargetType === "collector"}
+                      onChange={(event) => {
+                        setFilterTargetType(event.target.value);
+                        setFilterRetailerId("");
+                      }}
+                    />
+                    <span>Collector</span>
+                  </label>
+                </div>
                 <SearchableSelect
-                  value={filterCollectorId}
-                  onChange={setFilterCollectorId}
-                  options={collectors.map((collector) => ({
-                    value: collector.Id,
-                    label: `${collector.UserName} (${collector.Id})`,
-                  }))}
-                  placeholder="All collectors"
-                  searchPlaceholder="Search collector..."
+                  value={
+                    filterTargetType === "collector"
+                      ? filterCollectorId
+                      : filterRetailerId
+                  }
+                  onChange={(value) => {
+                    if (filterTargetType === "collector") {
+                      setFilterCollectorId(value);
+                    } else {
+                      setFilterRetailerId(value);
+                    }
+                  }}
+                  options={filterTargetOptions}
+                  placeholder={
+                    filterTargetType === "collector"
+                      ? "All collectors"
+                      : "All retailers"
+                  }
+                  searchPlaceholder={
+                    filterTargetType === "collector"
+                      ? "Search collector..."
+                      : "Search retailer..."
+                  }
                 />
               </div>
             )}
@@ -322,8 +475,9 @@ export default function AdditionalFund({
             <table className="app-table min-w-full divide-y divide-slate-200 text-sm">
               <thead className="sticky top-0 z-10 bg-slate-50">
                 <tr>
-                  <th className="px-4 py-3 text-left font-semibold text-slate-600">Collector</th>
-                  <th className="px-4 py-3 text-left font-semibold text-slate-600">Collector Id</th>
+                  <th className="px-4 py-3 text-left font-semibold text-slate-600">Type</th>
+                  <th className="px-4 py-3 text-left font-semibold text-slate-600">Name</th>
+                  <th className="px-4 py-3 text-left font-semibold text-slate-600">Id</th>
                   <th className="px-4 py-3 text-right font-semibold text-slate-600">Amount</th>
                   <th className="px-4 py-3 text-left font-semibold text-slate-600">Received Date & Time</th>
                   <th className="px-4 py-3 text-left font-semibold text-slate-600">Remarks</th>
@@ -333,54 +487,64 @@ export default function AdditionalFund({
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {entries.map((entry) => (
-                  <tr key={entry.Id} className="hover:bg-slate-50">
-                    <td className="px-4 py-3 font-medium text-slate-900">
-                      <TruncatedCell>{entry.CollectorName || "-"}</TruncatedCell>
-                    </td>
-                    <td className="px-4 py-3 text-slate-600">
-                      <TruncatedCell>{entry.CollectorId}</TruncatedCell>
-                    </td>
-                    <td className="px-4 py-3 text-right text-slate-900">
-                      <TruncatedCell>
-                        {Number(entry.Amount || 0).toLocaleString(undefined, {
-                          minimumFractionDigits: 2,
-                          maximumFractionDigits: 5,
-                        })}
-                      </TruncatedCell>
-                    </td>
-                    <td className="px-4 py-3 text-slate-600">
-                      <TruncatedCell>
-                        {entry.RecievedDate
-                          ? new Date(entry.RecievedDate).toLocaleString()
-                          : "-"}
-                      </TruncatedCell>
-                    </td>
-                    <td className="px-4 py-3 text-slate-600">
-                      <TruncatedCell>{entry.Remarks || "-"}</TruncatedCell>
-                    </td>
-                    {!readOnly && (
-                      <td className="px-4 py-3">
-                        <div className="flex justify-end gap-2">
-                          <button
-                            type="button"
-                            onClick={() => handleEdit(entry)}
-                            className="rounded-lg border border-emerald-200 px-3 py-1.5 font-medium text-emerald-700 hover:bg-emerald-50"
-                          >
-                            Edit
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleDelete(entry)}
-                            className="rounded-lg border border-rose-200 px-3 py-1.5 font-medium text-rose-700 hover:bg-rose-50"
-                          >
-                            Delete
-                          </button>
-                        </div>
+                {entries.map((entry) => {
+                  const isRetailerEntry = Boolean(entry.RetailerId);
+                  const entityType = isRetailerEntry ? "Retailer" : "Collector";
+                  const entityName = entry.RetailerName || entry.CollectorName || "-";
+                  const entityId = entry.RetailerId || entry.CollectorId || "-";
+
+                  return (
+                    <tr key={entry.Id} className="hover:bg-slate-50">
+                      <td className="px-4 py-3 text-slate-600">
+                        <TruncatedCell>{entityType}</TruncatedCell>
                       </td>
-                    )}
-                  </tr>
-                ))}
+                      <td className="px-4 py-3 font-medium text-slate-900">
+                        <TruncatedCell>{entityName}</TruncatedCell>
+                      </td>
+                      <td className="px-4 py-3 text-slate-600">
+                        <TruncatedCell>{entityId}</TruncatedCell>
+                      </td>
+                      <td className="px-4 py-3 text-right text-slate-900">
+                        <TruncatedCell>
+                          {Number(entry.Amount || 0).toLocaleString(undefined, {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 5,
+                          })}
+                        </TruncatedCell>
+                      </td>
+                      <td className="px-4 py-3 text-slate-600">
+                        <TruncatedCell>
+                          {entry.RecievedDate
+                            ? new Date(entry.RecievedDate).toLocaleString()
+                            : "-"}
+                        </TruncatedCell>
+                      </td>
+                      <td className="px-4 py-3 text-slate-600">
+                        <TruncatedCell>{entry.Remarks || "-"}</TruncatedCell>
+                      </td>
+                      {!readOnly && (
+                        <td className="px-4 py-3">
+                          <div className="flex justify-end gap-2">
+                            <button
+                              type="button"
+                              onClick={() => handleEdit(entry)}
+                              className="rounded-lg border border-emerald-200 px-3 py-1.5 font-medium text-emerald-700 hover:bg-emerald-50"
+                            >
+                              Edit
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleDelete(entry)}
+                              className="rounded-lg border border-rose-200 px-3 py-1.5 font-medium text-rose-700 hover:bg-rose-50"
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        </td>
+                      )}
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
