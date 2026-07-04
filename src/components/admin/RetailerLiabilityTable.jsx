@@ -5,6 +5,7 @@ import { apiBase } from "../../lib/apiBase";
 import { sortTableRows } from "../../lib/tableSort";
 import { formatIndianNumber } from "../../lib/utils";
 import LadgerDetailsDialog from "../LedgerDetailsDialog";
+import RetailerProjectionHistoryDialog from "../RetailerProjectionHistoryDialog";
 import TooltipIconButton from "../TooltipIconButton";
 import TruncatedCell from "../TruncatedCell";
 
@@ -37,11 +38,16 @@ function getColumns() {
 
 export default function RetailerLiabilityTable({
   data,
+  visibleColumnKeys = null,
+  enableHistoryOnName = true,
 }) {
-  const columns = getColumns();
+  const columns = visibleColumnKeys?.length
+    ? getColumns().filter((column) => visibleColumnKeys.includes(column.key))
+    : getColumns();
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedRetailer, setSelectedRetailer] = useState(null);
   const [projectionRetailer, setProjectionRetailer] = useState(null);
+  const [historyRetailer, setHistoryRetailer] = useState(null);
 
   const [filters, setFilters] = useState({
     UserName: "",
@@ -87,6 +93,10 @@ export default function RetailerLiabilityTable({
 
   const onProjectionAmount = (retailer) => {
     setProjectionRetailer(retailer);
+  };
+
+  const onProjectionHistory = (retailer) => {
+    setHistoryRetailer(retailer);
   };
 
   const renderCellValue = (item, key) => {
@@ -196,6 +206,17 @@ export default function RetailerLiabilityTable({
                             <TrendingUp size={16} />
                           </ActionIconButton>
                         </div>
+                      ) : col.key === "UserName" && enableHistoryOnName ? (
+                        <button
+                          type="button"
+                          onClick={() => onProjectionHistory(item)}
+                          title={renderCellValue(item, col.key)}
+                          className="block w-full max-w-full cursor-pointer overflow-hidden text-ellipsis whitespace-nowrap text-left text-blue-600 underline underline-offset-2 hover:text-blue-800"
+                        >
+                          {renderCellValue(item, col.key)}
+                        </button>
+                      ) : col.key === "UserName" ? (
+                        <TruncatedCell>{renderCellValue(item, col.key)}</TruncatedCell>
                       ) : (
                         <TruncatedCell className={col.key === "Warning" ? "text-red-600" : ""}>
                           {renderCellValue(item, col.key)}
@@ -224,6 +245,14 @@ export default function RetailerLiabilityTable({
         <ProjectionAmountDialog
           retailer={projectionRetailer}
           onClose={() => setProjectionRetailer(null)}
+        />
+      )}
+
+      {historyRetailer && (
+        <RetailerProjectionHistoryDialog
+          userId={historyRetailer.UserId}
+          userName={historyRetailer.UserName}
+          onClose={() => setHistoryRetailer(null)}
         />
       )}
     </div>
@@ -355,5 +384,3 @@ function ProjectionAmountDialog({ retailer, onClose }) {
 
   return createPortal(modalContent, document.body);
 }
-
-

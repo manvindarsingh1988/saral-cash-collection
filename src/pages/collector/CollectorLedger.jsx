@@ -214,16 +214,15 @@ export default function CollectorLedger({
   return (
     <div className="flex h-full min-h-0 flex-col gap-6 overflow-hidden">
       {liability && (
-        <div className="liability-summary grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8">
+        <div className="liability-summary grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7">
           {[
             ["Opening Amount", liability.ClosingAmount],
+            ["Current Sale", liability.CurrentAmount],
+            ["Handover Amount", liability.RecievedAmount],
+            ["Closing Amount", liability.ProjectionAmount],
             ["Liability", liability.LaibilityAmount],
-            ["Pending Approval Amount", liability.PendingApprovalAmount],
-            ["Projection Amount", liability.ProjectionAmount],
-            ["Retailer Initiated Amount", liability.RetailerInitiatedAmount],
-            ["Current Amount", liability.CurrentAmount],
-            ["Collector Initiated Amount", liability.CollectorInitiatedAmount],
             ["Fund Added By Admin", liability.RejectedAmount],
+            ["Pending Approval Amount", liability.PendingApprovalAmount],
           ].map(([label, value]) => (
             <div key={label} className="metric-tile">
               <dt className="metric-tile-label">{label}</dt>

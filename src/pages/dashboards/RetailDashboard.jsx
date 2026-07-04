@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Download } from "lucide-react";
 import RetailerLedgerModal from "../../components/retailer/RetailerLedgerModal";
+import RetailerProjectionHistoryDialog from "../../components/RetailerProjectionHistoryDialog";
 import Tooltip from "../../components/Tooltip";
 import TooltipIconButton from "../../components/TooltipIconButton";
 import TruncatedCell from "../../components/TruncatedCell";
@@ -29,12 +30,12 @@ const columns = [
 
 const summaryCards = [
   { key: "ClosingAmount", label: "Opening Amount", color: "#0f766e" },
+  { key: "CurrentAmount", label: "Current Sale", color: "#2563eb" },
+  { key: "ReceivedAmount", label: "Today Handover Amount", color: "#0284c7" },
+  { key: "ProjectionAmount", label: "Closing Amount", color: "#7c3aed" },
   { key: "LaibilityAmount", label: "Liability", color: "#dc2626" },
-  { key: "PendingApprovalAmount", label: "Total Pending Approval", color: "#d97706" },
+  { key: "PendingApprovalAmount", label: "Pending Approval", color: "#d97706" },
   { key: "PendingAmount", label: "Ewallet Pending Amount", color: "#0891b2" },
-  { key: "RejectedAmount", label: "Today Fix Fund Charges", color: "#db2777" },
-  { key: "ProjectionAmount", label: "Projection Amount", color: "#7c3aed" },
-  { key: "CurrentAmount", label: "Current Amount", color: "#2563eb" },
 ];
 
 const getWorkflowRowStyle = (workFlow) => {
@@ -66,6 +67,7 @@ export default function RetailDashboard({ retailUserId }) {
   const [ledger, setLedger] = useState([]);
   const [masterData, setMasterData] = useState(null);
   const [collectors, setCollectors] = useState([]);
+  const [showProjectionHistory, setShowProjectionHistory] = useState(false);
   const [showAll, setShowAll] = useState(false);
   const [fromDate, setFromDate] = useState(() => new Date().toISOString().split("T")[0]);
   const [toDate, setToDate] = useState(() => new Date().toISOString().split("T")[0]);
@@ -322,12 +324,21 @@ export default function RetailDashboard({ retailUserId }) {
             </div>
           </div>
 
-          <button
-            onClick={openAddLedger}
-            className="rounded-md bg-blue-600 px-5 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700"
-          >
-            Add Ledger Entry
-          </button>
+          <div className="flex flex-wrap items-center gap-3">
+            <button
+              type="button"
+              onClick={() => setShowProjectionHistory(true)}
+              className="rounded-md border border-slate-300 bg-white px-5 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50"
+            >
+              View Last 30 Days
+            </button>
+            <button
+              onClick={openAddLedger}
+              className="rounded-md bg-blue-600 px-5 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700"
+            >
+              Add Ledger Entry
+            </button>
+          </div>
         </div>
       </div>
 
@@ -481,6 +492,14 @@ export default function RetailDashboard({ retailUserId }) {
           onClose={() => setModalOpen(false)}
           onSubmit={handleLedgerSubmit}
           initialData={editData}
+        />
+      )}
+
+      {showProjectionHistory && (
+        <RetailerProjectionHistoryDialog
+          userId={retailUserId}
+          userName={liability?.UserName || apiBase.getCurrentUser()?.UserName}
+          onClose={() => setShowProjectionHistory(false)}
         />
       )}
     </div>

@@ -187,6 +187,14 @@ export const apiBase = {
         )}&date=${encodeURIComponent(date)}`
       )
     ).json(),
+  getRetailerProjectionAmountLast30Days: async (userId) =>
+    await (
+      await authorizedFetch(
+        `${API_URL}/GetRetailerProjectionAmountLast30Days?userId=${encodeURIComponent(
+          userId
+        )}`
+      )
+    ).json(),
   addLedgerInfo: async (data) =>
     await (
       await authorizedFetch(`${API_URL}/AddLadgerInfo`, {
