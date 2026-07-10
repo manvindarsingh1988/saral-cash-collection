@@ -18,6 +18,7 @@ const getWorkflowRowStyle = (workFlow) => {
   if (workFlow === 2 || workFlow === 4) return { backgroundColor: "#fee2e2" };
   if (workFlow === 5 || workFlow === 3) return { backgroundColor: "#dcfce7" };
   if (workFlow === 6 || workFlow === 8) return { backgroundColor: "#fef3c7" };
+  if (workFlow === 9) return { backgroundColor: "#ede9fe" };
   return undefined;
 };
 

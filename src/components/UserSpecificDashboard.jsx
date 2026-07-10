@@ -112,16 +112,6 @@ export default function UserSpecificDashboard() {
           element={<PendingApprovalsForCollector collectorUserId={Id} />}
         />
         <Route
-          path="/fund/additional"
-          element={
-            <AdditionalFund
-              readOnly
-              collectorId={Id}
-              documentTitle="Fund"
-            />
-          }
-        />
-        <Route
           path="/"
           element={<RetailerLiabilitiesForCollector collectorUserId={Id} />}
         />

@@ -195,6 +195,14 @@ export const apiBase = {
         )}`
       )
     ).json(),
+  getCollectorProjectionAmountLast7Days: async (userId) =>
+    await (
+      await authorizedFetch(
+        `${API_URL}/GetCollectorProjectionAmountLast7Days?userId=${encodeURIComponent(
+          userId
+        )}`
+      )
+    ).json(),
   addLedgerInfo: async (data) =>
     await (
       await authorizedFetch(`${API_URL}/AddLadgerInfo`, {
@@ -365,6 +373,16 @@ export const apiBase = {
         body: JSON.stringify({
           userId: id,
           projectionSnapshotMinutes,
+        }),
+      })
+    ).json(),
+  updateRetailerProjectionAmountByDate: async (retailerId) =>
+    await (
+      await authorizedFetch(`${API_URL}/UpdateRetailerProjectionAmountByDate`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          retailerId,
         }),
       })
     ).json(),

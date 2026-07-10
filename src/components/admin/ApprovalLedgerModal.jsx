@@ -73,6 +73,11 @@ export default function ApprovalLedgerModal({
     }
   }, [initialData]);
 
+  const allowedWorkflowIds =
+    initialData?.WorkFlow === 6 || initialData?.WorkFlow === 8 || formData.WorkFlow === "9"
+      ? [...new Set([...workflows, 9])]
+      : workflows;
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -165,7 +170,7 @@ export default function ApprovalLedgerModal({
                   {masterData?.[key + "s"]
                     ?.filter((t) => {
                       if (key === "WorkFlow") {
-                        return workflows.includes(t.Id);
+                        return allowedWorkflowIds.includes(t.Id);
                       }
                       return true;
                     })

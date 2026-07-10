@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Download } from "lucide-react";
+import CollectorProjectionHistoryDialog from "../../components/CollectorProjectionHistoryDialog";
 import LedgerModal from "../../components/LedgerModal";
 import Tooltip from "../../components/Tooltip";
 import TooltipIconButton from "../../components/TooltipIconButton";
@@ -30,6 +31,7 @@ const getWorkflowRowStyle = (workFlow) => {
   if (workFlow === 2 || workFlow === 4) return { backgroundColor: "#fee2e2" };
   if (workFlow === 5 || workFlow === 3) return { backgroundColor: "#dcfce7" };
   if (workFlow === 6 || workFlow === 8) return { backgroundColor: "#fef3c7" };
+  if (workFlow === 9) return { backgroundColor: "#ede9fe" };
   return undefined;
 };
 
@@ -81,6 +83,7 @@ export default function CollectorLedger({
   const [selectedLedger, setSelectedLedger] = useState(null);
   const [liability, setLiability] = useState({});
   const [showAll, setShowAll] = useState(false);
+  const [showProjectionHistory, setShowProjectionHistory] = useState(false);
   const [loadDashboardByValuationDate, setLoadDashboardByValuationDate] =
     useState(false);
 
@@ -148,6 +151,7 @@ export default function CollectorLedger({
   };
 
   const formatIndianNumber = (num) => num?.toLocaleString("en-IN");
+  const isPositiveAmount = (value) => Number(value) > 0;
 
   const getMasterValue = (key, id) => {
     const list = masterData?.[key] || [];
@@ -214,19 +218,33 @@ export default function CollectorLedger({
   return (
     <div className="flex h-full min-h-0 flex-col gap-6 overflow-hidden">
       {liability && (
-        <div className="liability-summary grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7">
+        <div className="liability-summary grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6">
           {[
             ["Opening Amount", liability.ClosingAmount],
-            ["Current Sale", liability.CurrentAmount],
-            ["Handover Amount", liability.RecievedAmount],
+            ["Today Collection Amount", liability.CurrentAmount],
+            ["Today Handover Amount", liability.ReceivedAmount],
             ["Closing Amount", liability.ProjectionAmount],
-            ["Liability", liability.LaibilityAmount],
-            ["Fund Added By Admin", liability.RejectedAmount],
-            ["Pending Approval Amount", liability.PendingApprovalAmount],
+            ["Pending Approval Amount(Office)", liability.PendingApprovalAmount],
+            ["CDM/Bank Stuck Amount", liability.RejectedAmount]
           ].map(([label, value]) => (
-            <div key={label} className="metric-tile">
+            <div
+              key={label}
+              className={`metric-tile ${
+                label === "CDM/Bank Stuck Amount" && isPositiveAmount(value)
+                  ? "metric-tile-alert"
+                  : ""
+              }`}
+            >
               <dt className="metric-tile-label">{label}</dt>
-              <dd className="metric-tile-value">Rs {formatIndianNumber(value)}</dd>
+              <dd
+                className={`metric-tile-value ${
+                  label === "CDM/Bank Stuck Amount" && isPositiveAmount(value)
+                    ? "metric-tile-value-alert"
+                    : ""
+                }`}
+              >
+                Rs {formatIndianNumber(value)}
+              </dd>
             </div>
           ))}
         </div>
@@ -249,12 +267,21 @@ export default function CollectorLedger({
             />
           </div>
           <div className="shrink-0">
-            <button
-              onClick={openAddLedger}
-              className="app-button-primary"
-            >
-              Add Ledger Entry
-            </button>
+            <div className="flex flex-wrap items-center gap-3">
+              <button
+                type="button"
+                onClick={() => setShowProjectionHistory(true)}
+                className="app-button-secondary"
+              >
+                View Last 7 Days
+              </button>
+              <button
+                onClick={openAddLedger}
+                className="app-button-primary"
+              >
+                Add Ledger Entry
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -418,6 +445,14 @@ export default function CollectorLedger({
           onClose={updateData}
           modelFor="CollectorLedger"
           initialData={selectedLedger}
+        />
+      )}
+
+      {showProjectionHistory && (
+        <CollectorProjectionHistoryDialog
+          userId={collectorUserId}
+          userName={liability?.UserName || apiBase.getCurrentUser()?.UserName}
+          onClose={() => setShowProjectionHistory(false)}
         />
       )}
     </div>

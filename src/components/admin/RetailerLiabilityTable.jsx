@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { createPortal } from "react-dom";
-import { Eye, TrendingUp, X } from "lucide-react";
+import { Eye, RefreshCw, TrendingUp, X } from "lucide-react";
 import { apiBase } from "../../lib/apiBase";
 import { sortTableRows } from "../../lib/tableSort";
 import { formatIndianNumber } from "../../lib/utils";
@@ -24,7 +24,8 @@ function getColumns() {
     { heading: "FixedFund Charge", key: "RejectedAmount", width: "140px" },
     { heading: "Warning", key: "Warning", width: "140px" },    
     { heading: "Remark", key: "Remark", width: "140px" },
-    { heading: "Action", key: "Action", width: "96px", isAction: true },
+    { heading: "Distributor City", key: "DistributorCity", width: "170px" },
+    { heading: "Action", key: "Action", width: "148px", isAction: true },
     { heading: "Counter Location", key: "CounterLocation", width: "180px" },
     { heading: "Linked Collector", key: "LinkedCollector", width: "180px" },
     { heading: "Linked Cashier", key: "LinkedCashier", width: "180px" },
@@ -40,6 +41,8 @@ export default function RetailerLiabilityTable({
   data,
   visibleColumnKeys = null,
   enableHistoryOnName = true,
+  showProjectionSnapshotAction = false,
+  onProjectionSnapshotUpdated,
 }) {
   const columns = visibleColumnKeys?.length
     ? getColumns().filter((column) => visibleColumnKeys.includes(column.key))
@@ -48,6 +51,7 @@ export default function RetailerLiabilityTable({
   const [selectedRetailer, setSelectedRetailer] = useState(null);
   const [projectionRetailer, setProjectionRetailer] = useState(null);
   const [historyRetailer, setHistoryRetailer] = useState(null);
+  const [updatingProjectionRetailerId, setUpdatingProjectionRetailerId] = useState("");
 
   const [filters, setFilters] = useState({
     UserName: "",
@@ -97,6 +101,25 @@ export default function RetailerLiabilityTable({
 
   const onProjectionHistory = (retailer) => {
     setHistoryRetailer(retailer);
+  };
+
+  const onUpdateProjectionSnapshot = async (retailer) => {
+    try {
+      setUpdatingProjectionRetailerId(retailer.UserId);
+      const result = await apiBase.updateRetailerProjectionAmountByDate(
+        retailer.UserId
+      );
+
+      if (result?.Response === false) {
+        throw new Error("Failed to update retailer projection amount.");
+      }
+
+      await onProjectionSnapshotUpdated?.();
+    } catch (error) {
+      alert(error.message || "Failed to update retailer projection amount.");
+    } finally {
+      setUpdatingProjectionRetailerId("");
+    }
   };
 
   const renderCellValue = (item, key) => {
@@ -190,7 +213,7 @@ export default function RetailerLiabilityTable({
                       style={{ width: col.width, minWidth: col.width, maxWidth: col.width }}
                     >
                       {col.isAction ? (
-                        <div className="flex items-center gap-2 whitespace-nowrap">
+                        <div className="flex min-w-[116px] items-center gap-2 whitespace-nowrap">
                           <ActionIconButton
                             label="More Details"
                             onClick={() => onMoreDetails(item.UserId)}
@@ -205,6 +228,23 @@ export default function RetailerLiabilityTable({
                           >
                             <TrendingUp size={16} />
                           </ActionIconButton>
+                          {showProjectionSnapshotAction ? (
+                            <ActionIconButton
+                              label="Update Projection Snapshot"
+                              onClick={() => onUpdateProjectionSnapshot(item)}
+                              disabled={updatingProjectionRetailerId === item.UserId}
+                              className="border-amber-200 text-amber-700 hover:bg-amber-50 disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                              <RefreshCw
+                                size={16}
+                                className={
+                                  updatingProjectionRetailerId === item.UserId
+                                    ? "animate-spin"
+                                    : ""
+                                }
+                              />
+                            </ActionIconButton>
+                          ) : null}
                         </div>
                       ) : col.key === "UserName" && enableHistoryOnName ? (
                         <button
@@ -259,11 +299,18 @@ export default function RetailerLiabilityTable({
   );
 }
 
-function ActionIconButton({ label, onClick, className = "", children }) {
+function ActionIconButton({
+  label,
+  onClick,
+  className = "",
+  children,
+  disabled = false,
+}) {
   return (
     <TooltipIconButton
       label={label}
       onClick={onClick}
+      disabled={disabled}
       className={`inline-flex h-7 w-7 flex-none items-center justify-center rounded border bg-white ${className}`}
     >
       {children}

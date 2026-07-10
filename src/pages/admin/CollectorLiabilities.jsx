@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
+import JSZip from "jszip";
 import LadgerDetailsDialog from "../../components/LedgerDetailsDialog";
 import Tooltip from "../../components/Tooltip";
 import TruncatedCell from "../../components/TruncatedCell";
@@ -7,17 +9,19 @@ import { apiBase } from "../../lib/apiBase";
 import { sortTableRows } from "../../lib/tableSort";
 import { formatIndianNumber } from "../../lib/utils";
 
-const columns = [
-  { key: "Warning", label: "Warning", width: "150px" },
+const columns = [  
   { key: "UserId", label: "ID", width: "110px" },
   { key: "UserName", label: "Name", width: "260px" },
-  { key: "ClosingAmount", label: "Opening", width: "140px" },
+  { key: "ClosingAmount", label: "Opening Amount", width: "150px" },
+  { key: "CurrentAmount", label: "Today Collection Amount", width: "170px" },
+  { key: "ReceivedAmount", label: "Today Handover Amount", width: "170px" },
+  { key: "ProjectionAmount", label: "Closing Amount", width: "150px" },  
+  { key: "PendingApprovalAmount", label: "Pending Approval Amount(Office)", width: "210px" },
+  { key: "RejectedAmount", label: "CDM/Bank Stuck Amount", width: "170px" },
   { key: "LaibilityAmount", label: "Liability (Rs)", width: "150px" },
-  { key: "PendingApprovalAmount", label: "Pending (Rs)", width: "150px" },
-  { key: "ProjectionAmount", label: "Projection (Rs)", width: "150px" },
-  { key: "CurrentAmount", label: "Current", width: "130px" },
   { key: "RetailerInitiatedAmount", label: "Retailers Initiated Amount", width: "180px" },
   { key: "CollectorInitiatedAmount", label: "Collectors Initiated Amount", width: "180px" },
+  { key: "Warning", label: "Warning", width: "150px" },
   { key: "LinkedCashier", label: "Linked Cashier", width: "200px" },
   { key: "LinkedMasterCashier", label: "Linked Master Cashier", width: "230px" },
 ];
@@ -39,6 +43,7 @@ export default function CollectorLiabilities({ userType, id }) {
   useDocumentTitle("Collector Liabilities");
 
   const [loading, setLoading] = useState(false);
+  const [exporting, setExporting] = useState(false);
   const [error, setError] = useState(null);
   const [collectorLiabilities, setCollectorLiabilities] = useState([]);
   const [modelFor, setModelFor] = useState("Handover");
@@ -51,6 +56,7 @@ export default function CollectorLiabilities({ userType, id }) {
     totalProjectionAmount: 0,
     totalRejectedAmount: 0,
     totalCurrentAmount: 0,
+    totalReceivedAmount: 0,
     totalClosingAmount: 0,
     totalRetailerInitiatedAmount: 0,
     totalCollectorInitiatedAmount: 0,
@@ -65,6 +71,8 @@ export default function CollectorLiabilities({ userType, id }) {
     PendingApprovalAmount: "",
     ProjectionAmount: "",
     CurrentAmount: "",
+    ReceivedAmount: "",
+    RejectedAmount: "",
     RetailerInitiatedAmount: "",
     CollectorInitiatedAmount: "",
     LinkedCashier: "",
@@ -88,6 +96,7 @@ export default function CollectorLiabilities({ userType, id }) {
         totalProjectionAmount: data.reduce((acc, x) => acc + (x.ProjectionAmount || 0), 0),
         totalRejectedAmount: data.reduce((acc, x) => acc + (x.RejectedAmount || 0), 0),
         totalCurrentAmount: data.reduce((acc, x) => acc + (x.CurrentAmount || 0), 0),
+        totalReceivedAmount: data.reduce((acc, x) => acc + (x.ReceivedAmount || 0), 0),
         totalClosingAmount: data.reduce((acc, x) => acc + (x.ClosingAmount || 0), 0),
         totalRetailerInitiatedAmount: data.reduce((acc, x) => acc + (x.RetailerInitiatedAmount || 0), 0),
         totalCollectorInitiatedAmount: data.reduce((acc, x) => acc + (x.CollectorInitiatedAmount || 0), 0),
@@ -128,22 +137,264 @@ export default function CollectorLiabilities({ userType, id }) {
     setOpenDialog(true);
   };
 
+  const handleExportExcel = async () => {
+    if (!filteredData.length) return;
+
+    setExporting(true);
+    try {
+      const exportRows = filteredData.map((item) => ({
+        ID: item.UserId ?? "",
+        Name: item.UserName ?? "",
+        "Opening Amount": item.ClosingAmount ?? 0,
+        "Today Collection Amount": item.CurrentAmount ?? 0,
+        "Today Handover Amount": item.ReceivedAmount ?? 0,
+        "Closing Amount": item.ProjectionAmount ?? 0,
+        "Pending Approval Amount(Office)": item.PendingApprovalAmount ?? 0,
+        "CDM/Bank Stuck Amount": item.RejectedAmount ?? 0,
+        "Liability Amount": item.LaibilityAmount ?? 0,
+        "Retailers Initiated Amount": item.RetailerInitiatedAmount ?? 0,
+        "Collectors Initiated Amount": item.CollectorInitiatedAmount ?? 0,
+        Warning: item.Warning ?? "",
+        "Linked Cashier": item.LinkedCashier ?? "",
+        "Linked Master Cashier": item.LinkedMasterCashier ?? "",
+      }));
+
+      const headers = Object.keys(exportRows[0] || {
+        ID: "",
+        Name: "",
+        "Opening Amount": "",
+        "Today Collection Amount": "",
+        "Today Handover Amount": "",
+        "Closing Amount": "",
+        "Pending Approval Amount(Office)": "",
+        "CDM/Bank Stuck Amount": "",
+        "Liability Amount": "",
+        "Retailers Initiated Amount": "",
+        "Collectors Initiated Amount": "",
+        Warning: "",
+        "Linked Cashier": "",
+        "Linked Master Cashier": "",
+      });
+
+      const numericHeaders = new Set([
+        "Opening Amount",
+        "Today Collection Amount",
+        "Today Handover Amount",
+        "Closing Amount",
+        "Pending Approval Amount(Office)",
+        "CDM/Bank Stuck Amount",
+        "Liability Amount",
+        "Retailers Initiated Amount",
+        "Collectors Initiated Amount",
+      ]);
+
+      const xmlEscape = (value) =>
+        String(value ?? "")
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&apos;");
+
+      const getColumnName = (index) => {
+        let columnName = "";
+        let current = index + 1;
+
+        while (current > 0) {
+          const remainder = (current - 1) % 26;
+          columnName = String.fromCharCode(65 + remainder) + columnName;
+          current = Math.floor((current - 1) / 26);
+        }
+
+        return columnName;
+      };
+
+      const buildCell = (rowIndex, columnIndex, value, isHeader = false) => {
+        const cellRef = `${getColumnName(columnIndex)}${rowIndex}`;
+
+        if (!isHeader && typeof value === "number" && Number.isFinite(value)) {
+          return `<c r="${cellRef}"><v>${value}</v></c>`;
+        }
+
+        return `<c r="${cellRef}" t="inlineStr"${isHeader ? ' s="1"' : ""}><is><t>${xmlEscape(value)}</t></is></c>`;
+      };
+
+      const sheetRows = [
+        `<row r="1">${headers
+          .map((header, columnIndex) => buildCell(1, columnIndex, header, true))
+          .join("")}</row>`,
+        ...exportRows.map((row, rowIndex) => {
+          const excelRowIndex = rowIndex + 2;
+          return `<row r="${excelRowIndex}">${headers
+            .map((header, columnIndex) => {
+              const value = row[header];
+              if (numericHeaders.has(header)) {
+                return buildCell(
+                  excelRowIndex,
+                  columnIndex,
+                  Number(value) || 0,
+                  false
+                );
+              }
+              return buildCell(excelRowIndex, columnIndex, value, false);
+            })
+            .join("")}</row>`;
+        }),
+      ].join("");
+
+      const lastColumnName = getColumnName(headers.length - 1);
+      const lastRowNumber = exportRows.length + 1;
+      const autoFilterRange = `A1:${lastColumnName}${lastRowNumber}`;
+
+      const sheetXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
+  <dimension ref="${autoFilterRange}"/>
+  <sheetViews>
+    <sheetView workbookViewId="0"/>
+  </sheetViews>
+  <sheetFormatPr defaultRowHeight="15"/>
+  <sheetData>${sheetRows}</sheetData>
+  <autoFilter ref="${autoFilterRange}"/>
+</worksheet>`;
+
+      const workbookXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
+  <sheets>
+    <sheet name="Collector Liabilities" sheetId="1" r:id="rId1"/>
+  </sheets>
+</workbook>`;
+
+      const stylesXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
+  <fonts count="2">
+    <font>
+      <sz val="11"/>
+      <name val="Calibri"/>
+      <family val="2"/>
+    </font>
+    <font>
+      <b/>
+      <sz val="11"/>
+      <name val="Calibri"/>
+      <family val="2"/>
+    </font>
+  </fonts>
+  <fills count="2">
+    <fill><patternFill patternType="none"/></fill>
+    <fill><patternFill patternType="gray125"/></fill>
+  </fills>
+  <borders count="1">
+    <border>
+      <left/><right/><top/><bottom/><diagonal/>
+    </border>
+  </borders>
+  <cellStyleXfs count="1">
+    <xf numFmtId="0" fontId="0" fillId="0" borderId="0"/>
+  </cellStyleXfs>
+  <cellXfs count="2">
+    <xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>
+    <xf numFmtId="0" fontId="1" fillId="0" borderId="0" xfId="0" applyFont="1"/>
+  </cellXfs>
+  <cellStyles count="1">
+    <cellStyle name="Normal" xfId="0" builtinId="0"/>
+  </cellStyles>
+</styleSheet>`;
+
+      const zip = new JSZip();
+      zip.file(
+        "[Content_Types].xml",
+        `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
+  <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
+  <Default Extension="xml" ContentType="application/xml"/>
+  <Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>
+  <Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>
+  <Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>
+  <Override PartName="/docProps/core.xml" ContentType="application/vnd.openxmlformats-package.core-properties+xml"/>
+  <Override PartName="/docProps/app.xml" ContentType="application/vnd.openxmlformats-officedocument.extended-properties+xml"/>
+</Types>`
+      );
+      zip.folder("_rels").file(
+        ".rels",
+        `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/>
+  <Relationship Id="rId2" Type="http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties" Target="docProps/core.xml"/>
+  <Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/extended-properties" Target="docProps/app.xml"/>
+</Relationships>`
+      );
+      zip.folder("docProps").file(
+        "app.xml",
+        `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Properties xmlns="http://schemas.openxmlformats.org/officeDocument/2006/extended-properties" xmlns:vt="http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes">
+  <Application>Microsoft Excel</Application>
+</Properties>`
+      );
+      zip.folder("docProps").file(
+        "core.xml",
+        `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:dcmitype="http://purl.org/dc/dcmitype/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <dc:creator>Saral Cash Collection</dc:creator>
+  <cp:lastModifiedBy>Saral Cash Collection</cp:lastModifiedBy>
+  <dcterms:created xsi:type="dcterms:W3CDTF">${new Date().toISOString()}</dcterms:created>
+  <dcterms:modified xsi:type="dcterms:W3CDTF">${new Date().toISOString()}</dcterms:modified>
+</cp:coreProperties>`
+      );
+
+      const xlFolder = zip.folder("xl");
+      xlFolder.file("workbook.xml", workbookXml);
+      xlFolder.file("styles.xml", stylesXml);
+      xlFolder.folder("_rels").file(
+        "workbook.xml.rels",
+        `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/>
+  <Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>
+</Relationships>`
+      );
+      xlFolder.folder("worksheets").file("sheet1.xml", sheetXml);
+
+      const blob = await zip.generateAsync({
+        type: "blob",
+        mimeType:
+          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      const dateLabel = new Date().toISOString().slice(0, 10);
+
+      link.href = url;
+      link.download = `collector-liabilities-${dateLabel}.xlsx`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } finally {
+      setExporting(false);
+    }
+  };
+
   return (
     <div className="flex h-full min-h-0 flex-col p-4">
+      <HeaderActions
+        canExport={filteredData.length > 0}
+        exportLoading={exporting}
+        onExport={handleExportExcel}
+      />
+
       {loading && <CenterLoader label="Loading collector liabilities..." />}
       {error && <div className="text-red-600">{error}</div>}
 
       {!loading && collectorLiabilities.length > 0 && (
         <div className="flex min-h-0 flex-1 flex-col gap-4">
-          <div className="liability-summary grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-7">
+          <div className="liability-summary grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6">
             {[
               { label: "Opening Amount", value: summary.totalClosingAmount },
-              { label: "Liability Amount", value: summary.totalLaibilityAmount },
-              { label: "Pending Approval", value: summary.totalPendingApprovalAmount },
-              { label: "Projection Amount", value: summary.totalProjectionAmount },
-              { label: "Current Amount", value: summary.totalCurrentAmount },
-              { label: "Retailers Initiated Amount", value: summary.totalRetailerInitiatedAmount },
-              { label: "Collectors Initiated Amount", value: summary.totalCollectorInitiatedAmount },
+              { label: "Today Collection Amount", value: summary.totalCurrentAmount },
+              { label: "Today Handover Amount", value: summary.totalReceivedAmount },
+              { label: "Closing Amount", value: summary.totalProjectionAmount },
+              { label: "Pending Approval Amount(Office)", value: summary.totalPendingApprovalAmount },
+              { label: "CDM/Bank Stuck Amount", value: summary.totalRejectedAmount },
             ].map((item) => (
               <div key={item.label} className="metric-tile">
                 <span className="metric-tile-label">{item.label}</span>
@@ -196,10 +447,7 @@ export default function CollectorLiabilities({ userType, id }) {
                 </thead>
                 <tbody>
                   {filteredData.map((item) => (
-                    <tr key={item.UserId} className="border-t text-xs">
-                      <td className="px-4 py-2">
-                        <TruncatedCell className="text-red-600">{item.Warning || "-"}</TruncatedCell>
-                      </td>
+                    <tr key={item.UserId} className="border-t text-xs">                      
                       <td className="px-4 py-2">
                         <TruncatedCell>{item.UserId}</TruncatedCell>
                       </td>
@@ -210,36 +458,35 @@ export default function CollectorLiabilities({ userType, id }) {
                         <TruncatedCell>{currencyText(item.ClosingAmount)}</TruncatedCell>
                       </td>
                       <td className="px-4 py-2">
-                        <Tooltip content={currencyText(item.LaibilityAmount)} className="block w-full">
-                          <button
-                            onClick={() => handleMoreDetails(item.UserId, "Cleared")}
-                            className="w-full text-left text-blue-600 underline"
-                          >
-                            <TruncatedCell>{currencyText(item.LaibilityAmount)}</TruncatedCell>
-                          </button>
-                        </Tooltip>
+                        <TruncatedCell>{currencyText(item.CurrentAmount)}</TruncatedCell>
                       </td>
                       <td className="px-4 py-2">
-                        <Tooltip content={currencyText(item.PendingApprovalAmount)} className="block w-full">
-                          <button
-                            onClick={() => handleMoreDetails(item.UserId, "Handover")}
-                            className="w-full text-left text-blue-600 underline"
-                          >
-                            <TruncatedCell>{currencyText(item.PendingApprovalAmount)}</TruncatedCell>
-                          </button>
-                        </Tooltip>
+                        <TruncatedCell>{currencyText(item.ReceivedAmount)}</TruncatedCell>
                       </td>
                       <td className="px-4 py-2">
                         <TruncatedCell>{currencyText(item.ProjectionAmount)}</TruncatedCell>
+                      </td>                      
+                      <td className="px-4 py-2">
+                        <Tooltip content={currencyText(item.PendingApprovalAmount)} className="block w-full">
+                          <TruncatedCell>{currencyText(item.PendingApprovalAmount)}</TruncatedCell>
+                        </Tooltip>
                       </td>
                       <td className="px-4 py-2">
-                        <TruncatedCell>{currencyText(item.CurrentAmount)}</TruncatedCell>
+                        <TruncatedCell>{currencyText(item.RejectedAmount)}</TruncatedCell>
+                      </td>
+                      <td className="px-4 py-2">
+                        <Tooltip content={currencyText(item.LaibilityAmount)} className="block w-full">
+                          <TruncatedCell>{currencyText(item.LaibilityAmount)}</TruncatedCell>
+                        </Tooltip>
                       </td>
                       <td className="px-4 py-2">
                         <TruncatedCell>{currencyText(item.RetailerInitiatedAmount)}</TruncatedCell>
                       </td>
                       <td className="px-4 py-2">
                         <TruncatedCell>{currencyText(item.CollectorInitiatedAmount)}</TruncatedCell>
+                      </td>
+                      <td className="px-4 py-2">
+                        <TruncatedCell className="text-red-600">{item.Warning || "-"}</TruncatedCell>
                       </td>
                       <td className="px-4 py-2">
                         <TruncatedCell>{item.LinkedCashier || "-"}</TruncatedCell>
@@ -267,5 +514,30 @@ export default function CollectorLiabilities({ userType, id }) {
         />
       )}
     </div>
+  );
+}
+
+function HeaderActions({ canExport, exportLoading, onExport }) {
+  const target =
+    typeof document !== "undefined"
+      ? document.getElementById("page-header-actions")
+      : null;
+
+  if (!target) return null;
+
+  return createPortal(
+    <div className="flex w-full justify-end">
+      <button
+        type="button"
+        onClick={onExport}
+        disabled={exportLoading || !canExport}
+        className={`app-button-secondary ${
+          exportLoading || !canExport ? "cursor-not-allowed opacity-60" : ""
+        }`}
+      >
+        {exportLoading ? "Exporting..." : "Export to Excel"}
+      </button>
+    </div>,
+    target
   );
 }

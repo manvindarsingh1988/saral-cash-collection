@@ -7,9 +7,7 @@ import useDocumentTitle from "../../hooks/useDocumentTitle";
 const summaryCards = [
   { key: "ProjectionAmount", label: "Retailer Closing Amount", color: "#7c3aed" },
   { key: "CombinedPendingApprovalAmount", label: "Pending Approval", color: "#d97706" },
-  { key: "CurrentAmount", label: "Current Sale", color: "#2563eb" },
-  { key: "RetailerInitiatedAmount", label: "Retailer Initiated Amount", color: "#0891b2" },
-  { key: "CollectorInitiatedAmount", label: "Collector Initiated Amount", color: "#6366f1" },
+  { key: "CurrentAmount", label: "Today Collection Amount", color: "#2563eb" },
 ];
 
 export default function RetailerLiabilitiesForCollector({ collectorUserId }) {
@@ -64,7 +62,7 @@ export default function RetailerLiabilitiesForCollector({ collectorUserId }) {
       {!loading && hasData && (
         <>
           <div className="rounded-lg py-2">
-            <div className="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+            <div className="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-3">
               {summaryCards.map(({ key, label, color }) => (
                 <div key={key} className="metric-tile" style={{ "--tile-color": color }}>
                   <dt className="metric-tile-label truncate">{label}</dt>

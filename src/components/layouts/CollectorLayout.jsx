@@ -10,7 +10,7 @@ import {
 } from "../collector/CollectorApprovalGateContext";
 import Tooltip from "../Tooltip";
 
-const allowedWhilePendingRoutes = ["/", "/pending-approvals", "/fund/additional"];
+const allowedWhilePendingRoutes = ["/", "/pending-approvals"];
 
 export default function CollectorLayout({ children }) {
   const [user] = React.useState(() => apiBase.getCurrentUser());
@@ -152,7 +152,6 @@ function NavLinks({ isActive, mobile = false, setMobileMenuOpen }) {
     // { to: "/", label: "Retailer Liabilities" },
     { to: "/", label: "Retailer Liabilities" },
     { to: "/collector-ledgers", label: "Ledgers" },
-    { to: "/fund/additional", label: "Fund" },
     { to: "/pending-approvals", label: "Pending Approvals" },
   ];
 

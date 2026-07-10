@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import JSZip from "jszip";
 import { apiBase } from "../../lib/apiBase";
@@ -23,18 +23,7 @@ export default function AdminDashboard({ userType, id }) {
   const [exporting, setExporting] = useState(false);
   const [error, setError] = useState(null);
   const [liabilities, setLiabilities] = useState([]);
-
-  const [summary, setSummary] = useState({
-    totalLaibilityAmount: 0,
-    totalPendingApprovalAmount: 0,
-    totalProjectionAmount: 0,
-    totalProjectionAmountBeforeXMinutes: 0,
-    totalProjectionAmountWithoutCurrentSale: 0,
-    totalRejectedAmount: 0,
-    totalCurrentAmount: 0,
-    totalClosingAmount: 0,
-    totalReceivedAmount: 0,
-  });
+  const [selectedCity, setSelectedCity] = useState("ALL");
 
   useEffect(() => {
     fetchLiabilities();
@@ -49,55 +38,6 @@ export default function AdminDashboard({ userType, id }) {
       );
 
       setLiabilities(retailerData || []);
-
-      const totalLaibilityAmount = (retailerData || []).reduce(
-        (sum, item) => sum + (item.LaibilityAmount || 0),
-        0
-      );
-      const totalPendingApprovalAmount = (retailerData || []).reduce(
-        (sum, item) => sum + (item.PendingApprovalAmount || 0),
-        0
-      );
-      const totalProjectionAmount = (retailerData || []).reduce(
-        (sum, item) => sum + (item.ProjectionAmount || 0),
-        0
-      );
-      const totalProjectionAmountBeforeXMinutes = (retailerData || []).reduce(
-        (sum, item) => sum + (item.ProjectionAmountBeforeXMinutes || 0),
-        0
-      );
-      const totalProjectionAmountWithoutCurrentSale = (retailerData || []).reduce(
-        (sum, item) => sum + (item.ProjectionAmountWithoutCurrentSale || 0),
-        0
-      );
-      const totalRejectedAmount = (retailerData || []).reduce(
-        (sum, item) => sum + (item.RejectedAmount || 0),
-        0
-      );
-      const totalCurrentAmount = (retailerData || []).reduce(
-        (sum, item) => sum + (item.CurrentAmount || 0),
-        0
-      );
-      const totalClosingAmount = (retailerData || []).reduce(
-        (sum, item) => sum + (item.ClosingAmount || 0),
-        0
-      );
-      const totalReceivedAmount = (retailerData || []).reduce(
-        (sum, item) => sum + (item.ReceivedAmount || 0),
-        0
-      );
-
-      setSummary({
-        totalLaibilityAmount,
-        totalPendingApprovalAmount,
-        totalProjectionAmount,
-        totalProjectionAmountBeforeXMinutes,
-        totalProjectionAmountWithoutCurrentSale,
-        totalRejectedAmount,
-        totalCurrentAmount,
-        totalClosingAmount,
-        totalReceivedAmount,
-      });
       setLoading(false);
     } catch (err) {
       console.error("Error fetching liabilities:", err);
@@ -106,13 +46,78 @@ export default function AdminDashboard({ userType, id }) {
     }
   };
 
+  const cityOptions = useMemo(() => {
+    const distinctCities = Array.from(
+      new Set(
+        liabilities
+          .map((item) => (item.DistributorCity || "").trim())
+          .filter(Boolean)
+      )
+    ).sort((a, b) => a.localeCompare(b));
+
+    return ["ALL", ...distinctCities];
+  }, [liabilities]);
+
+  const filteredLiabilities = useMemo(() => {
+    if (selectedCity === "ALL") {
+      return liabilities;
+    }
+
+    return liabilities.filter(
+      (item) => (item.DistributorCity || "").trim() === selectedCity
+    );
+  }, [liabilities, selectedCity]);
+
+  const summary = useMemo(
+    () => ({
+      totalLaibilityAmount: filteredLiabilities.reduce(
+        (sum, item) => sum + (item.LaibilityAmount || 0),
+        0
+      ),
+      totalPendingApprovalAmount: filteredLiabilities.reduce(
+        (sum, item) => sum + (item.PendingApprovalAmount || 0),
+        0
+      ),
+      totalProjectionAmount: filteredLiabilities.reduce(
+        (sum, item) => sum + (item.ProjectionAmount || 0),
+        0
+      ),
+      totalProjectionAmountBeforeXMinutes: filteredLiabilities.reduce(
+        (sum, item) => sum + (item.ProjectionAmountBeforeXMinutes || 0),
+        0
+      ),
+      totalProjectionAmountWithoutCurrentSale: filteredLiabilities.reduce(
+        (sum, item) => sum + (item.ProjectionAmountWithoutCurrentSale || 0),
+        0
+      ),
+      totalRejectedAmount: filteredLiabilities.reduce(
+        (sum, item) => sum + (item.RejectedAmount || 0),
+        0
+      ),
+      totalCurrentAmount: filteredLiabilities.reduce(
+        (sum, item) => sum + (item.CurrentAmount || 0),
+        0
+      ),
+      totalClosingAmount: filteredLiabilities.reduce(
+        (sum, item) => sum + (item.ClosingAmount || 0),
+        0
+      ),
+      totalReceivedAmount: filteredLiabilities.reduce(
+        (sum, item) => sum + (item.ReceivedAmount || 0),
+        0
+      ),
+    }),
+    [filteredLiabilities]
+  );
+
   const handleExportExcel = async () => {
-    if (!liabilities.length) return;
+    if (!filteredLiabilities.length) return;
 
     setExporting(true);
     try {
-      const exportRows = liabilities.map((item) => ({
+      const exportRows = filteredLiabilities.map((item) => ({
         "Retailer Name": item.UserName ?? "",
+        "Distributor City": item.DistributorCity ?? "",
         "Opening Balance": item.ClosingAmount ?? 0,
         "Current Sale": item.CurrentAmount ?? 0,
         "Ewallet Pending Sale": item.PendingAmount ?? 0,
@@ -133,6 +138,7 @@ export default function AdminDashboard({ userType, id }) {
 
       const headers = Object.keys(exportRows[0] || {
         "Retailer Name": "",
+        "Distributor City": "",
         "Opening Balance": "",
         "Current Sale": "",
         "Ewallet Pending Sale": "",
@@ -353,16 +359,19 @@ export default function AdminDashboard({ userType, id }) {
   return (
     <div className="flex h-full min-h-0 flex-col">
       <HeaderActions
-        canExport={liabilities.length > 0}
+        canExport={filteredLiabilities.length > 0}
         exportLoading={exporting}
         onExport={handleExportExcel}
+        cityOptions={cityOptions}
+        selectedCity={selectedCity}
+        onCityChange={setSelectedCity}
       />
 
       {error && <div className="text-red-600">{error}</div>}
 
       {loading && <CenterLoader label="Loading liabilities..." />}
 
-      {!loading && liabilities.length > 0 && (
+      {!loading && filteredLiabilities.length > 0 && (
         <div className="flex min-h-0 flex-1 flex-col">
           <div className="py-2">
             <div className="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-8">
@@ -377,7 +386,9 @@ export default function AdminDashboard({ userType, id }) {
             </div>
           </div>
           <RetailerLiabilityTable
-            data={liabilities}
+            data={filteredLiabilities}
+            showProjectionSnapshotAction
+            onProjectionSnapshotUpdated={fetchLiabilities}
           />
         </div>
       )}
@@ -400,6 +411,9 @@ function HeaderActions({
   canExport,
   exportLoading,
   onExport,
+  cityOptions,
+  selectedCity,
+  onCityChange,
 }) {
   const target = typeof document !== "undefined"
     ? document.getElementById("page-header-actions")
@@ -409,6 +423,17 @@ function HeaderActions({
 
   return createPortal(
     <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center sm:justify-end">
+      <select
+        value={selectedCity}
+        onChange={(e) => onCityChange(e.target.value)}
+        className="min-h-[42px] rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm"
+      >
+        {cityOptions.map((city) => (
+          <option key={city} value={city}>
+            {city}
+          </option>
+        ))}
+      </select>
       <button
         type="button"
         onClick={onExport}
