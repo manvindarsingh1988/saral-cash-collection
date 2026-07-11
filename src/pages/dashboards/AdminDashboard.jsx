@@ -23,19 +23,32 @@ export default function AdminDashboard({ userType, id }) {
   const [exporting, setExporting] = useState(false);
   const [error, setError] = useState(null);
   const [liabilities, setLiabilities] = useState([]);
+  const [useHistoricalDate, setUseHistoricalDate] = useState(false);
+  const [selectedSnapshotDate, setSelectedSnapshotDate] = useState("");
   const [selectedCity, setSelectedCity] = useState("ALL");
 
   useEffect(() => {
-    fetchLiabilities();
-  }, []);
+    if (useHistoricalDate && !selectedSnapshotDate) {
+      return;
+    }
 
-  const fetchLiabilities = async () => {
+    fetchLiabilities(useHistoricalDate, selectedSnapshotDate);
+  }, [id, selectedSnapshotDate, useHistoricalDate, userType]);
+
+  const fetchLiabilities = async (
+    loadHistorical = false,
+    snapshotDate = ""
+  ) => {
     try {
       setLoading(true);
-      const retailerData = await apiBase.getLiabilityAmountOfAllRetailers(
-        id,
-        userType
-      );
+      setError(null);
+      const retailerData = loadHistorical && snapshotDate
+        ? await apiBase.getLiabilityAmountOfAllRetailersByDate(
+            id,
+            userType,
+            snapshotDate
+          )
+        : await apiBase.getLiabilityAmountOfAllRetailers(id, userType);
 
       setLiabilities(retailerData || []);
       setLoading(false);
@@ -43,6 +56,25 @@ export default function AdminDashboard({ userType, id }) {
       console.error("Error fetching liabilities:", err);
       setError(err.message || "Failed to fetch data");
       setLoading(false);
+    }
+  };
+
+  const maxSnapshotDate = (() => {
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(today.getDate() - 1);
+    const offset = yesterday.getTimezoneOffset();
+    return new Date(yesterday.getTime() - offset * 60000)
+      .toISOString()
+      .slice(0, 10);
+  })();
+
+  const handleHistoricalToggleChange = (enabled) => {
+    setUseHistoricalDate(enabled);
+    setSelectedCity("ALL");
+
+    if (!enabled) {
+      setSelectedSnapshotDate("");
     }
   };
 
@@ -127,13 +159,10 @@ export default function AdminDashboard({ userType, id }) {
         "Pending Approval Amount": item.PendingApprovalAmount ?? 0,
         "Laibility Amount": item.LaibilityAmount ?? 0,
         "Projection Without Current Sale": item.ProjectionAmountWithoutCurrentSale ?? 0,
-        "FixedFund Charge": item.RejectedAmount ?? 0,
-        Warning: item.Warning ?? "",
-        Remark: item.Remark ?? "",
-        "Counter Location": item.CounterLocation ?? "",
+        "Pending Amount(Collector)": item.RetailerInitiatedAmount ?? 0,
+        "Pending Amount(Accountent)": item.CollectorInitiatedAmount ?? 0,
         "Linked Collector": item.LinkedCollector ?? "",
-        "Linked Cashier": item.LinkedCashier ?? "",
-        "Linked Master Cashier": item.LinkedMasterCashier ?? "",
+        "Linked Accountent": item.LinkedMasterCashier ?? "",
       }));
 
       const headers = Object.keys(exportRows[0] || {
@@ -148,13 +177,10 @@ export default function AdminDashboard({ userType, id }) {
         "Pending Approval Amount": "",
         "Laibility Amount": "",
         "Projection Without Current Sale": "",
-        "FixedFund Charge": "",
-        Warning: "",
-        Remark: "",
-        "Counter Location": "",
+        "Pending Amount(Collector)": "",
+        "Pending Amount(Accountent)": "",
         "Linked Collector": "",
-        "Linked Cashier": "",
-        "Linked Master Cashier": "",
+        "Linked Accountent": "",
       });
 
       const numericHeaders = new Set([
@@ -167,7 +193,8 @@ export default function AdminDashboard({ userType, id }) {
         "Pending Approval Amount",
         "Laibility Amount",
         "Projection Without Current Sale",
-        "FixedFund Charge",
+        "Pending Amount(Collector)",
+        "Pending Amount(Accountent)",
       ]);
 
       const xmlEscape = (value) =>
@@ -362,6 +389,11 @@ export default function AdminDashboard({ userType, id }) {
         canExport={filteredLiabilities.length > 0}
         exportLoading={exporting}
         onExport={handleExportExcel}
+        useHistoricalDate={useHistoricalDate}
+        onHistoricalToggleChange={handleHistoricalToggleChange}
+        selectedSnapshotDate={selectedSnapshotDate}
+        onSnapshotDateChange={setSelectedSnapshotDate}
+        maxSnapshotDate={maxSnapshotDate}
         cityOptions={cityOptions}
         selectedCity={selectedCity}
         onCityChange={setSelectedCity}
@@ -411,6 +443,11 @@ function HeaderActions({
   canExport,
   exportLoading,
   onExport,
+  useHistoricalDate,
+  onHistoricalToggleChange,
+  selectedSnapshotDate,
+  onSnapshotDateChange,
+  maxSnapshotDate,
   cityOptions,
   selectedCity,
   onCityChange,
@@ -423,6 +460,27 @@ function HeaderActions({
 
   return createPortal(
     <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center sm:justify-end">
+      <label className="flex min-h-[42px] items-center gap-3 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm">
+        <span>Load by date</span>
+        <button
+          type="button"
+          role="switch"
+          aria-checked={useHistoricalDate}
+          aria-label="Load retailer liabilities by date"
+          onClick={() => onHistoricalToggleChange(!useHistoricalDate)}
+          className={`app-switch ${useHistoricalDate ? "is-active" : ""}`}
+        >
+          <span className="app-switch-thumb" />
+        </button>
+      </label>
+      <input
+        type="date"
+        value={selectedSnapshotDate}
+        max={maxSnapshotDate}
+        disabled={!useHistoricalDate}
+        onChange={(e) => onSnapshotDateChange(e.target.value)}
+        className="min-h-[42px] rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400"
+      />
       <select
         value={selectedCity}
         onChange={(e) => onCityChange(e.target.value)}

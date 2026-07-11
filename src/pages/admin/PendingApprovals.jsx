@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Download, Trash2 } from "lucide-react";
+import { Clock3, Download, Trash2, X } from "lucide-react";
 import ApprovalLedgerModal from "../../components/admin/ApprovalLedgerModal";
 import Tooltip from "../../components/Tooltip";
 import TooltipIconButton from "../../components/TooltipIconButton";
@@ -50,6 +50,7 @@ export default function PendingApprovals({ userType, id }) {
   const [error, setError] = useState(null);
   const [isModalOpen, setModalOpen] = useState(false);
   const [editData, setEditData] = useState(null);
+  const [givenOnEditData, setGivenOnEditData] = useState(null);
   const [pendingApprovals, setPendingApprovals] = useState([]);
   const [filters, setFilters] = useState({});
   const [masterData, setMasterData] = useState({});
@@ -172,6 +173,30 @@ export default function PendingApprovals({ userType, id }) {
       alert(err.message || "Failed to delete ledger.");
     } finally {
       setDeletingLedgerId(null);
+    }
+  };
+
+  const handleGivenOnSubmit = async (givenOnValue) => {
+    if (!givenOnEditData || !givenOnValue) return;
+
+    try {
+      const payload = {
+        ...givenOnEditData,
+        GivenOn: new Date(givenOnValue).toISOString(),
+        WorkFlow: parseInt(givenOnEditData.WorkFlow),
+      };
+
+      const result = await apiBase.updateLedgerInfo(payload);
+      if (result.Response?.startsWith("Errors:")) {
+        alert(result.Response);
+        return;
+      }
+
+      setGivenOnEditData(null);
+      await fetchPendingApprovals();
+    } catch (err) {
+      console.error("GivenOn update failed:", err);
+      alert(err.message || "Failed to update GivenOn.");
     }
   };
 
@@ -383,6 +408,16 @@ export default function PendingApprovals({ userType, id }) {
                                 ) : null}
                                 {isAdmin && (
                                   <TooltipIconButton
+                                    label="Update Given On"
+                                    aria-label={`Update Given On for ledger ${item.Id}`}
+                                    onClick={() => setGivenOnEditData(item)}
+                                    className="text-sm text-amber-600 hover:text-amber-800"
+                                  >
+                                    <Clock3 className="h-4 w-4" />
+                                  </TooltipIconButton>
+                                )}
+                                {isAdmin && (
+                                  <TooltipIconButton
                                     label="Delete Ledger"
                                     aria-label={`Delete ledger ${item.Id}`}
                                     onClick={() => handleDeleteLedger(item.Id)}
@@ -441,6 +476,14 @@ export default function PendingApprovals({ userType, id }) {
           onSubmit={handleLedgerSubmit}
         />
       )}
+
+      {givenOnEditData && (
+        <GivenOnEditModal
+          ledger={givenOnEditData}
+          onClose={() => setGivenOnEditData(null)}
+          onSubmit={handleGivenOnSubmit}
+        />
+      )}
     </div>
   );
 }
@@ -469,6 +512,68 @@ function CenterLoader({ label }) {
       <div className="app-loading-card">
         <div className="app-spinner" />
         <div className="app-loading-label">{label}</div>
+      </div>
+    </div>
+  );
+}
+
+function formatDateTimeLocalInput(value) {
+  if (!value) return "";
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+
+  const offset = date.getTimezoneOffset();
+  const localDate = new Date(date.getTime() - offset * 60000);
+  return localDate.toISOString().slice(0, 16);
+}
+
+function GivenOnEditModal({ ledger, onClose, onSubmit }) {
+  const [givenOn, setGivenOn] = useState(() => formatDateTimeLocalInput(ledger?.GivenOn));
+
+  useEffect(() => {
+    setGivenOn(formatDateTimeLocalInput(ledger?.GivenOn));
+  }, [ledger]);
+
+  return (
+    <div className="app-modal-overlay">
+      <div className="app-modal app-modal-sm">
+        <div className="app-modal-header">
+          <div>
+            <h2 className="app-modal-title">Update Given On</h2>
+            <p className="app-modal-subtitle">
+              Update the `Given On` date and time for ledger {ledger?.Id}.
+            </p>
+          </div>
+          <button onClick={onClose} className="app-modal-close" aria-label="Close">
+            <X size={18} />
+          </button>
+        </div>
+        <div className="app-modal-body">
+          <div className="app-modal-form">
+            <div className="app-modal-field">
+              <label className="app-modal-label">Given On</label>
+              <input
+                type="datetime-local"
+                value={givenOn}
+                onChange={(e) => setGivenOn(e.target.value)}
+                className="border px-3 py-2 rounded-lg"
+              />
+            </div>
+          </div>
+        </div>
+        <div className="app-modal-actions">
+          <button onClick={onClose} className="app-button-secondary">
+            Cancel
+          </button>
+          <button
+            onClick={() => onSubmit(givenOn)}
+            className="app-button-primary"
+            disabled={!givenOn}
+          >
+            Save
+          </button>
+        </div>
       </div>
     </div>
   );

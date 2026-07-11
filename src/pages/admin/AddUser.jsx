@@ -119,11 +119,6 @@ export default function AddUser() {
             >
               <option value="12">Collector</option>
               <option value="20">ZoneManager</option>
-              {user?.UserType === "Cashier" ? (
-                ""
-              ) : (
-                <option value="13">Cashier</option>
-              )}
               {user?.UserType === "MasterCashier" || user?.UserType === "Cashier" ? (
                 ""
               ) : (

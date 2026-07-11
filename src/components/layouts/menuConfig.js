@@ -12,16 +12,6 @@ export const menuConfig = [
         label: "Collector Liabilities",
         allow: ["Admin", "MasterCashier", "Cashier", "ZoneManager"],
       },
-      {
-        to: "liabilities/cashier",
-        label: "Cashier Liabilities",
-        allow: ["Admin", "MasterCashier"],
-      },
-      {
-        to: "liabilities/mastercashier",
-        label: "MasterCashier Liabilities",
-        allow: ["Admin"],
-      },
     ],
   },
   {
@@ -64,6 +54,16 @@ export const menuConfig = [
         to: "dashboard/create",
         label: "Create Dashboard",
         allow: ["Admin", "MasterCashier", "Cashier"],
+      },
+      {
+        to: "dashboard/retailer-view",
+        label: "Retailer View",
+        allow: ["Admin"],
+      },
+      {
+        to: "dashboard/accountent-view",
+        label: "Accountent View",
+        allow: ["Admin"],
       },
       {
         to: "dashboard/collector-view",

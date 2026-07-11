@@ -146,6 +146,16 @@ export const apiBase = {
     await (
       await authorizedFetch(`${API_URL}/GetLiabilityAmountOfAllRetailers?id=${id}&userType=${userType}&includeProjectionAmountBeforeXMinutes=false`)
     ).json(),
+  getLiabilityAmountOfAllRetailersByDate: async (id, userType, snapshotDate) =>
+    await (
+      await authorizedFetch(
+        `${API_URL}/GetLiabilityAmountOfAllRetailersByDate?id=${encodeURIComponent(
+          id
+        )}&userType=${encodeURIComponent(
+          userType
+        )}&snapshotDate=${encodeURIComponent(snapshotDate)}`
+      )
+    ).json(),
   getLiabilityAmountOfAllRetailersByCollectorId: async (id) =>
     await (
       await authorizedFetch(

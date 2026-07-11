@@ -21,15 +21,12 @@ function getColumns() {
     { heading: "Pending Approval Amount", key: "PendingApprovalAmount", width: "160px" },
     { heading: "Laibility Amount", key: "LaibilityAmount", width: "140px" },
     { heading: "Projection Without Current Sale", key: "ProjectionAmountWithoutCurrentSale", width: "180px" },
-    { heading: "FixedFund Charge", key: "RejectedAmount", width: "140px" },
-    { heading: "Warning", key: "Warning", width: "140px" },    
-    { heading: "Remark", key: "Remark", width: "140px" },
+    { heading: "Pending Amount(Collector)", key: "RetailerInitiatedAmount", width: "180px" },
+    { heading: "Pending Amount(Accountent)", key: "CollectorInitiatedAmount", width: "190px" },
     { heading: "Distributor City", key: "DistributorCity", width: "170px" },
     { heading: "Action", key: "Action", width: "148px", isAction: true },
-    { heading: "Counter Location", key: "CounterLocation", width: "180px" },
     { heading: "Linked Collector", key: "LinkedCollector", width: "180px" },
-    { heading: "Linked Cashier", key: "LinkedCashier", width: "180px" },
-    { heading: "Linked Master Cashier", key: "LinkedMasterCashier", width: "220px" },
+    { heading: "Linked Accountent", key: "LinkedMasterCashier", width: "220px" },
   ];
 
   
@@ -129,10 +126,11 @@ export default function RetailerLiabilityTable({
       "PendingApprovalAmount",
       "ProjectionAmount",
       "ProjectionAmountBeforeXMinutes",
-      "RejectedAmount",
       "ClosingAmount",
       "CurrentAmount",
       "ReceivedAmount",
+      "RetailerInitiatedAmount",
+      "CollectorInitiatedAmount",
     ];
 
     const value = item[key];

@@ -18,11 +18,11 @@ import CollectorLiabilities from "../pages/admin/CollectorLiabilities";
 import PendingApprovals from "../pages/admin/PendingApprovals";
 import CreateDashboard from "../pages/admin/CreateDashboard";
 import CollectorView from "../pages/admin/CollectorView";
+import RetailerView from "../pages/admin/RetailerView";
+import AccountentView from "../pages/admin/AccountentView";
 import UserInfo from "../pages/admin/UserInfo";
 import UserQRMapping from "../pages/admin/UserQRMapping";
 import AdditionalFund from "../pages/admin/AdditionalFund";
-import CashierLiabilities from "../pages/admin/CashierLiabilities";
-import MasterCashierLiabilities from "../pages/admin/MasterCashierLiabilities";
 import CashierLedger from "../pages/cashier/CashierLedger";
 
 export default function UserSpecificDashboard() {
@@ -52,20 +52,6 @@ export default function UserSpecificDashboard() {
             element={<CollectorLiabilities userType={resolvedUserType} id={Id} />}
           />
 
-          {(UserType === "Admin" || UserType === "MasterCashier") && (
-            <Route
-              path="liabilities/cashier"
-              element={<CashierLiabilities userType={resolvedUserType} id={Id} />}
-            />
-          )}
-
-          {UserType === "Admin" && (
-            <Route
-              path="liabilities/mastercashier"
-              element={<MasterCashierLiabilities userType={resolvedUserType} id={Id} />}
-            />
-          )}
-
           {UserType === "Cashier" && (
             <Route path="ledgers/cashier" element={<CashierLedger cashierUserId={Id} />} />
           )}
@@ -87,6 +73,14 @@ export default function UserSpecificDashboard() {
             path="dashboard/create"
             element={<CreateDashboard userType={resolvedUserType} id={Id} />}
           />
+
+          {UserType === "Admin" && (
+            <Route path="dashboard/retailer-view" element={<RetailerView />} />
+          )}
+
+          {UserType === "Admin" && (
+            <Route path="dashboard/accountent-view" element={<AccountentView />} />
+          )}
 
           {UserType === "Admin" && (
             <Route path="dashboard/collector-view" element={<CollectorView />} />

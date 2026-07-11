@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import JSZip from "jszip";
+import CollectorProjectionHistoryDialog from "../../components/CollectorProjectionHistoryDialog";
 import LadgerDetailsDialog from "../../components/LedgerDetailsDialog";
 import Tooltip from "../../components/Tooltip";
 import TruncatedCell from "../../components/TruncatedCell";
@@ -21,9 +22,7 @@ const columns = [
   { key: "LaibilityAmount", label: "Liability (Rs)", width: "150px" },
   { key: "RetailerInitiatedAmount", label: "Retailers Initiated Amount", width: "180px" },
   { key: "CollectorInitiatedAmount", label: "Collectors Initiated Amount", width: "180px" },
-  { key: "Warning", label: "Warning", width: "150px" },
-  { key: "LinkedCashier", label: "Linked Cashier", width: "200px" },
-  { key: "LinkedMasterCashier", label: "Linked Master Cashier", width: "230px" },
+  { key: "LinkedMasterCashier", label: "Linked Accountent", width: "230px" },
 ];
 
 const currencyText = (value) => `Rs ${formatIndianNumber(value || 0)}`;
@@ -49,6 +48,7 @@ export default function CollectorLiabilities({ userType, id }) {
   const [modelFor, setModelFor] = useState("Handover");
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedCollector, setSelectedCollector] = useState(null);
+  const [selectedProjectionCollector, setSelectedProjectionCollector] = useState(null);
 
   const [summary, setSummary] = useState({
     totalLaibilityAmount: 0,
@@ -63,7 +63,6 @@ export default function CollectorLiabilities({ userType, id }) {
   });
 
   const [filters, setFilters] = useState({
-    Warning: "",
     UserId: "",
     UserName: "",
     ClosingAmount: "",
@@ -75,7 +74,6 @@ export default function CollectorLiabilities({ userType, id }) {
     RejectedAmount: "",
     RetailerInitiatedAmount: "",
     CollectorInitiatedAmount: "",
-    LinkedCashier: "",
     LinkedMasterCashier: "",
   });
   const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
@@ -152,11 +150,9 @@ export default function CollectorLiabilities({ userType, id }) {
         "Pending Approval Amount(Office)": item.PendingApprovalAmount ?? 0,
         "CDM/Bank Stuck Amount": item.RejectedAmount ?? 0,
         "Liability Amount": item.LaibilityAmount ?? 0,
-        "Retailers Initiated Amount": item.RetailerInitiatedAmount ?? 0,
-        "Collectors Initiated Amount": item.CollectorInitiatedAmount ?? 0,
-        Warning: item.Warning ?? "",
-        "Linked Cashier": item.LinkedCashier ?? "",
-        "Linked Master Cashier": item.LinkedMasterCashier ?? "",
+        "Pending Amount(Collector)": item.RetailerInitiatedAmount ?? 0,
+        "Pending Amount(Accountent)": item.CollectorInitiatedAmount ?? 0,
+        "Linked Accountent": item.LinkedMasterCashier ?? "",
       }));
 
       const headers = Object.keys(exportRows[0] || {
@@ -169,11 +165,9 @@ export default function CollectorLiabilities({ userType, id }) {
         "Pending Approval Amount(Office)": "",
         "CDM/Bank Stuck Amount": "",
         "Liability Amount": "",
-        "Retailers Initiated Amount": "",
-        "Collectors Initiated Amount": "",
-        Warning: "",
-        "Linked Cashier": "",
-        "Linked Master Cashier": "",
+        "Pending Amount(Collector)": "",
+        "Pending Amount(Accountent)": "",
+        "Linked Accountent": "",
       });
 
       const numericHeaders = new Set([
@@ -184,8 +178,8 @@ export default function CollectorLiabilities({ userType, id }) {
         "Pending Approval Amount(Office)",
         "CDM/Bank Stuck Amount",
         "Liability Amount",
-        "Retailers Initiated Amount",
-        "Collectors Initiated Amount",
+        "Pending Amount(Collector)",
+        "Pending Amount(Accountent)",
       ]);
 
       const xmlEscape = (value) =>
@@ -452,7 +446,18 @@ export default function CollectorLiabilities({ userType, id }) {
                         <TruncatedCell>{item.UserId}</TruncatedCell>
                       </td>
                       <td className="px-4 py-2">
-                        <TruncatedCell>{item.UserName || "-"}</TruncatedCell>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setSelectedProjectionCollector({
+                              userId: item.UserId,
+                              userName: item.UserName,
+                            })
+                          }
+                          className="max-w-full text-left text-blue-600 hover:text-blue-800 hover:underline"
+                        >
+                          <TruncatedCell>{item.UserName || "-"}</TruncatedCell>
+                        </button>
                       </td>
                       <td className="px-4 py-2">
                         <TruncatedCell>{currencyText(item.ClosingAmount)}</TruncatedCell>
@@ -486,12 +491,6 @@ export default function CollectorLiabilities({ userType, id }) {
                         <TruncatedCell>{currencyText(item.CollectorInitiatedAmount)}</TruncatedCell>
                       </td>
                       <td className="px-4 py-2">
-                        <TruncatedCell className="text-red-600">{item.Warning || "-"}</TruncatedCell>
-                      </td>
-                      <td className="px-4 py-2">
-                        <TruncatedCell>{item.LinkedCashier || "-"}</TruncatedCell>
-                      </td>
-                      <td className="px-4 py-2">
                         <TruncatedCell>{item.LinkedMasterCashier || "-"}</TruncatedCell>
                       </td>
                     </tr>
@@ -511,6 +510,14 @@ export default function CollectorLiabilities({ userType, id }) {
           }}
           userId={selectedCollector}
           modelFor={modelFor}
+        />
+      )}
+
+      {selectedProjectionCollector && (
+        <CollectorProjectionHistoryDialog
+          userId={selectedProjectionCollector.userId}
+          userName={selectedProjectionCollector.userName}
+          onClose={() => setSelectedProjectionCollector(null)}
         />
       )}
     </div>
