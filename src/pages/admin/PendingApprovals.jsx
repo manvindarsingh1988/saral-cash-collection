@@ -185,6 +185,7 @@ export default function PendingApprovals({ userType, id }) {
       const payload = {
         ...givenOnEditData,
         GivenOn: formatDateTimeLocalForApi(givenOnValue),
+        Comment: "Field Given on updated by Admin",
         WorkFlow: parseInt(givenOnEditData.WorkFlow),
       };
 
