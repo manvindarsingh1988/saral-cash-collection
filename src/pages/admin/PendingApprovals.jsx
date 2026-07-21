@@ -355,7 +355,7 @@ export default function PendingApprovals({ userType, id }) {
                         if (val === "Id") {
                           return (
                             <td key={val} className="px-4 py-2" style={workflowRowStyle}>
-                              {[1, 6, 8].includes(item.WorkFlow) ? (
+                              {[1, 6, 8, 9].includes(item.WorkFlow) ? (
                                 <Tooltip content={String(item[val] ?? "")} className="block w-full">
                                   <button
                                     onClick={(e) => {

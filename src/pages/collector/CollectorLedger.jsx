@@ -349,7 +349,7 @@ export default function CollectorLedger({
                     return (
                       <tr key={item.Id} className="cursor-pointer">
                         <td className="px-4 py-2" style={rowStyle}>
-                          {item.WorkFlow == "5" || item.WorkFlow == "3" ? (
+                          {item.WorkFlow == "5" || item.WorkFlow == "3" || item.WorkFlow == "9"? (
                             <TruncatedCell className="text-green-600">{item.Id}</TruncatedCell>
                           ) : (
                             <Tooltip content="Click to edit">
