@@ -8,6 +8,8 @@ import useDocumentTitle from "../../hooks/useDocumentTitle";
 import { apiBase } from "../../lib/apiBase";
 import { sortTableRows } from "../../lib/tableSort";
 import {
+  formatDateTimeLocalForApi,
+  formatDateTimeLocalInputValue,
   formatToCustomDateTime,
   handleDownloadFile,
 } from "../../lib/utils";
@@ -182,7 +184,7 @@ export default function PendingApprovals({ userType, id }) {
     try {
       const payload = {
         ...givenOnEditData,
-        GivenOn: new Date(givenOnValue).toISOString(),
+        GivenOn: formatDateTimeLocalForApi(givenOnValue),
         WorkFlow: parseInt(givenOnEditData.WorkFlow),
       };
 
@@ -517,22 +519,11 @@ function CenterLoader({ label }) {
   );
 }
 
-function formatDateTimeLocalInput(value) {
-  if (!value) return "";
-
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "";
-
-  const offset = date.getTimezoneOffset();
-  const localDate = new Date(date.getTime() - offset * 60000);
-  return localDate.toISOString().slice(0, 16);
-}
-
 function GivenOnEditModal({ ledger, onClose, onSubmit }) {
-  const [givenOn, setGivenOn] = useState(() => formatDateTimeLocalInput(ledger?.GivenOn));
+  const [givenOn, setGivenOn] = useState(() => formatDateTimeLocalInputValue(ledger?.GivenOn));
 
   useEffect(() => {
-    setGivenOn(formatDateTimeLocalInput(ledger?.GivenOn));
+    setGivenOn(formatDateTimeLocalInputValue(ledger?.GivenOn));
   }, [ledger]);
 
   return (

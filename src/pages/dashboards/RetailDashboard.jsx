@@ -9,6 +9,7 @@ import useDocumentTitle from "../../hooks/useDocumentTitle";
 import { apiBase } from "../../lib/apiBase";
 import { sanitiseLedgerPayload } from "../../lib/ledgerRuleEngine";
 import {
+  formatDateTimeLocalForApi,
   formatIndianNumber,
   formatToCustomDateTime,
   generateSafeGuid,
@@ -171,7 +172,9 @@ export default function RetailDashboard({ retailUserId }) {
         TransactionType: parseInt(data.TransactionType),
         WorkFlow: data?.StuckInBank ? 6 : data?.StuckInCDM ? 8 : 1,
         Date: new Date(data.Date).toISOString(),
-        GivenOn: new Date().toISOString(),
+        GivenOn: editData?.Id
+          ? formatDateTimeLocalForApi(editData.GivenOn)
+          : formatDateTimeLocalForApi(new Date()),
         CollectorId: data.TransactionType == "2" ? "" : data.CollectorId,
         CollectorName: data.TransactionType == "2" ? "" : data.CollectorName,
         DocId:

@@ -4,6 +4,7 @@ import { X } from "lucide-react";
 import { apiBase } from "../lib/apiBase";
 import SearchableSelect from "./SearchableSelect";
 import {
+  formatDateTimeLocalForApi,
   generateSafeGuid,
   handleDownloadFile,
   zipFilesToBlob
@@ -81,7 +82,7 @@ export default function LedgerModal({
           initialData?.ValuationDate?.split("T")[0] ??
           initialData?.Date?.split("T")[0] ??
           today,
-        GivenOn: today,
+        GivenOn: initialData?.GivenOn ?? new Date(),
         Comment: initialData?.Comment ?? "",
         StuckInBank: initialData?.WorkFlow === 6,
         StuckInCDM: initialData?.WorkFlow === 8,
@@ -165,7 +166,9 @@ export default function LedgerModal({
       ValuationDate: isCollectorLedger
         ? buildValuationDate(formData.ValuationDate)
         : null,
-      GivenOn: new Date(formData.GivenOn),
+      GivenOn: formData.Id
+        ? formatDateTimeLocalForApi(formData.GivenOn)
+        : formatDateTimeLocalForApi(new Date()),
       Comment: formData.Comment,
       DocId:
         formData.File && fileSaved

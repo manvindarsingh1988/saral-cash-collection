@@ -88,7 +88,7 @@ export default function ApprovalLedgerModal({
       obj[key] = formData[key];
       return obj;
     }, {});
-
+    filteredData.GivenOn = initialData?.GivenOn;
     if (
       filteredData.WorkFlow === "5" &&
       filteredData.TransactionType != "1" &&

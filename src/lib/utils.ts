@@ -61,6 +61,24 @@ export function formatToCustom(isoString: string): string {
   )}/${date.getFullYear()}`;
 }
 
+export function formatDateTimeLocalForApi(value: string | Date): string {
+  const date = value instanceof Date ? value : new Date(value);
+  if (isNaN(date.getTime())) return "";
+
+  const offset = date.getTimezoneOffset();
+  const localDate = new Date(date.getTime() - offset * 60000);
+  return localDate.toISOString().slice(0, 19);
+}
+
+export function formatDateTimeLocalInputValue(value: string | Date): string {
+  const date = value instanceof Date ? value : new Date(value);
+  if (isNaN(date.getTime())) return "";
+
+  const offset = date.getTimezoneOffset();
+  const localDate = new Date(date.getTime() - offset * 60000);
+  return localDate.toISOString().slice(0, 16);
+}
+
 export function generateSafeGuid(): string {
   const template = "10000000-1000-4000-8000-100000000000";
   return template.replace(/[018]/g, (c) => {

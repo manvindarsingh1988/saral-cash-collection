@@ -4,6 +4,7 @@ import SearchableSelect from "../../components/SearchableSelect";
 import Tooltip from "../../components/Tooltip";
 import TruncatedCell from "../../components/TruncatedCell";
 import {
+  formatDateTimeLocalForApi,
   formatIndianNumber,
   formatToCustomDateTime,
   getRowColor,
@@ -172,7 +173,7 @@ export default function CollectorDashboard({ collectorUserId }) {
         TransactionType: parseInt(data.TransactionType),
         WorkFlow: parseInt(data.WorkFlow),
         Date: new Date(data.Date).toISOString(),
-        GivenOn: new Date(data.GivenOn).toISOString(),
+        GivenOn: formatDateTimeLocalForApi(data.GivenOn),
       };
 
       if (editData?.Id) {

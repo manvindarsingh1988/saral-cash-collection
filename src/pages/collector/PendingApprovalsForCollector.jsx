@@ -9,6 +9,7 @@ import useDocumentTitle from "../../hooks/useDocumentTitle";
 import { apiBase } from "../../lib/apiBase";
 import { sortTableRows } from "../../lib/tableSort";
 import {
+  formatDateTimeLocalForApi,
   formatToCustomDateTime,
   handleDownloadFile,
 } from "../../lib/utils";
@@ -127,7 +128,7 @@ export default function PendingApprovalsForCollector({ collectorUserId }) {
         Amount: parseFloat(data.Amount),
         TransactionType: parseInt(data.TransactionType),
         Date: new Date(data.Date).toISOString(),
-        GivenOn: new Date().toISOString(),
+        GivenOn: formatDateTimeLocalForApi(data.GivenOn),
         CollectorId: data.TransactionType === "2" ? "" : data.CollectorId,
         CollectorName: data.TransactionType === "2" ? "" : data.CollectorName,
         ToCollector: data.ToCollector || "",
