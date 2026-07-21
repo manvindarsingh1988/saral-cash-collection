@@ -74,7 +74,7 @@ export default function ApprovalLedgerModal({
   }, [initialData]);
 
   const allowedWorkflowIds =
-    initialData?.WorkFlow === 6 || initialData?.WorkFlow === 8 || formData.WorkFlow === "9"
+    initialData?.WorkFlow === 6 || initialData?.WorkFlow === 8 || initialData?.WorkFlow === 9
       ? [...new Set([...workflows, 9])]
       : workflows;
 
