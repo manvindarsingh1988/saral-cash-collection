@@ -61,7 +61,9 @@ export default function PendingApprovals({ userType, id }) {
   const [showPendingOnly, setShowPendingOnly] = useState(true);
   const [fromDate, setFromDate] = useState(getCurrentDateString);
   const [toDate, setToDate] = useState(getCurrentDateString);
-  const isAdmin = apiBase.getCurrentUser()?.UserType === "Admin";
+  const currentUserType = apiBase.getCurrentUser()?.UserType;
+  const isAdmin = currentUserType === "Admin";
+  const canUpdateGivenOn = isAdmin || currentUserType === "MasterCashier";
 
   useEffect(() => {
     fetchPendingApprovals();
@@ -409,7 +411,7 @@ export default function PendingApprovals({ userType, id }) {
                                     <Download className="h-4 w-4" />
                                   </TooltipIconButton>
                                 ) : null}
-                                {isAdmin && (
+                                {canUpdateGivenOn && (
                                   <TooltipIconButton
                                     label="Update Given On"
                                     aria-label={`Update Given On for ledger ${item.Id}`}
