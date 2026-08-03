@@ -38,8 +38,8 @@ export default function UpdateOpeningBalanceModal({
       <div className="app-modal app-modal-sm">
         <div className="app-modal-header">
           <div>
-            <h3 className="app-modal-title">Update Opening Balance</h3>
-            <p className="app-modal-subtitle">Set opening balance for selected user.</p>
+            <h3 className="app-modal-title">Update Closing Balance</h3>
+            <p className="app-modal-subtitle">Set closing balance for selected user.</p>
           </div>
           <button
             onClick={() => handleOpeningBalanceModalClose(null, null)}
@@ -63,7 +63,7 @@ export default function UpdateOpeningBalanceModal({
         </div>
 
         <div className="app-modal-field">
-          <label htmlFor="opening-balance" className="app-modal-label">Opening Balance</label>
+          <label htmlFor="opening-balance" className="app-modal-label">Closing Balance</label>
           <input
             type="number"
             id="opening-balance"

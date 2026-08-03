@@ -479,12 +479,14 @@ export default function UserInfo() {
                       <td className="px-4 py-3" style={inactiveCellStyle}>
                         {user.Active ? (
                           <div className="flex flex-col gap-1">
-                            <button
-                              className="text-left text-xs text-indigo-600 underline"
-                              onClick={() => handleOpeningBalance(user.Id)}
-                            >
-                              Edit OB
-                            </button>
+                            {currentUser?.UserType === "Admin" && (
+                              <button
+                                className="text-left text-xs text-indigo-600 underline"
+                                onClick={() => handleOpeningBalance(user.Id)}
+                              >
+                                Edit Closing Balance
+                              </button>
+                            )}
                             <button
                               className="text-left text-xs text-indigo-600 underline"
                               onClick={() => handleAddRemark(user.Id)}
