@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { createPortal } from "react-dom";
-import { Eye, RefreshCw, TrendingUp, X } from "lucide-react";
+import { ChevronDown, ChevronRight, Eye, RefreshCw, TrendingUp, X } from "lucide-react";
 import { apiBase } from "../../lib/apiBase";
 import { sortTableRows } from "../../lib/tableSort";
 import { formatIndianNumber } from "../../lib/utils";
@@ -40,6 +40,7 @@ export default function RetailerLiabilityTable({
   enableHistoryOnName = true,
   showProjectionSnapshotAction = false,
   onProjectionSnapshotUpdated,
+  groupByCity = false,
 }) {
   const columns = visibleColumnKeys?.length
     ? getColumns().filter((column) => visibleColumnKeys.includes(column.key))
@@ -49,6 +50,7 @@ export default function RetailerLiabilityTable({
   const [projectionRetailer, setProjectionRetailer] = useState(null);
   const [historyRetailer, setHistoryRetailer] = useState(null);
   const [updatingProjectionRetailerId, setUpdatingProjectionRetailerId] = useState("");
+  const [collapsedCities, setCollapsedCities] = useState(() => new Set());
 
   const [filters, setFilters] = useState({
     UserName: "",
@@ -86,6 +88,53 @@ export default function RetailerLiabilityTable({
     }),
     sortConfig
   );
+
+  const groupedData = groupByCity
+    ? Array.from(
+        filteredData.reduce((groups, item) => {
+          const city = (item.DistributorCity || "").trim() || "Unknown city";
+          const group = groups.get(city) || [];
+          group.push(item);
+          groups.set(city, group);
+          return groups;
+        }, new Map())
+      ).sort(([cityA], [cityB]) => cityA.localeCompare(cityB))
+    : null;
+
+  const groupTotalKeys = new Set([
+    "ClosingAmount",
+    "CurrentAmount",
+    "ReceivedAmount",
+    "ProjectionAmount",
+    "ProjectionAmountBeforeXMinutes",
+    "PendingApprovalAmount",
+    "LaibilityAmount",
+    "ProjectionAmountWithoutCurrentSale",
+  ]);
+
+  const getGroupTotal = (items, key) =>
+    items.reduce((sum, item) => sum + (Number(item[key]) || 0), 0);
+
+  const toggleCity = (city) => {
+    setCollapsedCities((previous) => {
+      const next = new Set(previous);
+      if (next.has(city)) next.delete(city);
+      else next.add(city);
+      return next;
+    });
+  };
+
+  const allCitiesCollapsed =
+    Boolean(groupedData?.length) &&
+    groupedData.every(([city]) => collapsedCities.has(city));
+
+  const toggleAllCities = () => {
+    setCollapsedCities(
+      allCitiesCollapsed
+        ? new Set()
+        : new Set((groupedData || []).map(([city]) => city))
+    );
+  };
 
   const onMoreDetails = (retailUserId) => {
     setSelectedRetailer(retailUserId);
@@ -149,22 +198,43 @@ export default function RetailerLiabilityTable({
     <div className="flex min-h-0 flex-1 flex-col rounded-lg bg-white p-4 shadow sm:p-6">
       <div className="min-h-0 flex-1 overflow-x-auto">
         <div className="app-table-shell h-full min-h-0 overflow-y-auto text-xs">
-          <table className="app-table min-w-full table-auto divide-y divide-gray-200">
+          <table
+            className="app-table min-w-max table-fixed divide-y divide-gray-200"
+            style={{ width: "max-content", minWidth: "100%" }}
+          >
             <thead className="bg-gray-50 sticky top-0 z-10">
               <tr>
                 {columns.map((col) => (
                   <th
                     key={col.key}
-                    className="px-4 py-2 text-left"
+                    className={`px-4 py-2 text-left ${
+                      col.key === "UserName" ? "whitespace-nowrap" : "whitespace-normal"
+                    }`}
                     style={{ width: col.width, minWidth: col.width, maxWidth: col.width }}
                   >
                     {col.isAction ? (
                       <span>{col.heading}</span>
                     ) : (
+                      <div className="flex min-w-0 items-center gap-1 whitespace-nowrap">
+                        {groupByCity && col.key === "UserName" ? (
+                          <button
+                            type="button"
+                            onClick={toggleAllCities}
+                            title={allCitiesCollapsed ? "Expand all city groups" : "Collapse all city groups"}
+                            aria-label={allCitiesCollapsed ? "Expand all city groups" : "Collapse all city groups"}
+                            className="inline-flex h-5 w-5 flex-none items-center justify-center rounded text-slate-500 hover:bg-slate-200 hover:text-slate-800"
+                          >
+                            {allCitiesCollapsed ? <ChevronRight size={15} /> : <ChevronDown size={15} />}
+                          </button>
+                        ) : null}
                       <button
                         type="button"
                         onClick={() => onSort(col.key)}
-                        className={`flex items-center gap-1 text-left ${col.key === "Warning" ? "text-red-600" : ""}`}
+                        className={`inline-flex min-w-0 items-center gap-1 text-left ${
+                          col.key === "UserName"
+                            ? "whitespace-nowrap"
+                            : "whitespace-normal break-words"
+                        } ${col.key === "Warning" ? "text-red-600" : ""}`}
                       >
                         <span>{col.heading}</span>
                         <span className="text-[10px] text-slate-400">
@@ -175,6 +245,7 @@ export default function RetailerLiabilityTable({
                             : "↕"}
                         </span>
                       </button>
+                      </div>
                     )}
                   </th>
                 ))}
@@ -200,70 +271,117 @@ export default function RetailerLiabilityTable({
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {filteredData.map((item) => (
-                <tr key={item.UserId}>
-                  {columns.map((col) => (
-                    <td
-                      key={col.key}
-                      className={`px-4 py-2 whitespace-nowrap text-xs ${
-                        col.key === "Warning" ? "text-red-600" : "text-gray-900"
-                      }`}
-                      style={{ width: col.width, minWidth: col.width, maxWidth: col.width }}
-                    >
-                      {col.isAction ? (
-                        <div className="flex min-w-[116px] items-center gap-2 whitespace-nowrap">
-                          <ActionIconButton
-                            label="More Details"
-                            onClick={() => onMoreDetails(item.UserId)}
-                            className="border-blue-200 text-blue-700 hover:bg-blue-50"
-                          >
-                            <Eye size={16} />
-                          </ActionIconButton>
-                          <ActionIconButton
-                            label="Get Projection"
-                            onClick={() => onProjectionAmount(item)}
-                            className="border-emerald-200 text-emerald-700 hover:bg-emerald-50"
-                          >
-                            <TrendingUp size={16} />
-                          </ActionIconButton>
-                          {showProjectionSnapshotAction ? (
-                            <ActionIconButton
-                              label="Update Projection Snapshot"
-                              onClick={() => onUpdateProjectionSnapshot(item)}
-                              disabled={updatingProjectionRetailerId === item.UserId}
-                              className="border-amber-200 text-amber-700 hover:bg-amber-50 disabled:cursor-not-allowed disabled:opacity-50"
+              {(groupedData || [[null, filteredData]]).flatMap(([city, items]) => [
+                ...(groupByCity
+                  ? [
+                      <tr key={`city-${city}`} className="bg-slate-100">
+                        {columns.map((col) => {
+                          const total = groupTotalKeys.has(col.key)
+                            ? getGroupTotal(items, col.key)
+                            : null;
+
+                          return (
+                            <td
+                              key={col.key}
+                              className="px-4 py-2 text-left text-xs font-bold text-slate-700"
+                              style={{ width: col.width, minWidth: col.width, maxWidth: col.width }}
                             >
-                              <RefreshCw
-                                size={16}
-                                className={
-                                  updatingProjectionRetailerId === item.UserId
-                                    ? "animate-spin"
-                                    : ""
-                                }
-                              />
+                              {col.key === "UserName" ? (
+                                <button
+                                  type="button"
+                                  onClick={() => toggleCity(city)}
+                                  aria-expanded={!collapsedCities.has(city)}
+                                  className="flex items-center gap-2 text-left uppercase tracking-wide hover:text-blue-700"
+                                >
+                                  <span aria-hidden="true" className="inline-flex h-5 w-5 flex-none items-center justify-center">
+                                    {collapsedCities.has(city) ? (
+                                      <ChevronRight size={15} />
+                                    ) : (
+                                      <ChevronDown size={15} />
+                                    )}
+                                  </span>
+                                  <span>
+                                    {city} <span className="font-normal text-slate-500">({items.length})</span>
+                                  </span>
+                                </button>
+                              ) : total !== null ? (
+                                <span title={`Total ${col.heading}`}>
+                                  Rs {formatIndianNumber(total)}
+                                </span>
+                              ) : null}
+                            </td>
+                          );
+                        })}
+                      </tr>,
+                    ]
+                  : []),
+                ...(!groupByCity || !collapsedCities.has(city)
+                  ? items.map((item) => (
+                  <tr key={item.UserId}>
+                    {columns.map((col) => (
+                      <td
+                        key={col.key}
+                        className={`px-4 py-2 whitespace-nowrap text-xs ${
+                          col.key === "Warning" ? "text-red-600" : "text-gray-900"
+                        }`}
+                        style={{ width: col.width, minWidth: col.width, maxWidth: col.width }}
+                      >
+                        {col.isAction ? (
+                          <div className="flex min-w-[116px] items-center gap-2 whitespace-nowrap">
+                            <ActionIconButton
+                              label="More Details"
+                              onClick={() => onMoreDetails(item.UserId)}
+                              className="border-blue-200 text-blue-700 hover:bg-blue-50"
+                            >
+                              <Eye size={16} />
                             </ActionIconButton>
-                          ) : null}
-                        </div>
-                      ) : col.key === "UserName" && enableHistoryOnName ? (
-                        <button
-                          type="button"
-                          onClick={() => onProjectionHistory(item)}
-                          title={renderCellValue(item, col.key)}
-                          className="block w-full max-w-full cursor-pointer overflow-hidden text-ellipsis whitespace-nowrap text-left text-blue-600 underline underline-offset-2 hover:text-blue-800"
-                        >
-                          {renderCellValue(item, col.key)}
-                        </button>
-                      ) : col.key === "UserName" ? (
-                        <TruncatedCell>{renderCellValue(item, col.key)}</TruncatedCell>
-                      ) : (
-                        <TruncatedCell className={col.key === "Warning" ? "text-red-600" : ""}>
-                          {renderCellValue(item, col.key)}
-                        </TruncatedCell>
-                      )}
-                    </td>
-                  ))}
-                </tr>
-              ))}
+                            <ActionIconButton
+                              label="Get Projection"
+                              onClick={() => onProjectionAmount(item)}
+                              className="border-emerald-200 text-emerald-700 hover:bg-emerald-50"
+                            >
+                              <TrendingUp size={16} />
+                            </ActionIconButton>
+                            {showProjectionSnapshotAction ? (
+                              <ActionIconButton
+                                label="Update Projection Snapshot"
+                                onClick={() => onUpdateProjectionSnapshot(item)}
+                                disabled={updatingProjectionRetailerId === item.UserId}
+                                className="border-amber-200 text-amber-700 hover:bg-amber-50 disabled:cursor-not-allowed disabled:opacity-50"
+                              >
+                                <RefreshCw
+                                  size={16}
+                                  className={
+                                    updatingProjectionRetailerId === item.UserId
+                                      ? "animate-spin"
+                                      : ""
+                                  }
+                                />
+                              </ActionIconButton>
+                            ) : null}
+                          </div>
+                        ) : col.key === "UserName" && enableHistoryOnName ? (
+                          <button
+                            type="button"
+                            onClick={() => onProjectionHistory(item)}
+                            title={renderCellValue(item, col.key)}
+                            className="block w-full max-w-full cursor-pointer overflow-hidden text-ellipsis whitespace-nowrap text-left text-blue-600 underline underline-offset-2 hover:text-blue-800"
+                          >
+                            {renderCellValue(item, col.key)}
+                          </button>
+                        ) : col.key === "UserName" ? (
+                          <TruncatedCell>{renderCellValue(item, col.key)}</TruncatedCell>
+                        ) : (
+                          <TruncatedCell className={col.key === "Warning" ? "text-red-600" : ""}>
+                            {renderCellValue(item, col.key)}
+                          </TruncatedCell>
+                        )}
+                      </td>
+                    ))}
+                  </tr>
+                  ))
+                  : []),
+              ])}
             </tbody>
           </table>
         </div>

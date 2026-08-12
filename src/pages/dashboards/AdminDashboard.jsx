@@ -26,6 +26,7 @@ export default function AdminDashboard({ userType, id }) {
   const [useHistoricalDate, setUseHistoricalDate] = useState(false);
   const [selectedSnapshotDate, setSelectedSnapshotDate] = useState("");
   const [selectedCity, setSelectedCity] = useState("ALL");
+  const [groupByCity, setGroupByCity] = useState(false);
 
   useEffect(() => {
     if (useHistoricalDate && !selectedSnapshotDate) {
@@ -397,6 +398,8 @@ export default function AdminDashboard({ userType, id }) {
         cityOptions={cityOptions}
         selectedCity={selectedCity}
         onCityChange={setSelectedCity}
+        groupByCity={groupByCity}
+        onGroupByCityChange={setGroupByCity}
       />
 
       {error && <div className="text-red-600">{error}</div>}
@@ -419,6 +422,7 @@ export default function AdminDashboard({ userType, id }) {
           </div>
           <RetailerLiabilityTable
             data={filteredLiabilities}
+            groupByCity={groupByCity}
             showProjectionSnapshotAction
             onProjectionSnapshotUpdated={fetchLiabilities}
           />
@@ -451,6 +455,8 @@ function HeaderActions({
   cityOptions,
   selectedCity,
   onCityChange,
+  groupByCity,
+  onGroupByCityChange,
 }) {
   const target = typeof document !== "undefined"
     ? document.getElementById("page-header-actions")
@@ -492,6 +498,19 @@ function HeaderActions({
           </option>
         ))}
       </select>
+      <label className="flex min-h-[42px] items-center gap-3 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm">
+        <span>Group by city</span>
+        <button
+          type="button"
+          role="switch"
+          aria-checked={groupByCity}
+          aria-label="Group retailer liabilities by city"
+          onClick={() => onGroupByCityChange(!groupByCity)}
+          className={`app-switch ${groupByCity ? "is-active" : ""}`}
+        >
+          <span className="app-switch-thumb" />
+        </button>
+      </label>
       <button
         type="button"
         onClick={onExport}
