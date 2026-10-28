@@ -214,16 +214,40 @@ export const apiBase = {
       )
     ).json(),
   addLedgerInfo: async (data) =>
-    await (
-      await authorizedFetch(`${API_URL}/AddLadgerInfo`, {
+    await (async () => {
+      const result = await (
+        await authorizedFetch(`${API_URL}/AddLadgerInfo`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
+        })
+      ).json();
+      if (result?.Response === false) throw new Error("Ledger could not be created. Check the retailer OTP.");
+      return result;
+    })(),
+  updateLedgerInfo: async (data) =>
+    await (async () => {
+      const result = await (
+        await authorizedFetch(`${API_URL}/UpdateLadgerInfo`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+        })
+      ).json();
+      if (typeof result?.Response === "string" && /^Errors:/i.test(result.Response)) throw new Error(result.Response);
+      return result;
+    })(),
+  generateLedgerOtp: async (retailerId, collectorId) =>
+    await (
+      await authorizedFetch(`${API_URL}/GenerateLedgerOtp`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ RetailerId: retailerId, CollectorId: collectorId }),
       })
     ).json(),
-  updateLedgerInfo: async (data) =>
+  generateLedgerApprovalOtp: async (data) =>
     await (
-      await authorizedFetch(`${API_URL}/UpdateLadgerInfo`, {
+      await authorizedFetch(`${API_URL}/GenerateLedgerApprovalOtp`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),

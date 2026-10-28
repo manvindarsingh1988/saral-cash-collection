@@ -58,6 +58,7 @@ export default function ApprovalLedgerModal({
     Comment: "",
     DocId: null,
     CashierId: null,
+    Otp: "",
   });
 
   useEffect(() => {
@@ -89,6 +90,7 @@ export default function ApprovalLedgerModal({
       return obj;
     }, {});
     filteredData.GivenOn = initialData?.GivenOn;
+    filteredData.Otp = formData.Otp;
     if (
       filteredData.WorkFlow === "5" &&
       filteredData.TransactionType != "1" &&
@@ -216,6 +218,19 @@ export default function ApprovalLedgerModal({
             </div>
           );
         })}
+
+        {String(formData.TransactionType) === "1" && <div className="app-modal-field">
+          <label className="app-modal-label">Retailer OTP</label>
+          <input
+            name="Otp"
+            inputMode="numeric"
+            maxLength={6}
+            value={formData.Otp || ""}
+            onChange={handleChange}
+            placeholder="Enter 6-digit OTP"
+            className="border px-3 py-2 rounded-lg"
+          />
+        </div>}
 
         <div className="app-modal-field">
           {formData?.DocId && (

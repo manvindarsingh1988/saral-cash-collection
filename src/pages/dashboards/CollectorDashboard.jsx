@@ -425,6 +425,7 @@ export default function CollectorDashboard({ collectorUserId }) {
           initialData={editData}
           modelFor="RetailerLedger"
           collectorId={collectorUserId}
+          retailerId={selectedRetailerId}
         />
       ) : null}
     </div>

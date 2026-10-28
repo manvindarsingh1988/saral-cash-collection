@@ -35,6 +35,7 @@ export default function RetailerLedgerModal({
   onClose,
   onSubmit,
   initialData,
+  retailUserId,
 }) {
   console.log("Initial Data:", initialData);
 
@@ -49,6 +50,7 @@ export default function RetailerLedgerModal({
     StuckInCDM: false,
     File: [],
     DocId: null,
+    Otp: "",
   });
 
   console.log("Form Data:", formData);
@@ -91,10 +93,15 @@ export default function RetailerLedgerModal({
       alert("Select valid collector");
       return;
     }
+    if (!initialData?.Id && formData.TransactionType === "1" && (!formData.Otp || !/^\d{6}$/.test(formData.Otp))) {
+      alert("Enter the 6-digit retailer OTP.");
+      return;
+    }
     const filteredData = allowedFields.reduce((obj, key) => {
       obj[key] = formData[key];
       return obj;
     }, {});
+    filteredData.Otp = formData.Otp;
     onSubmit(filteredData);
     onClose();
   };
@@ -102,6 +109,7 @@ export default function RetailerLedgerModal({
   const handleFileChange = (e) => {
     setFormData((prev) => ({ ...prev, File: Array.from(e.target.files) }));
   };
+
 
   if (!isOpen) return null;
 
@@ -273,6 +281,19 @@ export default function RetailerLedgerModal({
             </div>
           );
         })}
+
+        {formData.TransactionType === "1" && <div className="app-modal-field">
+          <label className="app-modal-label">Retailer OTP</label>
+          <input
+            name="Otp"
+            inputMode="numeric"
+            maxLength={6}
+            value={formData.Otp}
+            onChange={handleChange}
+            placeholder="Enter 6-digit OTP shared by collector"
+            className="border px-3 py-2 rounded-lg"
+          />
+        </div>}
 
         <div className="app-modal-field">
           <label className="app-modal-label">Upload Slip</label>

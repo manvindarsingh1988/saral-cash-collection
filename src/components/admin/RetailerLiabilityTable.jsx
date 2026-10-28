@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { createPortal } from "react-dom";
-import { ChevronDown, ChevronRight, Eye, RefreshCw, TrendingUp, X } from "lucide-react";
+import { ChevronDown, ChevronRight, Eye, KeyRound, RefreshCw, TrendingUp, X } from "lucide-react";
 import { apiBase } from "../../lib/apiBase";
 import { sortTableRows } from "../../lib/tableSort";
 import { formatIndianNumber } from "../../lib/utils";
@@ -41,6 +41,9 @@ export default function RetailerLiabilityTable({
   showProjectionSnapshotAction = false,
   onProjectionSnapshotUpdated,
   groupByCity = false,
+  enableOtpGeneration = false,
+  otpCollectorId = "",
+  hideDetailsActions = false,
 }) {
   const columns = visibleColumnKeys?.length
     ? getColumns().filter((column) => visibleColumnKeys.includes(column.key))
@@ -51,6 +54,8 @@ export default function RetailerLiabilityTable({
   const [historyRetailer, setHistoryRetailer] = useState(null);
   const [updatingProjectionRetailerId, setUpdatingProjectionRetailerId] = useState("");
   const [collapsedCities, setCollapsedCities] = useState(() => new Set());
+  const [otpLoadingRetailerId, setOtpLoadingRetailerId] = useState("");
+  const [generatedOtp, setGeneratedOtp] = useState(null);
 
   const [filters, setFilters] = useState({
     UserName: "",
@@ -168,6 +173,21 @@ export default function RetailerLiabilityTable({
     }
   };
 
+  const onGenerateOtp = async (retailer) => {
+    try {
+      setOtpLoadingRetailerId(retailer.UserId);
+      const result = await apiBase.generateLedgerOtp(retailer.UserId, otpCollectorId);
+      if (!result?.Response || !result?.Otp) {
+        throw new Error(result?.Message || "OTP generation failed.");
+      }
+      setGeneratedOtp({ retailerId: retailer.UserId, retailerName: retailer.UserName, otp: result.Otp });
+    } catch (error) {
+      alert(error.message || "OTP generation failed.");
+    } finally {
+      setOtpLoadingRetailerId("");
+    }
+  };
+
   const renderCellValue = (item, key) => {
     const numericKeys = [
       "LaibilityAmount",
@@ -196,6 +216,12 @@ export default function RetailerLiabilityTable({
 
   return (
     <div className="flex min-h-0 flex-1 flex-col rounded-lg bg-white p-4 shadow sm:p-6">
+      {generatedOtp && (
+        <div className="mb-4 flex items-center justify-between rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+          <span>OTP for {generatedOtp.retailerName || generatedOtp.retailerId}: <strong className="text-lg tracking-widest">{generatedOtp.otp}</strong> <span className="text-xs">(valid for 15 minutes)</span></span>
+          <button type="button" onClick={() => setGeneratedOtp(null)} className="text-emerald-700 underline">Hide</button>
+        </div>
+      )}
       <div className="min-h-0 flex-1 overflow-x-auto">
         <div className="app-table-shell h-full min-h-0 overflow-y-auto text-xs">
           <table
@@ -328,20 +354,24 @@ export default function RetailerLiabilityTable({
                       >
                         {col.isAction ? (
                           <div className="flex min-w-[116px] items-center gap-2 whitespace-nowrap">
-                            <ActionIconButton
-                              label="More Details"
-                              onClick={() => onMoreDetails(item.UserId)}
-                              className="border-blue-200 text-blue-700 hover:bg-blue-50"
-                            >
-                              <Eye size={16} />
-                            </ActionIconButton>
-                            <ActionIconButton
-                              label="Get Projection"
-                              onClick={() => onProjectionAmount(item)}
-                              className="border-emerald-200 text-emerald-700 hover:bg-emerald-50"
-                            >
-                              <TrendingUp size={16} />
-                            </ActionIconButton>
+                            {!hideDetailsActions ? (
+                              <>
+                                <ActionIconButton
+                                  label="More Details"
+                                  onClick={() => onMoreDetails(item.UserId)}
+                                  className="border-blue-200 text-blue-700 hover:bg-blue-50"
+                                >
+                                  <Eye size={16} />
+                                </ActionIconButton>
+                                <ActionIconButton
+                                  label="Get Projection"
+                                  onClick={() => onProjectionAmount(item)}
+                                  className="border-emerald-200 text-emerald-700 hover:bg-emerald-50"
+                                >
+                                  <TrendingUp size={16} />
+                                </ActionIconButton>
+                              </>
+                            ) : null}
                             {showProjectionSnapshotAction ? (
                               <ActionIconButton
                                 label="Update Projection Snapshot"
@@ -357,6 +387,16 @@ export default function RetailerLiabilityTable({
                                       : ""
                                   }
                                 />
+                              </ActionIconButton>
+                            ) : null}
+                            {enableOtpGeneration ? (
+                              <ActionIconButton
+                                label="Generate retailer OTP"
+                                onClick={() => onGenerateOtp(item)}
+                                disabled={otpLoadingRetailerId === item.UserId}
+                                className="border-violet-200 text-violet-700 hover:bg-violet-50 disabled:cursor-not-allowed disabled:opacity-50"
+                              >
+                                <KeyRound size={16} className={otpLoadingRetailerId === item.UserId ? "animate-pulse" : ""} />
                               </ActionIconButton>
                             ) : null}
                           </div>

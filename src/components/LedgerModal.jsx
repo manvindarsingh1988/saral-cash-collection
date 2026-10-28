@@ -19,6 +19,7 @@ export default function LedgerModal({
   cashiers,
   collectors,
   modelFor,
+  retailerId,
 }) {
   const isCollectorLedger = modelFor === "CollectorLedger";
   const isCashierLedger = modelFor === "CashierLedger";
@@ -44,7 +45,7 @@ export default function LedgerModal({
   };
 
   const [formData, setFormData] = useState({
-    RetailerId: "",
+    RetailerId: retailerId || "",
     CollectorId: userId,
     TransactionType: isCashierLedger ? "2" : "1",
     CashierId: "",
@@ -59,6 +60,7 @@ export default function LedgerModal({
     StuckInBank: false,
     StuckInCDM: false,
     File: [],
+    Otp: "",
   });
 
   useEffect(() => {
@@ -88,9 +90,16 @@ export default function LedgerModal({
         StuckInCDM: initialData?.WorkFlow === 8,
         DocId: initialData?.DocId ?? null,
         File: null,
+        Otp: "",
       });
     }
-  }, [initialData, userId]);
+  }, [initialData, userId, retailerId]);
+
+  useEffect(() => {
+    if (!initialData && retailerId) {
+      setFormData((prev) => ({ ...prev, RetailerId: retailerId }));
+    }
+  }, [initialData, retailerId]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -114,6 +123,10 @@ export default function LedgerModal({
   };
 
   const handleSubmit = async () => {
+    if (formData.TransactionType === "1" && (!formData.Otp || !/^\d{6}$/.test(formData.Otp))) {
+      alert("Enter the 6-digit retailer OTP.");
+      return;
+    }
     const docId = formData?.DocId || generateSafeGuid();
     let fileSaved = false;
     const isCollectorToCollectorHandover =
@@ -176,6 +189,7 @@ export default function LedgerModal({
           : formData?.Id
           ? formData.DocId
           : null,
+      Otp: formData.Otp,
     };
 
     console.log("Payload before sanitization:", payload);
@@ -213,7 +227,7 @@ export default function LedgerModal({
 
         <div className="app-modal-body">
           <div className="app-modal-form">
-        <div className="app-modal-field">
+        {formData.TransactionType === "1" && <div className="app-modal-field">
           <label className="app-modal-label">Transaction Type</label>
           <select
             name="TransactionType"
@@ -238,7 +252,7 @@ export default function LedgerModal({
               comments to avoid rejection.
             </p>
           )}
-        </div>
+        </div>}
 
         {isCollectorLedger && formData.TransactionType === "1" && (
           <div className="app-modal-field">
@@ -378,6 +392,12 @@ export default function LedgerModal({
             className="border px-3 py-2 rounded-lg"
           />
         </div>
+
+        {formData.TransactionType === "1" && <div className="app-modal-field">
+          <label className="app-modal-label">Retailer OTP</label>
+          <p className="mb-2 text-xs text-slate-500">Generate the OTP from the Retailer Liabilities screen, then share it with the retailer.</p>
+          <input name="Otp" inputMode="numeric" maxLength={6} value={formData.Otp} onChange={handleChange} placeholder="Enter 6-digit OTP" className="border px-3 py-2 rounded-lg" />
+        </div>}
 
         {/* StuckInBank */}
         {formData.TransactionType === "2" && (
