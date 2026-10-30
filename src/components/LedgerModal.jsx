@@ -123,7 +123,7 @@ export default function LedgerModal({
   };
 
   const handleSubmit = async () => {
-    if (formData.TransactionType === "1" && (!formData.Otp || !/^\d{6}$/.test(formData.Otp))) {
+    if (formData.TransactionType === "1" && formData.HandoverTo !== "collector" && (!formData.Otp || !/^\d{6}$/.test(formData.Otp))) {
       alert("Enter the 6-digit retailer OTP.");
       return;
     }
@@ -227,7 +227,7 @@ export default function LedgerModal({
 
         <div className="app-modal-body">
           <div className="app-modal-form">
-        {formData.TransactionType === "1" && <div className="app-modal-field">
+        {formData.TransactionType === "1" && formData.HandoverTo !== "collector" && <div className="app-modal-field">
           <label className="app-modal-label">Transaction Type</label>
           <select
             name="TransactionType"

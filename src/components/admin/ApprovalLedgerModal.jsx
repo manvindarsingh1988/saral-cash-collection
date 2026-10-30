@@ -219,7 +219,7 @@ export default function ApprovalLedgerModal({
           );
         })}
 
-        {String(formData.TransactionType) === "1" && <div className="app-modal-field">
+        {String(formData.TransactionType) === "1" && !formData.ToCollector && <div className="app-modal-field">
           <label className="app-modal-label">Retailer OTP</label>
           <input
             name="Otp"

@@ -500,7 +500,7 @@ export default function RetailDashboard({ retailUserId }) {
                                 <Download className="h-4 w-4" />
                               </TooltipIconButton>
                             ) : null}
-                            {Number(item.TransactionType) === 1 && ![3, 5].includes(Number(item.WorkFlow)) ? (
+                            {Number(item.TransactionType) === 1 && !item.ToCollector && ![3, 5].includes(Number(item.WorkFlow)) ? (
                               <TooltipIconButton
                                 label="Generate new approval OTP"
                                 onClick={(e) => {
