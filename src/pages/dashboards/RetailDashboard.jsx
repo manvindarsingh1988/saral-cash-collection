@@ -74,6 +74,7 @@ export default function RetailDashboard({ retailUserId }) {
   const [fromDate, setFromDate] = useState(() => new Date().toISOString().split("T")[0]);
   const [toDate, setToDate] = useState(() => new Date().toISOString().split("T")[0]);
   const [enableDateFilter, setEnableDateFilter] = useState(false);
+  const [notice, setNotice] = useState(null);
   const [filters, setFilters] = useState({
     Id: "",
     Amount: "",
@@ -186,19 +187,19 @@ export default function RetailDashboard({ retailUserId }) {
       if (editData?.Id) {
         const result = await apiBase.updateLedgerInfo(sanitizedPayload);
         if (result?.Response) {
-          alert(result.Response);
+          setNotice({ type: "success", text: result.Response });
         }
       } else {
         const result = await apiBase.addLedgerInfo(sanitizedPayload);
         if (result?.Response) {
-          alert("Success: Ledger details added.");
+          setNotice({ type: "success", text: "Ledger details added successfully." });
         }
       }
 
       await fetchData();
     } catch (err) {
       console.error("Submission failed:", err);
-      alert("Submission failed.");
+      setNotice({ type: "error", text: "Submission failed." });
     }
   };
 
@@ -244,6 +245,11 @@ export default function RetailDashboard({ retailUserId }) {
 
   return (
     <div className="flex h-full min-h-0 flex-col gap-6">
+      {notice && (
+        <div className={`rounded-lg border px-4 py-3 text-sm ${notice.type === "error" ? "border-red-200 bg-red-50 text-red-700" : "border-emerald-200 bg-emerald-50 text-emerald-700"}`}>
+          <div className="flex items-center justify-between gap-3"><span>{notice.text}</span><button type="button" className="underline" onClick={() => setNotice(null)}>Dismiss</button></div>
+        </div>
+      )}
       {liability && (
         <div className="liability-summary grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-7">
           {summaryCards.map(({ key, label, color }) => (

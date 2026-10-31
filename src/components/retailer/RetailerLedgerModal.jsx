@@ -56,6 +56,7 @@ export default function RetailerLedgerModal({
   const [collectorOtpEnabled, setCollectorOtpEnabled] = useState(false);
   const [requestingOtp, setRequestingOtp] = useState(false);
   const [otpRequestMessage, setOtpRequestMessage] = useState("");
+  const [formMessage, setFormMessage] = useState(null);
 
   console.log("Form Data:", formData);
 
@@ -108,7 +109,7 @@ export default function RetailerLedgerModal({
   const handleRequestOtp = async () => {
     const amount = Number(formData.Amount);
     if (!formData.CollectorId || !amount || amount <= 0) {
-      alert("Select a collector and enter the amount first.");
+      setFormMessage({ type: "error", text: "Select a collector and enter the amount first." });
       return;
     }
     setRequestingOtp(true);
@@ -120,9 +121,11 @@ export default function RetailerLedgerModal({
       });
       if (!result?.Response) throw new Error(result?.Message || "OTP request failed.");
       setFormData((prev) => ({ ...prev, OtpRequestId: result.RequestId || "" }));
-      setOtpRequestMessage(`Request ID: ${result.RequestId}. Share this with the collector.`);
+      const message = `Request ID: ${result.RequestId}. Share this with the collector.`;
+      setOtpRequestMessage(message);
+      setFormMessage({ type: "success", text: message });
     } catch (error) {
-      alert(error.message);
+      setFormMessage({ type: "error", text: error.message || "OTP request failed." });
     } finally {
       setRequestingOtp(false);
     }
@@ -130,12 +133,12 @@ export default function RetailerLedgerModal({
 
   const handleSubmit = () => {
     if (formData.TransactionType === "1" && !formData.CollectorId) {
-      alert("Select valid collector");
+      setFormMessage({ type: "error", text: "Select a valid collector." });
       return;
     }
     if (!initialData?.Id && formData.TransactionType === "1" && collectorOtpEnabled &&
       (!formData.OtpRequestId || !formData.Otp || !/^\d{6}$/.test(formData.Otp))) {
-      alert("Enter the 6-digit retailer OTP.");
+      setFormMessage({ type: "error", text: "Enter the 6-digit retailer OTP." });
       return;
     }
     const filteredData = allowedFields.reduce((obj, key) => {
@@ -170,6 +173,11 @@ export default function RetailerLedgerModal({
           </button>
         </div>
         <div className="app-modal-body">
+          {formMessage && (
+            <div className={`mb-3 rounded-lg border px-3 py-2 text-sm ${formMessage.type === "error" ? "border-red-200 bg-red-50 text-red-700" : "border-emerald-200 bg-emerald-50 text-emerald-700"}`}>
+              {formMessage.text}
+            </div>
+          )}
           <div className="app-modal-form">
         {allowedFields.map((key) => {
           console.log("Key:", key, "Value:", formData[key]);

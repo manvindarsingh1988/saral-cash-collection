@@ -10,6 +10,7 @@ export default function LedgerOtpRequests({ collectorUserId }) {
   const [loading, setLoading] = useState(true);
   const [busyId, setBusyId] = useState(null);
   const [error, setError] = useState("");
+  const [generatedOtp, setGeneratedOtp] = useState(null);
 
   const loadRequests = useCallback(async () => {
     if (!collectorUserId) return;
@@ -34,10 +35,14 @@ export default function LedgerOtpRequests({ collectorUserId }) {
     try {
       const result = await apiBase.generateLedgerOtpForRequest(request.RequestId, collectorUserId);
       if (!result?.Response) throw new Error(result?.Message || "OTP could not be generated.");
-      window.alert(`OTP for ${request.RetailerName || request.RetailerId}: ${result.Otp}\nRequest ID: ${request.RequestId}`);
+      setGeneratedOtp({
+        otp: result.Otp,
+        retailerName: request.RetailerName || request.RetailerId,
+        requestId: request.RequestId,
+      });
       await loadRequests();
     } catch (err) {
-      window.alert(err.message || "OTP could not be generated.");
+      setError(err.message || "OTP could not be generated.");
     } finally {
       setBusyId(null);
     }
@@ -53,6 +58,12 @@ export default function LedgerOtpRequests({ collectorUserId }) {
         <button className="app-button-secondary" onClick={loadRequests}>Refresh</button>
       </div>
       {error && <div className="mb-3 rounded bg-red-50 p-3 text-sm text-red-700">{error}</div>}
+      {generatedOtp && (
+        <div className="mb-3 flex items-center justify-between rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800">
+          <span>OTP for <strong>{generatedOtp.retailerName}</strong>: <strong className="text-lg tracking-widest">{generatedOtp.otp}</strong><br /><span className="text-xs">Request ID: {generatedOtp.requestId} · Valid for 15 minutes</span></span>
+          <button type="button" className="underline" onClick={() => setGeneratedOtp(null)}>Hide</button>
+        </div>
+      )}
       <div className="app-table-shell min-h-0 flex-1 overflow-auto">
         <table className="app-table min-w-full text-sm">
           <thead>
