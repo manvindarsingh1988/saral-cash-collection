@@ -11,6 +11,7 @@ import RetailDashboard from "../pages/dashboards/RetailDashboard";
 import CollectorLedger from "../pages/collector/CollectorLedger";
 import PendingApprovalsForCollector from "../pages/collector/PendingApprovalsForCollector";
 import RetailerLiabilitiesForCollector from "../pages/collector/RetailerLiabilitiesForCollector";
+import LedgerOtpRequests from "../pages/collector/LedgerOtpRequests";
 
 import AddUser from "../pages/admin/AddUser";
 import AssignRetail from "../pages/admin/AssignRetail";
@@ -104,6 +105,10 @@ export default function UserSpecificDashboard() {
         <Route
           path="/pending-approvals"
           element={<PendingApprovalsForCollector collectorUserId={Id} />}
+        />
+        <Route
+          path="/otp-requests"
+          element={<LedgerOtpRequests collectorUserId={Id} />}
         />
         <Route
           path="/"

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Download, KeyRound } from "lucide-react";
+import { Download } from "lucide-react";
 import RetailerLedgerModal from "../../components/retailer/RetailerLedgerModal";
 import RetailerProjectionHistoryDialog from "../../components/RetailerProjectionHistoryDialog";
 import Tooltip from "../../components/Tooltip";
@@ -212,37 +212,6 @@ export default function RetailDashboard({ retailUserId }) {
       await fetchData();
     } catch (err) {
       console.error("Delete failed:", err);
-    }
-  };
-
-  const handleGenerateApprovalOtp = async (item) => {
-    if (Number(item?.TransactionType) !== 1 || !item?.CollectorId) {
-      alert("A pending cash ledger with a collector is required.");
-      return;
-    }
-
-    try {
-      const result = await apiBase.generateLedgerApprovalOtp({
-        Id: item.Id,
-        RetailerId: retailUserId,
-        CollectorId: item.CollectorId,
-        Amount: Number(item.Amount),
-        TransactionType: 1,
-        Date: item.Date,
-        ValuationDate: item.ValuationDate || null,
-        Comment: item.Comment || "",
-        CashierId: item.CashierId || "",
-        DocId: item.DocId || "",
-        ToCollector: item.ToCollector || "",
-      });
-
-      if (!result?.Response || !result?.Otp) {
-        throw new Error(result?.Message || "Approval OTP generation failed.");
-      }
-
-      alert(`New approval OTP for ledger ${item.Id}: ${result.Otp}\nShare this OTP with the collector.`);
-    } catch (err) {
-      alert(err.message || "Approval OTP generation failed.");
     }
   };
 
@@ -498,18 +467,6 @@ export default function RetailDashboard({ retailUserId }) {
                                 className="text-blue-600 hover:text-blue-800"
                               >
                                 <Download className="h-4 w-4" />
-                              </TooltipIconButton>
-                            ) : null}
-                            {Number(item.TransactionType) === 1 && !item.ToCollector && ![3, 5].includes(Number(item.WorkFlow)) ? (
-                              <TooltipIconButton
-                                label="Generate new approval OTP"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleGenerateApprovalOtp(item);
-                                }}
-                                className="text-violet-600 hover:text-violet-800"
-                              >
-                                <KeyRound className="h-4 w-4" />
                               </TooltipIconButton>
                             ) : null}
                           </div>

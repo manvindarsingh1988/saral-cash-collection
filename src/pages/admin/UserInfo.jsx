@@ -21,6 +21,7 @@ const columns = [
   { key: "ProjectionSnapshotMinutes", label: "Projection Snapshot Minutes", width: "200px" },
   { key: "IsThirdParty", label: "3rd Party", width: "100px" },
   { key: "IsSelfSubmitter", label: "Self Submitter", width: "130px" },
+  { key: "IsLedgerOtpEnabled", label: "Ledger OTP", width: "110px" },
   { key: "Actions", label: "Actions", width: "120px" },
   { key: "Password", label: "Password", width: "120px" },
   { key: "Remark", label: "Remark", width: "160px", filter: "remark", type: "text" },
@@ -274,7 +275,9 @@ export default function UserInfo() {
   const updateFlag = async (userId, value, type) => {
     try {
       const updater =
-        type === "thirdParty"
+        type === "ledgerOtp"
+          ? apiBase.updateCollectorLedgerOtpEnabled
+          : type === "thirdParty"
           ? apiBase.updateIsThirdPartyFlag
           : apiBase.updateIsSelfSubmitterFlag;
 
@@ -286,7 +289,9 @@ export default function UserInfo() {
           u.Id === userId
             ? {
                 ...u,
-                [type === "thirdParty" ? "IsThirdParty" : "IsSelfSubmitter"]: value,
+                [type === "ledgerOtp"
+                  ? "IsLedgerOtpEnabled"
+                  : type === "thirdParty" ? "IsThirdParty" : "IsSelfSubmitter"]: value,
               }
             : u
         )
@@ -473,6 +478,16 @@ export default function UserInfo() {
                             checked={user.IsSelfSubmitter}
                             disabled={!user.Active}
                             onChange={(e) => updateFlag(user.Id, e.target.checked, "selfSubmitter")}
+                          />
+                        ) : null}
+                      </td>
+                      <td className="px-4 py-3" style={inactiveCellStyle}>
+                        {user.UserType == 12 ? (
+                          <input
+                            type="checkbox"
+                            checked={!!user.IsLedgerOtpEnabled}
+                            disabled={!user.Active}
+                            onChange={(e) => updateFlag(user.Id, e.target.checked, "ledgerOtp")}
                           />
                         ) : null}
                       </td>

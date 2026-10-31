@@ -51,7 +51,11 @@ export default function RetailerLedgerModal({
     File: [],
     DocId: null,
     Otp: "",
+    OtpRequestId: "",
   });
+  const [collectorOtpEnabled, setCollectorOtpEnabled] = useState(false);
+  const [requestingOtp, setRequestingOtp] = useState(false);
+  const [otpRequestMessage, setOtpRequestMessage] = useState("");
 
   console.log("Form Data:", formData);
 
@@ -83,9 +87,45 @@ export default function RetailerLedgerModal({
     }
   }, [initialData]);
 
+  useEffect(() => {
+    let cancelled = false;
+    setCollectorOtpEnabled(false);
+    setOtpRequestMessage("");
+    if (initialData?.Id || formData.TransactionType !== "1" || !formData.CollectorId) return undefined;
+    apiBase.getCollectorLedgerOtpEnabled(formData.CollectorId)
+      .then((result) => {
+        if (!cancelled) setCollectorOtpEnabled(result?.Response === true || result?.IsLedgerOtpEnabled === true || result === true);
+      })
+      .catch(() => { if (!cancelled) setCollectorOtpEnabled(false); });
+    return () => { cancelled = true; };
+  }, [formData.CollectorId, formData.TransactionType, initialData?.Id]);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleRequestOtp = async () => {
+    const amount = Number(formData.Amount);
+    if (!formData.CollectorId || !amount || amount <= 0) {
+      alert("Select a collector and enter the amount first.");
+      return;
+    }
+    setRequestingOtp(true);
+    try {
+      const result = await apiBase.requestLedgerOtp({
+        RetailerId: retailUserId,
+        CollectorId: formData.CollectorId,
+        Amount: amount,
+      });
+      if (!result?.Response) throw new Error(result?.Message || "OTP request failed.");
+      setFormData((prev) => ({ ...prev, OtpRequestId: result.RequestId || "" }));
+      setOtpRequestMessage(`Request ID: ${result.RequestId}. Share this with the collector.`);
+    } catch (error) {
+      alert(error.message);
+    } finally {
+      setRequestingOtp(false);
+    }
   };
 
   const handleSubmit = () => {
@@ -93,7 +133,8 @@ export default function RetailerLedgerModal({
       alert("Select valid collector");
       return;
     }
-    if (!initialData?.Id && formData.TransactionType === "1" && (!formData.Otp || !/^\d{6}$/.test(formData.Otp))) {
+    if (!initialData?.Id && formData.TransactionType === "1" && collectorOtpEnabled &&
+      (!formData.OtpRequestId || !formData.Otp || !/^\d{6}$/.test(formData.Otp))) {
       alert("Enter the 6-digit retailer OTP.");
       return;
     }
@@ -102,6 +143,7 @@ export default function RetailerLedgerModal({
       return obj;
     }, {});
     filteredData.Otp = formData.Otp;
+    filteredData.OtpRequestId = formData.OtpRequestId;
     onSubmit(filteredData);
     onClose();
   };
@@ -282,17 +324,28 @@ export default function RetailerLedgerModal({
           );
         })}
 
-        {formData.TransactionType === "1" && <div className="app-modal-field">
-          <label className="app-modal-label">Retailer OTP</label>
-          <input
-            name="Otp"
-            inputMode="numeric"
-            maxLength={6}
-            value={formData.Otp}
-            onChange={handleChange}
-            placeholder="Enter 6-digit OTP shared by collector"
-            className="border px-3 py-2 rounded-lg"
-          />
+        {formData.TransactionType === "1" && collectorOtpEnabled && !initialData?.Id && <div className="app-modal-field rounded-lg border border-indigo-100 bg-indigo-50 p-3">
+          <div className="flex items-end gap-2">
+            <div className="min-w-0 flex-1">
+              <label className="app-modal-label">Retailer OTP</label>
+              <input
+                name="Otp"
+                inputMode="numeric"
+                maxLength={6}
+                value={formData.Otp}
+                onChange={handleChange}
+                placeholder="Enter OTP shared by collector"
+                className="border px-3 py-2 rounded-lg"
+              />
+            </div>
+            <button type="button" onClick={handleRequestOtp} disabled={requestingOtp}
+              className="app-button-secondary whitespace-nowrap">
+              {requestingOtp ? "Requesting..." : "Request OTP"}
+            </button>
+          </div>
+          {formData.OtpRequestId && (
+            <p className="mt-2 text-xs text-indigo-700 break-all">{otpRequestMessage}</p>
+          )}
         </div>}
 
         <div className="app-modal-field">

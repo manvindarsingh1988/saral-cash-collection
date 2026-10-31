@@ -253,6 +253,42 @@ export const apiBase = {
         body: JSON.stringify(data),
       })
     ).json(),
+  requestLedgerOtp: async (data) =>
+    await (
+      await authorizedFetch(`${API_URL}/RequestLedgerOtp`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      })
+    ).json(),
+  getLedgerOtpRequests: async (collectorId) =>
+    await (
+      await authorizedFetch(
+        `${API_URL}/GetLedgerOtpRequests?collectorId=${encodeURIComponent(collectorId)}`
+      )
+    ).json(),
+  generateLedgerOtpForRequest: async (requestId, collectorId) =>
+    await (
+      await authorizedFetch(`${API_URL}/GenerateLedgerOtpForRequest`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ RequestId: requestId, CollectorId: collectorId }),
+      })
+    ).json(),
+  getCollectorLedgerOtpEnabled: async (collectorId) =>
+    await (
+      await authorizedFetch(
+        `${API_URL}/GetCollectorLedgerOtpEnabled?collectorId=${encodeURIComponent(collectorId)}`
+      )
+    ).json(),
+  updateCollectorLedgerOtpEnabled: async (userId, enabled) =>
+    await (
+      await authorizedFetch(`${API_URL}/UpdateCollectorLedgerOtpEnabled`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ UserId: userId, Enabled: enabled }),
+      })
+    ).json(),
   deleteLedgerInfo: async (id) =>
     await (
       await authorizedFetch(`${API_URL}/DeleteLadgerInfo?id=${id}`, {

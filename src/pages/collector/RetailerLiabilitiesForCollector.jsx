@@ -75,10 +75,8 @@ export default function RetailerLiabilitiesForCollector({ collectorUserId }) {
           </div>
           <RetailerLiabilityTable
             data={liabilities}
-            visibleColumnKeys={["UserName", "ProjectionAmount", "Action"]}
+            visibleColumnKeys={["UserName", "ProjectionAmount"]}
             enableHistoryOnName={false}
-            enableOtpGeneration
-            otpCollectorId={collectorUserId}
             hideDetailsActions
           />
         </>
