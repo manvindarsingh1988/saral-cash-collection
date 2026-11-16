@@ -11,6 +11,7 @@ const columns = [
   { key: "CurrentSale", label: "Current Sale" },
   { key: "HandoverAmount", label: "Handover Amount" },
   { key: "ClosingAmount", label: "Closing Amount" },
+  { key: "HoldAmount", label: "Hold Amount" },
 ];
 
 export default function RetailerProjectionHistoryDialog({
@@ -78,6 +79,8 @@ export default function RetailerProjectionHistoryDialog({
             accumulator.HandoverAmount + (Number(row.HandoverAmount) || 0),
           ClosingAmount:
             accumulator.ClosingAmount + (Number(row.ClosingAmount) || 0),
+          HoldAmount:
+            accumulator.HoldAmount + (Number(row.HoldAmount) || 0),
         }),
         {
           OpeningAmount: 0,
@@ -380,6 +383,9 @@ export default function RetailerProjectionHistoryDialog({
                     </td>
                     <td className="border-t border-slate-300 bg-slate-100 px-4 py-3 text-xs font-semibold text-slate-700">
                       Rs {formatIndianNumber(totals.ClosingAmount)}
+                    </td>
+                    <td className="border-t border-slate-300 bg-slate-100 px-4 py-3 text-xs font-semibold text-slate-700">
+                      Rs {formatIndianNumber(totals.HoldAmount)}
                     </td>
                   </tr>
                 </tfoot>
