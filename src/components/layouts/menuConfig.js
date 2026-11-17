@@ -38,6 +38,12 @@ export const menuConfig = [
     ],
   },
   {
+    title: "Master Data",
+    children: [
+      { to: "master-data/market-locations", label: "Market Locations", allow: ["Admin"] },
+    ],
+  },
+  {
     title: "Approvals",
     children: [
       {
@@ -63,6 +69,11 @@ export const menuConfig = [
       {
         to: "dashboard/accountent-view",
         label: "Accountent View",
+        allow: ["Admin"],
+      },
+      {
+        to: "dashboard/zone-manager-view",
+        label: "Zone Manager View",
         allow: ["Admin"],
       },
       {

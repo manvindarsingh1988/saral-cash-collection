@@ -16,10 +16,23 @@ export default function AssignRetail() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
+  const [assignByMarketLocation, setAssignByMarketLocation] = useState(false);
+  const [marketLocations, setMarketLocations] = useState([]);
+  const [selectedMarketLocationId, setSelectedMarketLocationId] = useState("");
+  const [marketLocationCollectorId, setMarketLocationCollectorId] = useState("");
+  const [replaceExistingMapping, setReplaceExistingMapping] = useState(false);
+  const [marketMoveLoading, setMarketMoveLoading] = useState(false);
 
   useEffect(() => {
     fetchUsers();
   }, []);
+
+  useEffect(() => {
+    if (!assignByMarketLocation) return;
+    apiBase.getMarketLocations()
+      .then((data) => setMarketLocations(Array.isArray(data) ? data : data?.Data || []))
+      .catch((err) => setError(err.message || "Unable to load market locations."));
+  }, [assignByMarketLocation]);
 
   const fetchUsers = async () => {
     try {
@@ -142,6 +155,32 @@ export default function AssignRetail() {
     }
   };
 
+  const getMarketLocationId = (location) => location?.Id ?? location?.id ?? location?.MarketLocationId ?? location?.marketLocationId;
+  const getMarketLocationName = (location) => location?.Name ?? location?.name ?? location?.MarketLocation ?? location?.marketLocation ?? "";
+
+  const handleMoveByMarketLocation = async () => {
+    if (!selectedMarketLocationId || !marketLocationCollectorId) {
+      setError("Select a market location and target collector.");
+      return;
+    }
+    try {
+      setMarketMoveLoading(true);
+      setError(null);
+      const result = await apiBase.moveRetailersByMarketLocation(selectedMarketLocationId, marketLocationCollectorId, replaceExistingMapping);
+      if (result?.Response === false || result?.success === false) throw new Error(result?.Message || "Failed to move retailers.");
+      setSuccess(true);
+      setTimeout(() => setSuccess(false), 3000);
+      setSelectedMarketLocationId("");
+      setMarketLocationCollectorId("");
+      setReplaceExistingMapping(false);
+      fetchUsers();
+    } catch (err) {
+      setError(err.message || "Failed to move retailers by market location.");
+    } finally {
+      setMarketMoveLoading(false);
+    }
+  };
+
   if (loading) return <div>Loading...</div>;
 
   return (
@@ -157,8 +196,90 @@ export default function AssignRetail() {
         </div>
       )}
 
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
+        <div>
+          <div className="text-sm font-semibold text-slate-800">Assignment mode</div>
+          <div className="text-xs text-slate-500">Switch on to move all retailers from one market location to a collector.</div>
+        </div>
+        <fieldset className="flex flex-wrap items-center gap-4 text-sm font-semibold text-slate-700">
+          <legend className="sr-only">Assignment mode</legend>
+          <label className="flex cursor-pointer items-center gap-2">
+            <input
+              type="radio"
+              name="assignmentMode"
+              checked={!assignByMarketLocation}
+              onChange={() => {
+                setAssignByMarketLocation(false);
+                setSelectedMarketLocationId("");
+                setMarketLocationCollectorId("");
+              }}
+              className="h-4 w-4 border-slate-300 text-blue-600 focus:ring-blue-500"
+            />
+            Standard
+          </label>
+          <label className="flex cursor-pointer items-center gap-2">
+            <input
+              type="radio"
+              name="assignmentMode"
+              checked={assignByMarketLocation}
+              onChange={() => setAssignByMarketLocation(true)}
+              className="h-4 w-4 border-slate-300 text-blue-600 focus:ring-blue-500"
+            />
+            Assign By MarketLoc
+          </label>
+        </fieldset>
+      </div>
+
+      {assignByMarketLocation ? (
+        <div className="mb-6 rounded-2xl border border-blue-200 bg-blue-50/80 p-5">
+          <div className="mb-4">
+            <h2 className="text-base font-semibold text-blue-900">Move Retailers By Market Location</h2>
+            <p className="mt-1 text-sm text-blue-700/80">Choose a market location and the collector who should receive all retailers mapped to it.</p>
+          </div>
+          <div className="grid gap-4 md:grid-cols-[1fr_1fr_auto] md:items-end">
+            <div>
+              <label className="mb-2 block text-sm font-medium text-slate-700">Market Location</label>
+              <SearchableSelect
+                value={selectedMarketLocationId}
+                onChange={setSelectedMarketLocationId}
+                options={marketLocations.map((location) => ({ value: getMarketLocationId(location), label: getMarketLocationName(location) }))}
+                placeholder="Select market location"
+                searchPlaceholder="Search market location..."
+              />
+            </div>
+            <div>
+              <label className="mb-2 block text-sm font-medium text-slate-700">Target Collector</label>
+              <SearchableSelect
+                value={marketLocationCollectorId}
+                onChange={setMarketLocationCollectorId}
+                options={collectors.map((collector) => ({ value: collector.Id, label: `${collector.UserName} (${collector.Id})` }))}
+                placeholder="Select collector"
+                searchPlaceholder="Search collector..."
+              />
+            </div>
+            <button
+              type="button"
+              onClick={handleMoveByMarketLocation}
+              disabled={marketMoveLoading || !selectedMarketLocationId || !marketLocationCollectorId}
+              className="app-button-primary whitespace-nowrap disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {marketMoveLoading ? "Moving..." : "Move Retailers"}
+            </button>
+            <label className="flex items-center gap-2 self-center text-sm font-medium text-slate-700 md:col-span-2">
+              <input
+                type="checkbox"
+                checked={replaceExistingMapping}
+                onChange={(event) => setReplaceExistingMapping(event.target.checked)}
+                className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+              />
+              Replace existing retailer mapping before assigning
+            </label>
+          </div>
+        </div>
+      ) : null}
+
       {/* Source Collector Select */}
-      <div className="mb-6">
+      {!assignByMarketLocation && <div className="mb-6">
         <label className="block text-sm font-medium text-gray-700">
           Select Source Collector
         </label>
@@ -173,10 +294,10 @@ export default function AssignRetail() {
           placeholder="Select collector"
           searchPlaceholder="Search collector..."
         />
-      </div>
+      </div>}
 
       {/* Target Collector and Shift Panel */}
-      {selectedCollector && (
+      {!assignByMarketLocation && selectedCollector && (
         <div className="mb-6 p-4 border border-indigo-200 rounded-lg bg-indigo-50">
           <h3 className="text-md font-semibold text-indigo-700 mb-2">
             Shift All Retailers to Another Collector
@@ -215,7 +336,7 @@ export default function AssignRetail() {
       )}
 
       {/* Retailers Panel */}
-      {selectedCollector && (
+      {!assignByMarketLocation && selectedCollector && (
         <div className="grid gap-6 md:grid-cols-2">
           {/* Assigned Retailers */}
           <div>

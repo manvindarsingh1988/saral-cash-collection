@@ -13,11 +13,13 @@ const routesForRoles = {
     "/dashboard/create",
     "/dashboard/retailer-view",
     "/dashboard/accountent-view",
+    "/dashboard/zone-manager-view",
     "/dashboard/collector-view",
     "/fund/additional",
     "/users/add",
     "/users/info",
-    "/users/qr-mapping"
+    "/users/qr-mapping",
+    "/master-data/market-locations"
   ],
   Cashier: [
     "/",

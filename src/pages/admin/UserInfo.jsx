@@ -5,6 +5,7 @@ import Tooltip from "../../components/Tooltip";
 import UpdateOpeningBalanceModal from "../../components/admin/UpdateOpeningBalanceModal";
 import UpdateProjectionSnapshotMinutesModal from "../../components/admin/UpdateProjectionSnapshotMinutesModal";
 import UpdateRemarkModal from "../../components/admin/UpdateRemarkModal";
+import MarketLocationMappingModal from "../../components/admin/MarketLocationMappingModal";
 import TruncatedCell from "../../components/TruncatedCell";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
 import { apiBase } from "../../lib/apiBase";
@@ -23,6 +24,7 @@ const columns = [
   { key: "IsSelfSubmitter", label: "Self Submitter", width: "130px" },
   { key: "IsLedgerOtpEnabled", label: "Ledger OTP", width: "110px" },
   { key: "Actions", label: "Actions", width: "120px" },
+  { key: "MarketLocations", label: "Market Locations", width: "150px" },
   { key: "Password", label: "Password", width: "120px" },
   { key: "Remark", label: "Remark", width: "160px", filter: "remark", type: "text" },
   { key: "IsUserLinked", label: "Is User Linked", width: "240px", filter: "isUserLinked", type: "text" },
@@ -43,6 +45,7 @@ export default function UserInfo() {
   const [showProjectionSnapshotMinutesModal, setShowProjectionSnapshotMinutesModal] = useState(false);
   const [pendingModalType, setPendingModalType] = useState(null);
   const [selectedProjectionSnapshotMinutes, setSelectedProjectionSnapshotMinutes] = useState(null);
+  const [marketLocationUser, setMarketLocationUser] = useState(null);
 
   const [filters, setFilters] = useState({
     id: "",
@@ -95,8 +98,25 @@ export default function UserInfo() {
     setLoading(true);
     try {
       const response = await apiBase.getUserExtendedInfo();
-      setUserInfos(response || []);
-      setFilteredUserInfos(response || []);
+      const users = Array.isArray(response) ? response : [];
+      const usersWithMarketLocations = await Promise.all(
+        users.map(async (user) => {
+          try {
+            const mappings = await apiBase.getUserMarketLocations(user.Id);
+            return {
+              ...user,
+              MarketLocations: Array.isArray(mappings)
+                ? mappings
+                : mappings?.Data || [],
+            };
+          } catch (error) {
+            console.error(`Error fetching market locations for user ${user.Id}:`, error);
+            return { ...user, MarketLocations: [] };
+          }
+        })
+      );
+      setUserInfos(usersWithMarketLocations);
+      setFilteredUserInfos(usersWithMarketLocations);
     } catch (error) {
       console.error("Error fetching user info:", error);
     } finally {
@@ -143,6 +163,34 @@ export default function UserInfo() {
     setSelectedProjectionSnapshotMinutes(minutes ?? null);
     setPendingModalType("projectionSnapshotMinutes");
   };
+
+  const handleMarketLocationMapping = (user) => setMarketLocationUser(user);
+
+  const handleMarketLocationsSaved = async (userId) => {
+    try {
+      const mappings = await apiBase.getUserMarketLocations(userId);
+      const marketLocations = Array.isArray(mappings)
+        ? mappings
+        : mappings?.Data || [];
+      setUserInfos((prev) =>
+        prev.map((user) =>
+          user.Id === userId ? { ...user, MarketLocations: marketLocations } : user
+        )
+      );
+      setFilteredUserInfos((prev) =>
+        prev.map((user) =>
+          user.Id === userId ? { ...user, MarketLocations: marketLocations } : user
+        )
+      );
+    } catch (error) {
+      console.error(`Error refreshing market locations for user ${userId}:`, error);
+    } finally {
+      setMarketLocationUser(null);
+    }
+  };
+
+  const getMarketLocationLabel = (location) =>
+    location?.Name ?? location?.name ?? location?.MarketLocation ?? location?.marketLocation ?? "";
 
   const handleOpeningBalanceModalClose = (balance, date) => {
     if (balance && date) {
@@ -264,7 +312,7 @@ export default function UserInfo() {
   };
 
   const onSort = (key) => {
-    if (key === "Actions" || key === "Password") return;
+    if (key === "Actions" || key === "Password" || key === "MarketLocations") return;
     setSortConfig((prev) =>
       prev.key === key
         ? { key, direction: prev.direction === "asc" ? "desc" : "asc" }
@@ -523,6 +571,28 @@ export default function UserInfo() {
                         ) : null}
                       </td>
 
+                      <td className="px-4 py-3" style={inactiveCellStyle}>
+                        {user.Active ? (
+                          <div className="flex flex-col gap-1">
+                            <TruncatedCell>
+                              {user.MarketLocations?.length
+                                ? user.MarketLocations
+                                    .map(getMarketLocationLabel)
+                                    .filter(Boolean)
+                                    .join(", ")
+                                : "Not mapped"}
+                            </TruncatedCell>
+                            <button
+                              type="button"
+                              className="text-left text-xs font-semibold text-blue-600 underline"
+                              onClick={() => handleMarketLocationMapping(user)}
+                            >
+                              Map Market Loc
+                            </button>
+                          </div>
+                        ) : null}
+                      </td>
+
                       {currentUser?.UserType === "Admin" && (
                         <td className="px-4 py-3" style={inactiveCellStyle}>
                           <button
@@ -578,6 +648,14 @@ export default function UserInfo() {
         <UpdateRemarkModal
           selectedUserId={selectedUserId}
           handleRemarkModalClose={handleRemarkeModalClose}
+        />
+      )}
+
+      {marketLocationUser && (
+        <MarketLocationMappingModal
+          user={marketLocationUser}
+          onClose={() => setMarketLocationUser(null)}
+          onSaved={() => handleMarketLocationsSaved(marketLocationUser.Id)}
         />
       )}
 

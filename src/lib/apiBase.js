@@ -130,6 +130,46 @@ export const apiBase = {
     await (await authorizedFetch(`${API_URL}/GetRetailerUsers`)).json(),
   getCollectors: async () =>
     await (await authorizedFetch(`${API_URL}/GetCollectorUsers`)).json(),
+  getMarketLocations: async () =>
+    await (await authorizedFetch(`${API_URL}/GetMarketLocations`)).json(),
+  saveMarketLocation: async (data) =>
+    await (
+      await authorizedFetch(`${API_URL}/SaveMarketLocation`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      })
+    ).json(),
+  deleteMarketLocation: async (id) =>
+    await (
+      await authorizedFetch(`${API_URL}/DeleteMarketLocation`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id }),
+      })
+    ).json(),
+  getUserMarketLocations: async (userId) =>
+    await (
+      await authorizedFetch(
+        `${API_URL}/GetUserMarketLocations?userId=${encodeURIComponent(userId)}`
+      )
+    ).json(),
+  saveUserMarketLocations: async (userId, marketLocationIds) =>
+    await (
+      await authorizedFetch(`${API_URL}/SaveUserMarketLocations`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId, marketLocationIds }),
+      })
+    ).json(),
+  moveRetailersByMarketLocation: async (marketLocationId, collectorId, replaceExistingMapping = false) =>
+    await (
+      await authorizedFetch(`${API_URL}/MoveRetailersByMarketLocation`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ marketLocationId, collectorId, replaceExistingMapping }),
+      })
+    ).json(),
   getCashiers: async () =>
     await (await authorizedFetch(`${API_URL}/GetCashierUsers`)).json(),
   getZoneManagers: async () =>

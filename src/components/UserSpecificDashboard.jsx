@@ -21,9 +21,11 @@ import CreateDashboard from "../pages/admin/CreateDashboard";
 import CollectorView from "../pages/admin/CollectorView";
 import RetailerView from "../pages/admin/RetailerView";
 import AccountentView from "../pages/admin/AccountentView";
+import ZoneManagerView from "../pages/admin/ZoneManagerView";
 import UserInfo from "../pages/admin/UserInfo";
 import UserQRMapping from "../pages/admin/UserQRMapping";
 import AdditionalFund from "../pages/admin/AdditionalFund";
+import MarketLocations from "../pages/admin/MarketLocations";
 import CashierLedger from "../pages/cashier/CashierLedger";
 
 export default function UserSpecificDashboard() {
@@ -60,6 +62,9 @@ export default function UserSpecificDashboard() {
           <Route path="users/add" element={<AddUser />} />
           <Route path="users/assign-retail" element={<AssignRetail />} />
           <Route path="users/info" element={<UserInfo />} />
+          {UserType === "Admin" && (
+            <Route path="master-data/market-locations" element={<MarketLocations />} />
+          )}
 
           {UserType === "Admin" && (
             <Route path="users/qr-mapping" element={<UserQRMapping />} />
@@ -81,6 +86,10 @@ export default function UserSpecificDashboard() {
 
           {UserType === "Admin" && (
             <Route path="dashboard/accountent-view" element={<AccountentView />} />
+          )}
+
+          {UserType === "Admin" && (
+            <Route path="dashboard/zone-manager-view" element={<ZoneManagerView />} />
           )}
 
           {UserType === "Admin" && (

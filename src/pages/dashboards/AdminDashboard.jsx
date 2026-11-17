@@ -17,7 +17,7 @@ const summaryCards = [
   { key: "totalProjectionAmountWithoutCurrentSale", label: "Projection Without Current Sale", color: "#475569" },
 ];
 
-export default function AdminDashboard({ userType, id }) {
+export default function AdminDashboard({ userType, id, showHeaderActions = true }) {
   useDocumentTitle("Retailer Liabilities");
   const [loading, setLoading] = useState(false);
   const [exporting, setExporting] = useState(false);
@@ -386,21 +386,23 @@ export default function AdminDashboard({ userType, id }) {
 
   return (
     <div className="flex h-full min-h-0 flex-col">
-      <HeaderActions
-        canExport={filteredLiabilities.length > 0}
-        exportLoading={exporting}
-        onExport={handleExportExcel}
-        useHistoricalDate={useHistoricalDate}
-        onHistoricalToggleChange={handleHistoricalToggleChange}
-        selectedSnapshotDate={selectedSnapshotDate}
-        onSnapshotDateChange={setSelectedSnapshotDate}
-        maxSnapshotDate={maxSnapshotDate}
-        cityOptions={cityOptions}
-        selectedCity={selectedCity}
-        onCityChange={setSelectedCity}
-        groupByCity={groupByCity}
-        onGroupByCityChange={setGroupByCity}
-      />
+      {showHeaderActions && (
+        <HeaderActions
+          canExport={filteredLiabilities.length > 0}
+          exportLoading={exporting}
+          onExport={handleExportExcel}
+          useHistoricalDate={useHistoricalDate}
+          onHistoricalToggleChange={handleHistoricalToggleChange}
+          selectedSnapshotDate={selectedSnapshotDate}
+          onSnapshotDateChange={setSelectedSnapshotDate}
+          maxSnapshotDate={maxSnapshotDate}
+          cityOptions={cityOptions}
+          selectedCity={selectedCity}
+          onCityChange={setSelectedCity}
+          groupByCity={groupByCity}
+          onGroupByCityChange={setGroupByCity}
+        />
+      )}
 
       {error && <div className="text-red-600">{error}</div>}
 
