@@ -24,6 +24,7 @@ function getColumns() {
     { heading: "Pending Amount(Collector)", key: "RetailerInitiatedAmount", width: "180px" },
     { heading: "Pending Amount(Accountent)", key: "CollectorInitiatedAmount", width: "190px" },
     { heading: "Distributor City", key: "DistributorCity", width: "170px" },
+    { heading: "Market Location", key: "Remark", width: "190px" },
     { heading: "Action", key: "Action", width: "148px", isAction: true },
     { heading: "Linked Collector", key: "LinkedCollector", width: "180px" },
     { heading: "Linked Accountent", key: "LinkedMasterCashier", width: "220px" },
@@ -41,6 +42,7 @@ export default function RetailerLiabilityTable({
   showProjectionSnapshotAction = false,
   onProjectionSnapshotUpdated,
   groupByCity = false,
+  groupByMarketLocation = false,
   enableOtpGeneration = false,
   otpCollectorId = "",
   hideDetailsActions = false,
@@ -53,7 +55,7 @@ export default function RetailerLiabilityTable({
   const [projectionRetailer, setProjectionRetailer] = useState(null);
   const [historyRetailer, setHistoryRetailer] = useState(null);
   const [updatingProjectionRetailerId, setUpdatingProjectionRetailerId] = useState("");
-  const [collapsedCities, setCollapsedCities] = useState(() => new Set());
+  const [collapsedGroups, setCollapsedGroups] = useState(() => new Set());
   const [otpLoadingRetailerId, setOtpLoadingRetailerId] = useState("");
   const [generatedOtp, setGeneratedOtp] = useState(null);
 
@@ -94,16 +96,24 @@ export default function RetailerLiabilityTable({
     sortConfig
   );
 
-  const groupedData = groupByCity
+  const activeGroupKey = groupByMarketLocation
+    ? "Remark"
+    : groupByCity
+    ? "DistributorCity"
+    : null;
+  const activeGroupLabel = groupByMarketLocation ? "market location" : "city";
+  const activeGroupPluralLabel = groupByMarketLocation ? "market locations" : "cities";
+
+  const groupedData = activeGroupKey
     ? Array.from(
         filteredData.reduce((groups, item) => {
-          const city = (item.DistributorCity || "").trim() || "Unknown city";
-          const group = groups.get(city) || [];
+          const groupValue = String(item[activeGroupKey] || "").trim() || `Unknown ${activeGroupLabel}`;
+          const group = groups.get(groupValue) || [];
           group.push(item);
-          groups.set(city, group);
+          groups.set(groupValue, group);
           return groups;
         }, new Map())
-      ).sort(([cityA], [cityB]) => cityA.localeCompare(cityB))
+      ).sort(([groupA], [groupB]) => groupA.localeCompare(groupB))
     : null;
 
   const groupTotalKeys = new Set([
@@ -120,24 +130,24 @@ export default function RetailerLiabilityTable({
   const getGroupTotal = (items, key) =>
     items.reduce((sum, item) => sum + (Number(item[key]) || 0), 0);
 
-  const toggleCity = (city) => {
-    setCollapsedCities((previous) => {
+  const toggleGroup = (groupValue) => {
+    setCollapsedGroups((previous) => {
       const next = new Set(previous);
-      if (next.has(city)) next.delete(city);
-      else next.add(city);
+      if (next.has(groupValue)) next.delete(groupValue);
+      else next.add(groupValue);
       return next;
     });
   };
 
-  const allCitiesCollapsed =
+  const allGroupsCollapsed =
     Boolean(groupedData?.length) &&
-    groupedData.every(([city]) => collapsedCities.has(city));
+    groupedData.every(([groupValue]) => collapsedGroups.has(groupValue));
 
-  const toggleAllCities = () => {
-    setCollapsedCities(
-      allCitiesCollapsed
+  const toggleAllGroups = () => {
+    setCollapsedGroups(
+      allGroupsCollapsed
         ? new Set()
-        : new Set((groupedData || []).map(([city]) => city))
+        : new Set((groupedData || []).map(([groupValue]) => groupValue))
     );
   };
 
@@ -242,15 +252,15 @@ export default function RetailerLiabilityTable({
                       <span>{col.heading}</span>
                     ) : (
                       <div className="flex min-w-0 items-center gap-1 whitespace-nowrap">
-                        {groupByCity && col.key === "UserName" ? (
+                        {activeGroupKey && col.key === "UserName" ? (
                           <button
                             type="button"
-                            onClick={toggleAllCities}
-                            title={allCitiesCollapsed ? "Expand all city groups" : "Collapse all city groups"}
-                            aria-label={allCitiesCollapsed ? "Expand all city groups" : "Collapse all city groups"}
+                            onClick={toggleAllGroups}
+                            title={allGroupsCollapsed ? `Expand all ${activeGroupPluralLabel} groups` : `Collapse all ${activeGroupPluralLabel} groups`}
+                            aria-label={allGroupsCollapsed ? `Expand all ${activeGroupPluralLabel} groups` : `Collapse all ${activeGroupPluralLabel} groups`}
                             className="inline-flex h-5 w-5 flex-none items-center justify-center rounded text-slate-500 hover:bg-slate-200 hover:text-slate-800"
                           >
-                            {allCitiesCollapsed ? <ChevronRight size={15} /> : <ChevronDown size={15} />}
+                            {allGroupsCollapsed ? <ChevronRight size={15} /> : <ChevronDown size={15} />}
                           </button>
                         ) : null}
                       <button
@@ -297,10 +307,10 @@ export default function RetailerLiabilityTable({
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {(groupedData || [[null, filteredData]]).flatMap(([city, items]) => [
-                ...(groupByCity
+              {(groupedData || [[null, filteredData]]).flatMap(([groupValue, items]) => [
+                ...(activeGroupKey
                   ? [
-                      <tr key={`city-${city}`} className="bg-slate-100">
+                      <tr key={`group-${groupValue}`} className="bg-slate-100">
                         {columns.map((col) => {
                           const total = groupTotalKeys.has(col.key)
                             ? getGroupTotal(items, col.key)
@@ -315,19 +325,19 @@ export default function RetailerLiabilityTable({
                               {col.key === "UserName" ? (
                                 <button
                                   type="button"
-                                  onClick={() => toggleCity(city)}
-                                  aria-expanded={!collapsedCities.has(city)}
+                                  onClick={() => toggleGroup(groupValue)}
+                                  aria-expanded={!collapsedGroups.has(groupValue)}
                                   className="flex items-center gap-2 text-left uppercase tracking-wide hover:text-blue-700"
                                 >
                                   <span aria-hidden="true" className="inline-flex h-5 w-5 flex-none items-center justify-center">
-                                    {collapsedCities.has(city) ? (
+                                    {collapsedGroups.has(groupValue) ? (
                                       <ChevronRight size={15} />
                                     ) : (
                                       <ChevronDown size={15} />
                                     )}
                                   </span>
                                   <span>
-                                    {city} <span className="font-normal text-slate-500">({items.length})</span>
+                                    {groupValue} <span className="font-normal text-slate-500">({items.length})</span>
                                   </span>
                                 </button>
                               ) : total !== null ? (
@@ -341,7 +351,7 @@ export default function RetailerLiabilityTable({
                       </tr>,
                     ]
                   : []),
-                ...(!groupByCity || !collapsedCities.has(city)
+                ...(!activeGroupKey || !collapsedGroups.has(groupValue)
                   ? items.map((item) => (
                   <tr key={item.UserId}>
                     {columns.map((col) => (

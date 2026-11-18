@@ -9,6 +9,8 @@ export default function LedgerOtpRequests({ collectorUserId }) {
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [busyId, setBusyId] = useState(null);
+  const [cooldownId, setCooldownId] = useState(null);
+  const [cooldownSeconds, setCooldownSeconds] = useState(0);
   const [error, setError] = useState("");
   const [generatedOtp, setGeneratedOtp] = useState(null);
 
@@ -30,6 +32,16 @@ export default function LedgerOtpRequests({ collectorUserId }) {
     return () => clearInterval(timer);
   }, [loadRequests]);
 
+  useEffect(() => {
+    if (cooldownSeconds <= 0) {
+      setCooldownId(null);
+      return undefined;
+    }
+
+    const timer = setTimeout(() => setCooldownSeconds((seconds) => seconds - 1), 1000);
+    return () => clearTimeout(timer);
+  }, [cooldownSeconds]);
+
   const generateOtp = async (request) => {
     setBusyId(request.RequestId);
     try {
@@ -40,6 +52,8 @@ export default function LedgerOtpRequests({ collectorUserId }) {
         retailerName: request.RetailerName || request.RetailerId,
         requestId: request.RequestId,
       });
+      setCooldownId(request.RequestId);
+      setCooldownSeconds(30);
       await loadRequests();
     } catch (err) {
       setError(err.message || "OTP could not be generated.");
@@ -83,9 +97,15 @@ export default function LedgerOtpRequests({ collectorUserId }) {
                 <td>{formatDate(request.CreatedOn)}</td>
                 <td>{formatDate(request.ExpiresOn)}</td>
                 <td>
-                  <button className="app-button-primary text-xs" disabled={busyId === request.RequestId}
+                  <button
+                    className="app-button-primary text-xs disabled:cursor-not-allowed disabled:opacity-50"
+                    disabled={busyId === request.RequestId || cooldownId === request.RequestId}
                     onClick={() => generateOtp(request)}>
-                    {busyId === request.RequestId ? "Generating..." : "Verify and Generate OTP"}
+                    {busyId === request.RequestId
+                      ? "Generating..."
+                      : cooldownId === request.RequestId
+                      ? `Wait ${cooldownSeconds}s`
+                      : "Verify and Generate OTP"}
                   </button>
                 </td>
               </tr>

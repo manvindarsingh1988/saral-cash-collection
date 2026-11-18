@@ -99,24 +99,8 @@ export default function UserInfo() {
     try {
       const response = await apiBase.getUserExtendedInfo();
       const users = Array.isArray(response) ? response : [];
-      const usersWithMarketLocations = await Promise.all(
-        users.map(async (user) => {
-          try {
-            const mappings = await apiBase.getUserMarketLocations(user.Id);
-            return {
-              ...user,
-              MarketLocations: Array.isArray(mappings)
-                ? mappings
-                : mappings?.Data || [],
-            };
-          } catch (error) {
-            console.error(`Error fetching market locations for user ${user.Id}:`, error);
-            return { ...user, MarketLocations: [] };
-          }
-        })
-      );
-      setUserInfos(usersWithMarketLocations);
-      setFilteredUserInfos(usersWithMarketLocations);
+      setUserInfos(users);
+      setFilteredUserInfos(users);
     } catch (error) {
       console.error("Error fetching user info:", error);
     } finally {
@@ -166,31 +150,39 @@ export default function UserInfo() {
 
   const handleMarketLocationMapping = (user) => setMarketLocationUser(user);
 
+  const getMarketLocationLabel = (location) =>
+    typeof location === "string"
+      ? location
+      : location?.Name ??
+        location?.name ??
+        location?.MarketLocation ??
+        location?.marketLocation ??
+        "";
+
   const handleMarketLocationsSaved = async (userId) => {
     try {
+      // Refresh mappings only for the user whose locations were just changed.
       const mappings = await apiBase.getUserMarketLocations(userId);
       const marketLocations = Array.isArray(mappings)
         ? mappings
         : mappings?.Data || [];
-      setUserInfos((prev) =>
-        prev.map((user) =>
-          user.Id === userId ? { ...user, MarketLocations: marketLocations } : user
-        )
-      );
-      setFilteredUserInfos((prev) =>
-        prev.map((user) =>
-          user.Id === userId ? { ...user, MarketLocations: marketLocations } : user
-        )
-      );
+      const remark = marketLocations.map(getMarketLocationLabel).filter(Boolean).join(", ");
+
+      const updateUser = (users) =>
+        users.map((user) =>
+          user.Id === userId
+            ? { ...user, Remark: remark, MarketLocations: marketLocations }
+            : user
+        );
+
+      setUserInfos(updateUser);
+      setFilteredUserInfos(updateUser);
     } catch (error) {
       console.error(`Error refreshing market locations for user ${userId}:`, error);
     } finally {
       setMarketLocationUser(null);
     }
   };
-
-  const getMarketLocationLabel = (location) =>
-    location?.Name ?? location?.name ?? location?.MarketLocation ?? location?.marketLocation ?? "";
 
   const handleOpeningBalanceModalClose = (balance, date) => {
     if (balance && date) {
@@ -575,11 +567,8 @@ export default function UserInfo() {
                         {user.Active ? (
                           <div className="flex flex-col gap-1">
                             <TruncatedCell>
-                              {user.MarketLocations?.length
-                                ? user.MarketLocations
-                                    .map(getMarketLocationLabel)
-                                    .filter(Boolean)
-                                    .join(", ")
+                              {user.Remark?.length
+                                ? user.Remark
                                 : "Not mapped"}
                             </TruncatedCell>
                             <button

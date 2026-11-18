@@ -16,6 +16,8 @@ export default function RetailerLiabilitiesForCollector({ collectorUserId }) {
   const [error, setError] = useState(null);
   const [liabilities, setLiabilities] = useState([]);
   const [liability, setLiability] = useState({});
+  const [groupByCity, setGroupByCity] = useState(false);
+  const [groupByMarketLocation, setGroupByMarketLocation] = useState(false);
 
   useEffect(() => {
     fetchLiabilities();
@@ -73,14 +75,57 @@ export default function RetailerLiabilitiesForCollector({ collectorUserId }) {
               ))}
             </div>
           </div>
+          <div className="mb-3 flex flex-wrap items-center gap-4 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm">
+            <span className="whitespace-nowrap">Group by</span>
+            <GroupOption
+              label="City"
+              checked={groupByCity}
+              onChange={() => {
+                setGroupByCity((value) => !value);
+                setGroupByMarketLocation(false);
+              }}
+            />
+            <GroupOption
+              label="Market Location"
+              checked={groupByMarketLocation}
+              onChange={() => {
+                setGroupByMarketLocation((value) => !value);
+                setGroupByCity(false);
+              }}
+            />
+          </div>
           <RetailerLiabilityTable
             data={liabilities}
-            visibleColumnKeys={["UserName", "ProjectionAmount"]}
+            visibleColumnKeys={["UserName", "ProjectionAmount", "DistributorCity", "Remark"]}
             enableHistoryOnName={false}
             hideDetailsActions
+            groupByCity={groupByCity}
+            groupByMarketLocation={groupByMarketLocation}
           />
         </>
       )}
     </div>
+  );
+}
+
+function GroupOption({ label, checked, onChange }) {
+  return (
+    <button
+      type="button"
+      role="radio"
+      aria-checked={checked}
+      aria-label={`Group retailer liabilities by ${label}`}
+      onClick={onChange}
+      className="inline-flex items-center gap-2 whitespace-nowrap"
+    >
+      <span
+        className={`inline-flex h-4 w-4 items-center justify-center rounded-full border ${
+          checked ? "border-blue-600" : "border-slate-400"
+        }`}
+      >
+        {checked && <span className="h-2 w-2 rounded-full bg-blue-600" />}
+      </span>
+      <span>{label}</span>
+    </button>
   );
 }

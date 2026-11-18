@@ -55,10 +55,18 @@ export default function RetailerLedgerModal({
   });
   const [collectorOtpEnabled, setCollectorOtpEnabled] = useState(false);
   const [requestingOtp, setRequestingOtp] = useState(false);
+  const [otpCooldownSeconds, setOtpCooldownSeconds] = useState(0);
   const [otpRequestMessage, setOtpRequestMessage] = useState("");
   const [formMessage, setFormMessage] = useState(null);
 
   console.log("Form Data:", formData);
+
+  useEffect(() => {
+    if (otpCooldownSeconds <= 0) return undefined;
+
+    const timer = setTimeout(() => setOtpCooldownSeconds((seconds) => seconds - 1), 1000);
+    return () => clearTimeout(timer);
+  }, [otpCooldownSeconds]);
 
   useEffect(() => {
     if (initialData) {
@@ -124,6 +132,7 @@ export default function RetailerLedgerModal({
       const message = `Request ID: ${result.RequestId}. Share this with the collector.`;
       setOtpRequestMessage(message);
       setFormMessage({ type: "success", text: message });
+      setOtpCooldownSeconds(30);
     } catch (error) {
       setFormMessage({ type: "error", text: error.message || "OTP request failed." });
     } finally {
@@ -346,9 +355,17 @@ export default function RetailerLedgerModal({
                 className="border px-3 py-2 rounded-lg"
               />
             </div>
-            <button type="button" onClick={handleRequestOtp} disabled={requestingOtp}
-              className="app-button-secondary whitespace-nowrap">
-              {requestingOtp ? "Requesting..." : "Request OTP"}
+            <button
+              type="button"
+              onClick={handleRequestOtp}
+              disabled={requestingOtp || otpCooldownSeconds > 0}
+              className="app-button-secondary whitespace-nowrap disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {requestingOtp
+                ? "Requesting..."
+                : otpCooldownSeconds > 0
+                ? `Wait ${otpCooldownSeconds}s`
+                : "Request OTP"}
             </button>
           </div>
           {formData.OtpRequestId && (

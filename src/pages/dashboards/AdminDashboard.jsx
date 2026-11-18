@@ -27,6 +27,7 @@ export default function AdminDashboard({ userType, id, showHeaderActions = true 
   const [selectedSnapshotDate, setSelectedSnapshotDate] = useState("");
   const [selectedCity, setSelectedCity] = useState("ALL");
   const [groupByCity, setGroupByCity] = useState(false);
+  const [groupByMarketLocation, setGroupByMarketLocation] = useState(false);
 
   useEffect(() => {
     if (useHistoricalDate && !selectedSnapshotDate) {
@@ -400,7 +401,15 @@ export default function AdminDashboard({ userType, id, showHeaderActions = true 
           selectedCity={selectedCity}
           onCityChange={setSelectedCity}
           groupByCity={groupByCity}
-          onGroupByCityChange={setGroupByCity}
+          onGroupByCityChange={(enabled) => {
+            setGroupByCity(enabled);
+            if (enabled) setGroupByMarketLocation(false);
+          }}
+          groupByMarketLocation={groupByMarketLocation}
+          onGroupByMarketLocationChange={(enabled) => {
+            setGroupByMarketLocation(enabled);
+            if (enabled) setGroupByCity(false);
+          }}
         />
       )}
 
@@ -425,6 +434,7 @@ export default function AdminDashboard({ userType, id, showHeaderActions = true 
           <RetailerLiabilityTable
             data={filteredLiabilities}
             groupByCity={groupByCity}
+            groupByMarketLocation={groupByMarketLocation}
             showProjectionSnapshotAction
             onProjectionSnapshotUpdated={fetchLiabilities}
           />
@@ -459,6 +469,8 @@ function HeaderActions({
   onCityChange,
   groupByCity,
   onGroupByCityChange,
+  groupByMarketLocation,
+  onGroupByMarketLocationChange,
 }) {
   const target = typeof document !== "undefined"
     ? document.getElementById("page-header-actions")
@@ -500,19 +512,19 @@ function HeaderActions({
           </option>
         ))}
       </select>
-      <label className="flex min-h-[42px] items-center gap-3 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm">
-        <span>Group by city</span>
-        <button
-          type="button"
-          role="switch"
-          aria-checked={groupByCity}
-          aria-label="Group retailer liabilities by city"
-          onClick={() => onGroupByCityChange(!groupByCity)}
-          className={`app-switch ${groupByCity ? "is-active" : ""}`}
-        >
-          <span className="app-switch-thumb" />
-        </button>
-      </label>
+      <div className="flex min-h-[42px] items-center gap-4 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm">
+        <span className="whitespace-nowrap">Group by</span>
+        <GroupOption
+          label="City"
+          checked={groupByCity}
+          onChange={() => onGroupByCityChange(!groupByCity)}
+        />
+        <GroupOption
+          label="Market Location"
+          checked={groupByMarketLocation}
+          onChange={() => onGroupByMarketLocationChange(!groupByMarketLocation)}
+        />
+      </div>
       <button
         type="button"
         onClick={onExport}
@@ -523,5 +535,27 @@ function HeaderActions({
       </button>
     </div>,
     target
+  );
+}
+
+function GroupOption({ label, checked, onChange }) {
+  return (
+    <button
+      type="button"
+      role="radio"
+      aria-checked={checked}
+      aria-label={`Group retailer liabilities by ${label}`}
+      onClick={onChange}
+      className="inline-flex items-center gap-2 whitespace-nowrap"
+    >
+      <span
+        className={`inline-flex h-4 w-4 items-center justify-center rounded-full border ${
+          checked ? "border-blue-600" : "border-slate-400"
+        }`}
+      >
+        {checked && <span className="h-2 w-2 rounded-full bg-blue-600" />}
+      </span>
+      <span>{label}</span>
+    </button>
   );
 }
